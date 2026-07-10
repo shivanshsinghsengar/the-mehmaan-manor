@@ -6,6 +6,7 @@ import { Menu, X, Instagram, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { cn } from "@/lib/utils";
+import { Float } from "@/components/3d-effects";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -46,10 +47,12 @@ export function Navigation() {
               className="flex items-center space-x-3 group"
               aria-label="The Mehmaan Manor Home"
             >
-              <Logo
-                size={44}
-                className="transition-transform duration-500 group-hover:scale-105 flex-shrink-0"
-              />
+              <Float amplitude={4} duration={5}>
+                <Logo
+                  size={44}
+                  className="transition-transform duration-500 group-hover:scale-105 flex-shrink-0"
+                />
+              </Float>
               <span className={cn(
                 "hidden md:block font-display text-lg transition-colors duration-300",
                 isScrolled ? "text-forest" : "text-forest"

@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type React from "react";
 import Link from "next/link";
 import { ArrowRight, Instagram } from "lucide-react";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
+import { TiltCard, ParallaxLayer, Reveal3D, DepthText, MouseParallax, ScrollProgressBar, Float } from "@/components/3d-effects";
 
 /* ─── Dark interior room scene SVG for the hero ─────────────────────── */
 function HeroScene() {
@@ -228,12 +230,15 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-cream">
+      <ScrollProgressBar />
       <Navigation />
       <main id="main-content">
 
         {/* ═══ HERO ═══════════════════════════════════════════════════════ */}
         <section className="relative h-screen min-h-[700px] flex items-center overflow-hidden">
-          <HeroScene />
+          <MouseParallax intensity={18} className="absolute inset-0">
+            <HeroScene />
+          </MouseParallax>
 
           {/* Left content */}
           <div className="relative z-10 w-full px-8 md:px-16 lg:px-24 xl:px-32">
@@ -245,12 +250,15 @@ export default function HomePage() {
                 </span>
               </div>
 
-              <h1 className="font-display text-cream leading-[0.92] tracking-[-0.02em] mb-8 animate-fade-up"
-                style={{ fontSize: "clamp(3.2rem, 7vw, 7rem)" }}>
+              <DepthText
+                as="h1"
+                className="font-display text-cream leading-[0.92] tracking-[-0.02em] mb-8 animate-fade-up"
+                style={{ fontSize: "clamp(3.2rem, 7vw, 7rem)" } as React.CSSProperties}
+              >
                 The<br />
                 <em className="not-italic text-gold">Mehmaan</em><br />
                 Experience
-              </h1>
+              </DepthText>
 
               <p className="text-cream/70 text-lg md:text-xl font-sans font-light leading-relaxed mb-10 max-w-md animate-fade-up"
                 style={{ animationDelay: "200ms" }}>
@@ -311,22 +319,23 @@ export default function HomePage() {
                 </h2>
               </div>
               <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-forest/10">
-                {[
+              {[
                   { num: "01", title: "Your Vibe", body: "Work, unwind, celebrate — the space reads you and adapts. No mood is wrong here." },
                   { num: "02", title: "Your Space", body: "Rooms that feel lived-in with intention. Styled but never sterile. Yours for the night." },
                   { num: "03", title: "Your Time", body: "No rigid check-in theatre. Arrive when you do. Breathe. The home waits for you." },
                 ].map(({ num, title, body }, i) => (
-                  <div key={num} className="reveal flex flex-col justify-between p-8 md:px-10 group"
-                    style={{ animationDelay: `${i * 120}ms` }}>
-                    <div className="font-mono text-gold/50 text-xs mb-6">{num}</div>
-                    <div>
-                      <h3 className="font-display text-forest mb-4 group-hover:text-gold transition-colors duration-500"
-                        style={{ fontSize: "clamp(1.5rem, 2.2vw, 2rem)" }}>
-                        {title}
-                      </h3>
-                      <p className="text-ink/65 text-sm leading-relaxed">{body}</p>
+                  <Reveal3D key={num} delay={i * 0.12} direction="up">
+                    <div className="flex flex-col justify-between p-8 md:px-10 group">
+                      <div className="font-mono text-gold/50 text-xs mb-6">{num}</div>
+                      <div>
+                        <h3 className="font-display text-forest mb-4 group-hover:text-gold transition-colors duration-500"
+                          style={{ fontSize: "clamp(1.5rem, 2.2vw, 2rem)" }}>
+                          {title}
+                        </h3>
+                        <p className="text-ink/65 text-sm leading-relaxed">{body}</p>
+                      </div>
                     </div>
-                  </div>
+                  </Reveal3D>
                 ))}
               </div>
             </div>
@@ -353,32 +362,32 @@ export default function HomePage() {
                   vibe: "Cozy neighborhood, close to everything — your happy place in the city.",
                   rate: "from ₹4,000/night", href: "/homes/jharsa-village" },
               ].map((p, i) => (
-                <Link key={p.num} href={p.href}
-                  className="group relative block overflow-hidden reveal"
-                  style={{ animationDelay: `${i * 150}ms` }}>
-                  <div className="relative h-[520px] lg:h-[640px]">
-                    <PropertyScene variant={p.variant} />
-                    <div className="absolute inset-0 bg-forest-deep/0 group-hover:bg-forest-deep/20 transition-colors duration-700" />
-                    <div className="absolute inset-0 flex flex-col justify-between p-8">
-                      <div className="flex items-start justify-between">
-                        <span className="font-mono text-gold text-xs tracking-[0.25em] bg-ink/40 px-3 py-1.5 backdrop-blur-sm">{p.num}</span>
-                        <span className="font-mono text-cream/50 text-xs">{p.coords}</span>
-                      </div>
-                      <div>
-                        <p className="font-mono text-cream/50 text-xs mb-2 tracking-widest">{p.loc}</p>
-                        <h3 className="font-display text-cream leading-none mb-3 group-hover:text-gold transition-colors duration-500"
-                          style={{ fontSize: "clamp(2rem, 3.5vw, 3rem)" }}>{p.name}</h3>
-                        <p className="text-cream/70 text-sm leading-relaxed mb-6 max-w-sm">{p.vibe}</p>
-                        <div className="flex items-center justify-between">
-                          <span className="font-mono text-gold text-sm">{p.rate}</span>
-                          <span className="flex items-center gap-2 text-cream/70 text-sm group-hover:text-gold group-hover:gap-3 transition-all duration-300">
-                            Explore <ArrowRight size={16} />
-                          </span>
+                <TiltCard key={p.num} intensity={8} className="reveal" style={{ animationDelay: `${i * 150}ms` }}>
+                  <Link href={p.href} className="group relative block overflow-hidden">
+                    <div className="relative h-[520px] lg:h-[640px]">
+                      <PropertyScene variant={p.variant} />
+                      <div className="absolute inset-0 bg-forest-deep/0 group-hover:bg-forest-deep/20 transition-colors duration-700" />
+                      <div className="absolute inset-0 flex flex-col justify-between p-8">
+                        <div className="flex items-start justify-between">
+                          <span className="font-mono text-gold text-xs tracking-[0.25em] bg-ink/40 px-3 py-1.5 backdrop-blur-sm">{p.num}</span>
+                          <span className="font-mono text-cream/50 text-xs">{p.coords}</span>
+                        </div>
+                        <div>
+                          <p className="font-mono text-cream/50 text-xs mb-2 tracking-widest">{p.loc}</p>
+                          <h3 className="font-display text-cream leading-none mb-3 group-hover:text-gold transition-colors duration-500"
+                            style={{ fontSize: "clamp(2rem, 3.5vw, 3rem)" }}>{p.name}</h3>
+                          <p className="text-cream/70 text-sm leading-relaxed mb-6 max-w-sm">{p.vibe}</p>
+                          <div className="flex items-center justify-between">
+                            <span className="font-mono text-gold text-sm">{p.rate}</span>
+                            <span className="flex items-center gap-2 text-cream/70 text-sm group-hover:text-gold group-hover:gap-3 transition-all duration-300">
+                              Explore <ArrowRight size={16} />
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </Link>
+                  </Link>
+                </TiltCard>
               ))}
             </div>
             <div className="text-center mt-8 reveal">
@@ -412,15 +421,16 @@ export default function HomePage() {
                 { num: "03", title: "Spotless & Styled", sub: "Cleaned, arranged, ready for you.", icon: "◈" },
                 { num: "04", title: "Prime Locations", sub: "Gurugram at your doorstep.", icon: "◎" },
               ].map(({ num, title, sub, icon }, i) => (
-                <div key={num} className="reveal border-r border-b border-forest/10 p-8 group hover:bg-forest hover:text-cream transition-all duration-500"
-                  style={{ animationDelay: `${i * 80}ms` }}>
-                  <div className="flex items-start justify-between mb-8">
-                    <span className="font-mono text-gold text-xs group-hover:text-gold/70">{num}</span>
-                    <span className="text-2xl text-forest/20 group-hover:text-cream/20 transition-colors">{icon}</span>
+                <TiltCard key={num} intensity={10} className="reveal border-r border-b border-forest/10" style={{ animationDelay: `${i * 80}ms` }}>
+                  <div className="p-8 group hover:bg-forest hover:text-cream transition-all duration-500 h-full">
+                    <div className="flex items-start justify-between mb-8">
+                      <span className="font-mono text-gold text-xs group-hover:text-gold/70">{num}</span>
+                      <span className="text-2xl text-forest/20 group-hover:text-cream/20 transition-colors">{icon}</span>
+                    </div>
+                    <h3 className="font-display text-xl text-forest group-hover:text-cream mb-3 transition-colors duration-500">{title}</h3>
+                    <p className="text-ink/60 group-hover:text-cream/70 text-sm leading-relaxed transition-colors duration-500">{sub}</p>
                   </div>
-                  <h3 className="font-display text-xl text-forest group-hover:text-cream mb-3 transition-colors duration-500">{title}</h3>
-                  <p className="text-ink/60 group-hover:text-cream/70 text-sm leading-relaxed transition-colors duration-500">{sub}</p>
-                </div>
+                </TiltCard>
               ))}
             </div>
           </div>
@@ -428,15 +438,23 @@ export default function HomePage() {
 
         {/* ═══ PULL QUOTE ═════════════════════════════════════════════════ */}
         <section className="relative py-36 px-6 bg-forest overflow-hidden">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 border-2 border-gold/10 rounded-t-full" aria-hidden="true" />
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-48 border border-gold/5 rounded-t-full" aria-hidden="true" />
+          <ParallaxLayer speed={0.3} className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 border-2 border-gold/10 rounded-t-full" aria-hidden="true" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-48 border border-gold/5 rounded-t-full" aria-hidden="true" />
+          </ParallaxLayer>
           <div className="container mx-auto max-w-4xl text-center relative z-10">
             <p className="font-mono text-gold/50 text-xs tracking-[0.3em] uppercase mb-10 reveal">A Promise</p>
-            <blockquote className="font-display text-cream reveal"
-              style={{ fontSize: "clamp(2.2rem, 5vw, 4.5rem)", lineHeight: "1.15" }}>
-              "Come as a guest,<br />
-              <span className="text-gold italic">leave as family."</span>
-            </blockquote>
+            <Reveal3D direction="up">
+              <DepthText
+                as="h2"
+                className="font-display text-cream"
+                style={{ fontSize: "clamp(2.2rem, 5vw, 4.5rem)", lineHeight: "1.15" } as React.CSSProperties}
+                color="oklch(0.75 0.12 85)"
+              >
+                "Come as a guest,<br />
+                <span className="text-gold italic">leave as family."</span>
+              </DepthText>
+            </Reveal3D>
             <p className="mt-8 font-mono text-cream/30 text-xs tracking-[0.2em] reveal">— The Mehmaan Manor Promise</p>
           </div>
           <div className="absolute bottom-0 left-0 right-0 h-px bg-gold/20" />

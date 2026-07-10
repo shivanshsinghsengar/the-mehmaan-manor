@@ -7,6 +7,7 @@ import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { PlaceholderImage } from "@/components/placeholder-image";
 import { Button } from "@/components/ui/button";
+import { TiltCard, Reveal3D, DepthText, ScrollProgressBar, Float } from "@/components/3d-effects";
 
 const team = [
   {
@@ -50,6 +51,7 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen bg-cream">
+      <ScrollProgressBar />
       <Navigation />
 
       <main id="main-content">
@@ -59,11 +61,15 @@ export default function AboutPage() {
             <p className="font-mono text-gold text-sm tracking-widest uppercase mb-6 animate-fade-in">
               About Us
             </p>
-            <h1 className="text-display font-display text-forest mb-6 animate-fade-up">
+            <DepthText
+              as="h1"
+              className="text-display font-display text-forest mb-6 animate-fade-up"
+              color="oklch(0.75 0.12 85)"
+            >
               More Than Hosts.
               <br />
               <span className="italic">Your Gurugram Family.</span>
-            </h1>
+            </DepthText>
             <p className="text-lg text-ink/80 max-w-2xl mx-auto animate-fade-up">
               The story behind The Mehmaan Manor — and the people who make it
               feel like home.
@@ -118,39 +124,45 @@ export default function AboutPage() {
               What We Believe
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-              <div className="reveal text-center">
-                <div className="font-mono text-gold text-sm mb-3">01</div>
-                <h3 className="text-xl font-display text-forest mb-3">
-                  Hospitality Over Business
-                </h3>
-                <p className="text-ink/70 text-sm leading-relaxed">
-                  We're not running a hotel. We're opening our homes. That means
-                  you get warmth, flexibility, and care — not corporate
-                  policies.
-                </p>
-              </div>
-              <div className="reveal text-center" style={{ animationDelay: "150ms" }}>
-                <div className="font-mono text-gold text-sm mb-3">02</div>
-                <h3 className="text-xl font-display text-forest mb-3">
-                  Details Matter
-                </h3>
-                <p className="text-ink/70 text-sm leading-relaxed">
-                  From the thread count to the coffee brand — everything is
-                  chosen with intention. You may not notice every detail, but
-                  you'll feel it.
-                </p>
-              </div>
-              <div className="reveal text-center" style={{ animationDelay: "300ms" }}>
-                <div className="font-mono text-gold text-sm mb-3">03</div>
-                <h3 className="text-xl font-display text-forest mb-3">
-                  Real People, Real Conversations
-                </h3>
-                <p className="text-ink/70 text-sm leading-relaxed">
-                  When you call, you reach Simran, Vipin, or Jyoti — real
-                  humans who genuinely care about your experience. No chatbots.
-                  No scripts.
-                </p>
-              </div>
+              <Reveal3D delay={0} direction="up">
+                <div className="text-center">
+                  <div className="font-mono text-gold text-sm mb-3">01</div>
+                  <h3 className="text-xl font-display text-forest mb-3">
+                    Hospitality Over Business
+                  </h3>
+                  <p className="text-ink/70 text-sm leading-relaxed">
+                    We're not running a hotel. We're opening our homes. That means
+                    you get warmth, flexibility, and care — not corporate
+                    policies.
+                  </p>
+                </div>
+              </Reveal3D>
+              <Reveal3D delay={0.15} direction="up">
+                <div className="text-center">
+                  <div className="font-mono text-gold text-sm mb-3">02</div>
+                  <h3 className="text-xl font-display text-forest mb-3">
+                    Details Matter
+                  </h3>
+                  <p className="text-ink/70 text-sm leading-relaxed">
+                    From the thread count to the coffee brand — everything is
+                    chosen with intention. You may not notice every detail, but
+                    you'll feel it.
+                  </p>
+                </div>
+              </Reveal3D>
+              <Reveal3D delay={0.3} direction="up">
+                <div className="text-center">
+                  <div className="font-mono text-gold text-sm mb-3">03</div>
+                  <h3 className="text-xl font-display text-forest mb-3">
+                    Real People, Real Conversations
+                  </h3>
+                  <p className="text-ink/70 text-sm leading-relaxed">
+                    When you call, you reach Simran, Vipin, or Jyoti — real
+                    humans who genuinely care about your experience. No chatbots.
+                    No scripts.
+                  </p>
+                </div>
+              </Reveal3D>
             </div>
           </div>
         </section>
@@ -167,16 +179,19 @@ export default function AboutPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {team.map((member, i) => (
-                <div
+                <TiltCard
                   key={i}
-                  className="reveal text-center space-y-4"
+                  intensity={10}
+                  className="reveal text-center space-y-4 p-6 rounded-sm"
                   style={{ animationDelay: `${i * 150}ms` }}
                 >
-                  <div className="w-32 h-32 mx-auto rounded-full bg-forest/10 flex items-center justify-center">
-                    <span className="font-display text-4xl text-gold">
-                      {member.name[0]}
-                    </span>
-                  </div>
+                  <Float amplitude={6} duration={3 + i * 0.5}>
+                    <div className="w-32 h-32 mx-auto rounded-full bg-forest/10 flex items-center justify-center">
+                      <span className="font-display text-4xl text-gold">
+                        {member.name[0]}
+                      </span>
+                    </div>
+                  </Float>
                   <div>
                     <h3 className="text-2xl font-display text-forest">
                       {member.name}
@@ -205,7 +220,7 @@ export default function AboutPage() {
                     </a>
                   </div>
                   <p className="font-mono text-xs text-ink/50">{member.phone}</p>
-                </div>
+                </TiltCard>
               ))}
             </div>
           </div>
