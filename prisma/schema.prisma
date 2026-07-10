@@ -1,0 +1,167 @@
+// Prisma schema for The Mehmaan Manor
+// Database: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  OWNER
+  MANAGER
+  STAFF
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CHECKED_IN
+  CHECKED_OUT
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  REFUNDED
+  FAILED
+}
+
+enum InquiryStatus {
+  NEW
+  REPLIED
+  BOOKED
+  CLOSED
+}
+
+enum BookingSource {
+  DIRECT
+  AIRBNB
+  MAKEMYTRIP
+  REFERRAL
+  OTHER
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  phone     String?
+  role      UserRole @default(STAFF)
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookingsCreated Booking[]
+  inquiriesHandled Inquiry[]
+}
+
+model Property {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  address     String
+  pincode     String?
+  coordinates String?
+  description String   @db.Text
+  vibe        String   @db.Text
+  baseRate    Float
+  weekendRate Float?
+  cleaningFee Float?
+  maxGuests   Int
+  checkInTime String   @default("14:00")
+  checkOutTime String  @default("11:00")
+  amenities   String[]
+  policies    String   @db.Text
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  photos   Photo[]
+  bookings Booking[]
+  inquiries Inquiry[]
+}
+
+model Photo {
+  id         String   @id @default(cuid())
+  propertyId String
+  url        String
+  alt        String
+  order      Int      @default(0)
+  isHero     Boolean  @default(false)
+  tags       String[]
+  createdAt  DateTime @default(now())
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+}
+
+model Guest {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String
+  notes     String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookings Booking[]
+
+  @@index([email])
+  @@index([phone])
+}
+
+model Booking {
+  id            String        @id @default(cuid())
+  bookingNumber String        @unique @default(cuid())
+  propertyId    String
+  guestId       String
+  userId        String?
+  checkIn       DateTime
+  checkOut      DateTime
+  guestsCount   Int
+  totalAmount   Float
+  status        BookingStatus @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
+  source        BookingSource @default(DIRECT)
+  notes         String?       @db.Text
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  property Property @relation(fields: [propertyId], references: [id])
+  guest    Guest    @relation(fields: [guestId], references: [id])
+  user     User?    @relation(fields: [userId], references: [id])
+
+  @@index([propertyId])
+  @@index([guestId])
+  @@index([checkIn])
+  @@index([checkOut])
+  @@index([status])
+}
+
+model Inquiry {
+  id         String        @id @default(cuid())
+  name       String
+  email      String
+  phone      String
+  propertyId String?
+  dates      String?
+  message    String        @db.Text
+  status     InquiryStatus @default(NEW)
+  userId     String?
+  reply      String?       @db.Text
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  property Property? @relation(fields: [propertyId], references: [id])
+  user     User?     @relation(fields: [userId], references: [id])
+
+  @@index([status])
+  @@index([createdAt])
+}

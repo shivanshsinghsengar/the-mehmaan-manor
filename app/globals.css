@@ -1,0 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-cormorant: 'Cormorant Garamond', serif;
+    --font-inter: 'Inter', sans-serif;
+    --font-jetbrains: 'JetBrains Mono', monospace;
+  }
+  
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    @apply scroll-smooth;
+  }
+  
+  body {
+    @apply bg-cream text-ink font-sans antialiased;
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Custom cursor for interactive elements */
+  @media (hover: hover) and (pointer: fine) {
+    .cursor-custom {
+      cursor: none;
+    }
+    
+    .cursor-custom::after {
+      content: '';
+      @apply fixed w-3 h-3 rounded-full bg-cream pointer-events-none z-50;
+      mix-blend-mode: difference;
+    }
+  }
+
+  /* Scroll reveal animations */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  }
+  
+  .reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Image hover effect */
+  .image-hover {
+    @apply overflow-hidden;
+  }
+  
+  .image-hover img {
+    transition: transform 1.2s ease-out;
+  }
+  
+  .image-hover:hover img {
+    transform: scale(1.03);
+  }
+
+  /* Gold arch divider */
+  .arch-divider {
+    @apply relative w-full h-px;
+    background-color: oklch(0.75 0.12 85 / 0.2);
+  }
+  
+  .arch-divider::before {
+    content: '';
+    @apply absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-8 border-2 border-gold rounded-t-full bg-cream;
+  }
+
+  /* Typography utilities */
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer utilities {
+  /* Skip to content link for accessibility */
+  .skip-to-content {
+    @apply absolute -top-full left-0 z-50 bg-forest text-cream px-6 py-3 font-medium transition-all;
+  }
+  .skip-to-content:focus {
+    @apply top-0;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-cream;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background-color: oklch(0.32 0.05 155 / 0.2);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: oklch(0.32 0.05 155 / 0.3);
+}
+
+/* Selection */
+::selection {
+  background-color: oklch(0.75 0.12 85 / 0.3);
+  @apply text-ink;
+}
+
+/* Focus visible */
+:focus-visible {
+  @apply outline-2 outline-offset-2 outline-gold;
+}
