@@ -3,6 +3,8 @@ import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { savePhoto, getStore, type SitePhoto } from "@/lib/store";
 
+export const runtime = "nodejs";
+
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
@@ -15,7 +17,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No files provided" }, { status: 400 });
     }
 
-    // Ensure upload directory exists
     const uploadDir = path.join(process.cwd(), "public", "uploads");
     await mkdir(uploadDir, { recursive: true });
 
@@ -27,7 +28,6 @@ export async function POST(request: Request) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
 
-      // Safe filename
       const ext = path.extname(file.name) || ".jpg";
       const safeName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`;
       const filePath = path.join(uploadDir, safeName);
@@ -35,9 +35,10 @@ export async function POST(request: Request) {
       await writeFile(filePath, buffer);
 
       const store = getStore();
-      const maxOrder = store.photos.length > 0
-        ? Math.max(...store.photos.map((p) => p.order)) + 1
-        : 0;
+      const maxOrder =
+        store.photos.length > 0
+          ? Math.max(...store.photos.map((p) => p.order)) + 1
+          : 0;
 
       const photo: SitePhoto = {
         id: `photo-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
@@ -61,5 +62,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });
   }
 }
-
-export const runtime = "nodejs";
