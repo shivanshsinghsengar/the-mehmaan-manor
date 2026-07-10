@@ -1,9 +1,5 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 import { savePhoto, getStore, type SitePhoto } from "@/lib/store";
-
-export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   try {
@@ -17,22 +13,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No files provided" }, { status: 400 });
     }
 
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    await mkdir(uploadDir, { recursive: true });
-
     const saved: SitePhoto[] = [];
 
     for (const file of files) {
       if (!file.size) continue;
 
+      // On Vercel: convert to base64 data URL (no filesystem needed)
       const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-
-      const ext = path.extname(file.name) || ".jpg";
-      const safeName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`;
-      const filePath = path.join(uploadDir, safeName);
-
-      await writeFile(filePath, buffer);
+      const base64 = Buffer.from(bytes).toString("base64");
+      const mimeType = file.type || "image/jpeg";
+      const dataUrl = `data:${mimeType};base64,${base64}`;
 
       const store = getStore();
       const maxOrder =
@@ -40,10 +30,13 @@ export async function POST(request: Request) {
           ? Math.max(...store.photos.map((p) => p.order)) + 1
           : 0;
 
+      const ext = file.name.split(".").pop() || "jpg";
+      const alt = altPrefix || file.name.replace(`.${ext}`, "").replace(/-/g, " ");
+
       const photo: SitePhoto = {
         id: `photo-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        url: `/uploads/${safeName}`,
-        alt: altPrefix || file.name.replace(ext, "").replace(/-/g, " "),
+        url: dataUrl,
+        alt,
         propertyId: propertyId || null,
         section,
         order: maxOrder,
