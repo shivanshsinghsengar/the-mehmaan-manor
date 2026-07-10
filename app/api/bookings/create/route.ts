@@ -1,50 +1,5 @@
 import { NextResponse } from "next/server";
-
-// In-memory booking store (replace with Prisma in production)
-declare global {
-  // eslint-disable-next-line no-var
-  var __bookings: BookingRecord[] | undefined;
-}
-
-export interface BookingRecord {
-  id: string;
-  bookingNumber: string;
-  propertyId: string;
-  propertyName: string;
-  guestName: string;
-  guestEmail: string;
-  guestPhone: string;
-  checkIn: string;
-  checkOut: string;
-  nights: number;
-  guests: number;
-  baseAmount: number;
-  cleaningFee: number;
-  taxes: number;
-  totalAmount: number;
-  status: "PENDING_PAYMENT" | "CONFIRMED" | "CANCELLED";
-  paymentId: string | null;
-  razorpayOrderId: string | null;
-  specialRequests: string;
-  createdAt: string;
-}
-
-if (!global.__bookings) global.__bookings = [];
-
-export function getAllBookings(): BookingRecord[] {
-  return global.__bookings || [];
-}
-
-export function getBookingById(id: string): BookingRecord | undefined {
-  return (global.__bookings || []).find((b) => b.id === id);
-}
-
-export function saveBooking(b: BookingRecord) {
-  if (!global.__bookings) global.__bookings = [];
-  const idx = global.__bookings.findIndex((x) => x.id === b.id);
-  if (idx >= 0) global.__bookings[idx] = b;
-  else global.__bookings.push(b);
-}
+import { saveBooking, type BookingRecord } from "@/lib/bookings-store";
 
 function generateBookingNumber() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";

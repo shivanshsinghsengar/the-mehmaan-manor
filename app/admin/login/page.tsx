@@ -28,7 +28,7 @@ export default function AdminLoginPage() {
       {/* Left Side - Brand */}
       <div className="hidden lg:flex lg:w-1/2 bg-forest-deep text-cream p-12 flex-col justify-between">
         <div>
-          <Logo size={72} variant="full" className="mb-6" />
+          <Logo size={72} className="mb-6" />
           <h1 className="text-4xl font-display mb-4 text-cream">The Mehmaan Manor</h1>
           <p className="text-cream/70 text-lg">
             Admin panel for managing properties, bookings, and guest relations.

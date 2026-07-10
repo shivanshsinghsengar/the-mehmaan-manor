@@ -9,7 +9,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           {/* Logo & Tagline */}
           <div className="space-y-4">
-            <Logo size={80} variant="full" />
+            <Logo size={80} />
             <p className="text-cream/80 text-sm leading-relaxed">
               Thoughtful stays. Warm hospitality. Memories that stay.
             </p>

@@ -55,7 +55,7 @@ export default function AdminLayout({
           {/* Logo */}
           <div className="h-16 flex items-center justify-between px-4 border-b border-cream/10">
             <Link href="/admin" className="flex items-center space-x-3">
-              <Logo size={38} variant="full" className="flex-shrink-0" />
+              <Logo size={38} className="flex-shrink-0" />
               <span className="font-display text-base text-cream">Admin</span>
             </Link>
             <button

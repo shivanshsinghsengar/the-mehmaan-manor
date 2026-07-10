@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getBookingById, saveBooking } from "@/app/api/bookings/create/route";
+import { getBookingById, saveBooking } from "@/lib/bookings-store";
 
 export async function POST(request: Request) {
   const { bookingId, paymentId } = await request.json();

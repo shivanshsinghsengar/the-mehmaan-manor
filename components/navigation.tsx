@@ -48,7 +48,6 @@ export function Navigation() {
             >
               <Logo
                 size={44}
-                variant="full"
                 className="transition-transform duration-500 group-hover:scale-105 flex-shrink-0"
               />
               <span className={cn(
@@ -99,7 +98,7 @@ export function Navigation() {
         <div className="flex flex-col h-full p-8">
           {/* Close Button */}
           <div className="flex justify-between items-center mb-12">
-            <Logo size={52} variant="full" />
+            <Logo size={52} />
             <button
               onClick={() => setIsOpen(false)}
               className="w-10 h-10 flex items-center justify-center text-cream hover:text-gold transition-colors"
