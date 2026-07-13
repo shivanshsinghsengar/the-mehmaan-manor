@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getBookingById, saveBooking } from "@/lib/bookings-store";
+import { sendBookingConfirmationToGuest, sendNewBookingAlertToOwner } from "@/lib/email";
 
 export async function POST(request: Request) {
   const { bookingId, paymentId } = await request.json();
@@ -9,15 +10,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Booking not found" }, { status: 404 });
   }
 
-  // Mark as confirmed with payment ID
-  const updated = {
+  // Mark as confirmed
+  const confirmed = {
     ...booking,
     status: "CONFIRMED" as const,
-    paymentId,
+    paymentId: paymentId || null,
   };
-  saveBooking(updated);
+  saveBooking(confirmed);
 
-  // In production: send confirmation email via Resend, WhatsApp via Twilio here
+  // Send emails in parallel — don't let email failures block the response
+  Promise.allSettled([
+    sendBookingConfirmationToGuest(confirmed),
+    sendNewBookingAlertToOwner(confirmed),
+  ]).then((results) => {
+    results.forEach((r, i) => {
+      if (r.status === "rejected") {
+        console.error(`Email ${i === 0 ? "guest confirmation" : "owner alert"} failed:`, r.reason);
+      }
+    });
+  });
 
-  return NextResponse.json({ success: true, booking: updated });
+  return NextResponse.json({ success: true, booking: confirmed });
 }

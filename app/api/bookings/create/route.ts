@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { saveBooking, type BookingRecord } from "@/lib/bookings-store";
+import { sendNewBookingAlertToOwner } from "@/lib/email";
 
 function generateBookingNumber() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -37,6 +38,11 @@ export async function POST(request: Request) {
     };
 
     saveBooking(booking);
+
+    // Notify owner immediately on booking creation (before payment)
+    sendNewBookingAlertToOwner(booking).catch((err) =>
+      console.error("Owner alert email failed:", err)
+    );
 
     // In production: create Razorpay order here
     // const razorpay = new Razorpay({ key_id, key_secret });

@@ -19,6 +19,7 @@ export default function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -35,11 +36,27 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsSubmitting(false);
-    setSubmitted(true);
-    setFormData({ name: "", email: "", phone: "", property: "", dates: "", message: "" });
+    setError("");
+
+    try {
+      const res = await fetch("/api/inquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (res.ok) {
+        setSubmitted(true);
+        setFormData({ name: "", email: "", phone: "", property: "", dates: "", message: "" });
+      } else {
+        const data = await res.json();
+        setError(data.error || "Something went wrong. Please try again.");
+      }
+    } catch {
+      setError("Network error. Please try again or contact us directly.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -287,6 +304,12 @@ export default function ContactPage() {
                     rows={5}
                   />
                 </div>
+
+                {error && (
+                  <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-sm">
+                    {error}
+                  </div>
+                )}
 
                 <Button
                   type="submit"
