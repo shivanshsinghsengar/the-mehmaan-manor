@@ -42,6 +42,11 @@ export default function AdminLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
 
+  // Login page renders without the admin shell
+  if (pathname === "/admin/login") {
+    return <>{children}</>;
+  }
+
   return (
     <div className="min-h-screen bg-neutral-50 flex">
       {/* Sidebar */}
@@ -102,17 +107,16 @@ export default function AdminLayout({
                 <p className="text-xs text-cream/60">Owner</p>
               </div>
             </div>
-            <Button
-              asChild
-              variant="outline"
-              size="sm"
-              className="w-full border-cream/20 text-cream hover:bg-cream/10"
+            <button
+              onClick={async () => {
+                await fetch("/api/admin/logout", { method: "POST" });
+                window.location.href = "/admin/login";
+              }}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm border border-cream/20 text-cream hover:bg-cream/10 transition-colors"
             >
-              <Link href="/admin/login">
-                <LogOut size={14} className="mr-2" />
-                Logout
-              </Link>
-            </Button>
+              <LogOut size={14} />
+              Logout
+            </button>
           </div>
         </div>
       </aside>
