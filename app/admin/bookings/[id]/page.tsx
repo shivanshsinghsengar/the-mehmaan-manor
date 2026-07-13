@@ -1,74 +1,110 @@
 "use client";
 
-import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
-  ArrowLeft,
-  Phone,
-  Mail,
-  MessageCircle,
-  MapPin,
-  Calendar,
-  Users,
-  IndianRupee,
-  Edit,
-  Trash2,
-  CheckCircle,
-  Clock,
-  XCircle,
-  FileText,
+  ArrowLeft, Phone, Mail, MessageCircle, MapPin,
+  Calendar, Users, Clock, CheckCircle, XCircle, FileText, RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { mockBookings, mockProperties } from "@/lib/mock-data";
-import {
-  formatDate,
-  formatCurrency,
-  calculateNights,
-} from "@/lib/utils";
+import { formatDate, formatCurrency, calculateNights } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import type { BookingRecord } from "@/lib/bookings-store";
 
 const STATUS_STEPS = [
-  { key: "PENDING", label: "Inquiry", icon: Clock },
+  { key: "PENDING_PAYMENT", label: "Pending", icon: Clock },
   { key: "CONFIRMED", label: "Confirmed", icon: CheckCircle },
-  { key: "CHECKED_IN", label: "Checked In", icon: CheckCircle },
-  { key: "CHECKED_OUT", label: "Checked Out", icon: CheckCircle },
+  { key: "CANCELLED", label: "Cancelled", icon: XCircle },
 ];
+
+const STATUS_COLORS: Record<string, string> = {
+  CONFIRMED: "bg-green-100 text-green-700",
+  PENDING_PAYMENT: "bg-yellow-100 text-yellow-700",
+  CANCELLED: "bg-red-100 text-red-700",
+};
+
+const PROPERTY_ADDRESSES: Record<string, string> = {
+  "1": "Sector 57, Phase 2, Sushant Lok, Gurugram, Haryana - 122011",
+  "2": "593, Durga Colony, Jharsa Village, Sector 39, Gurugram - 122003",
+};
 
 export default function BookingDetailPage() {
   const params = useParams();
-  const router = useRouter();
+  const bookingId = params.id as string;
 
-  const booking =
-    mockBookings.find((b) => b.id === params.id) ?? mockBookings[0];
-  const property =
-    mockProperties.find((p) => p.id === booking.propertyId) ??
-    mockProperties[0];
-
-  const [status, setStatus] = useState(booking.status);
+  const [booking, setBooking] = useState<BookingRecord | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [note, setNote] = useState("");
-  const [notes, setNotes] = useState<string[]>(
-    booking.notes ? [booking.notes] : []
-  );
+  const [successMsg, setSuccessMsg] = useState("");
+
+  useEffect(() => {
+    fetch("/api/admin/bookings")
+      .then((r) => r.json())
+      .then((data) => {
+        const found = (data.bookings as BookingRecord[]).find((b) => b.id === bookingId);
+        setBooking(found || null);
+      })
+      .finally(() => setLoading(false));
+  }, [bookingId]);
+
+  const updateStatus = async (status: string) => {
+    if (!booking) return;
+    setSaving(true);
+    const res = await fetch("/api/admin/bookings", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: booking.id, status }),
+    });
+    const data = await res.json();
+    setBooking(data.booking);
+    setSaving(false);
+    setSuccessMsg("Status updated");
+    setTimeout(() => setSuccessMsg(""), 2000);
+  };
+
+  const addNote = async () => {
+    if (!booking || !note.trim()) return;
+    setSaving(true);
+    const res = await fetch("/api/admin/bookings", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: booking.id, note }),
+    });
+    const data = await res.json();
+    setBooking(data.booking);
+    setNote("");
+    setSaving(false);
+    setSuccessMsg("Note saved");
+    setTimeout(() => setSuccessMsg(""), 2000);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-32 text-ink/40 gap-2">
+        <RefreshCw size={16} className="animate-spin" />
+        <span className="font-mono text-sm">Loading booking…</span>
+      </div>
+    );
+  }
+
+  if (!booking) {
+    return (
+      <div className="py-32 text-center">
+        <p className="text-lg font-display text-forest mb-4">Booking not found</p>
+        <p className="text-sm text-ink/50 mb-6">This booking may no longer exist or the server restarted.</p>
+        <Button asChild variant="outline">
+          <Link href="/admin/bookings"><ArrowLeft size={14} className="mr-2" />Back to Bookings</Link>
+        </Button>
+      </div>
+    );
+  }
 
   const nights = calculateNights(booking.checkIn, booking.checkOut);
-  const cleaningFee = property.cleaningFee ?? 500;
-  const subtotal = booking.totalAmount - cleaningFee;
-
-  const statusIndex = STATUS_STEPS.findIndex((s) => s.key === status);
-
-  const handleAddNote = () => {
-    if (!note.trim()) return;
-    setNotes((prev) => [...prev, note]);
-    setNote("");
-  };
-
-  const handleDelete = () => {
-    if (confirm("Cancel this booking? This action cannot be undone.")) {
-      setStatus("CANCELLED");
-    }
-  };
+  const address = PROPERTY_ADDRESSES[booking.propertyId] || "";
+  const statusIndex = STATUS_STEPS.findIndex((s) => s.key === booking.status);
 
   return (
     <div className="space-y-6 max-w-5xl">
@@ -76,320 +112,187 @@ export default function BookingDetailPage() {
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center space-x-4">
           <Button variant="ghost" size="sm" asChild>
-            <Link href="/admin/bookings">
-              <ArrowLeft size={16} className="mr-2" />
-              Bookings
-            </Link>
+            <Link href="/admin/bookings"><ArrowLeft size={16} className="mr-2" />Bookings</Link>
           </Button>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-display text-forest">
-                {booking.guestName}
-              </h1>
-              <span
-                className={cn(
-                  "text-xs px-3 py-1 rounded-full font-medium",
-                  status === "CONFIRMED" && "bg-green-100 text-green-700",
-                  status === "PENDING" && "bg-yellow-100 text-yellow-700",
-                  status === "CHECKED_IN" && "bg-blue-100 text-blue-700",
-                  status === "CHECKED_OUT" && "bg-neutral-100 text-neutral-600",
-                  status === "CANCELLED" && "bg-red-100 text-red-700"
-                )}
-              >
-                {status}
+              <h1 className="text-2xl font-display text-forest">{booking.guestName}</h1>
+              <span className={cn("text-xs px-3 py-1 rounded-full font-medium", STATUS_COLORS[booking.status] || "bg-neutral-100 text-neutral-600")}>
+                {booking.status.replace("_", " ")}
               </span>
             </div>
-            <p className="font-mono text-sm text-ink/50">
-              #{booking.bookingNumber}
-            </p>
+            <p className="font-mono text-sm text-ink/50">#{booking.bookingNumber}</p>
           </div>
         </div>
-
-        <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            className="border-red-200 text-red-600 hover:bg-red-50"
-            onClick={handleDelete}
-          >
-            <XCircle size={14} className="mr-2" />
-            Cancel Booking
-          </Button>
-          <Button variant="gold" size="sm">
-            <Edit size={14} className="mr-2" />
-            Edit Booking
-          </Button>
-        </div>
+        {successMsg && (
+          <span className="text-sm text-green-600 font-mono bg-green-50 px-3 py-1 border border-green-200">
+            ✓ {successMsg}
+          </span>
+        )}
       </div>
 
-      {/* Booking Timeline */}
+      {/* Status stepper */}
       <div className="bg-white border border-neutral-200 p-6">
-        <p className="text-xs font-mono text-ink/50 uppercase mb-4">
-          Booking Status
-        </p>
-        <div className="flex items-center">
-          {STATUS_STEPS.map((step, i) => {
-            const isCompleted = i < statusIndex;
-            const isCurrent = i === statusIndex;
+        <p className="text-xs font-mono text-ink/50 uppercase mb-4">Update Status</p>
+        <div className="flex items-center gap-2 flex-wrap">
+          {STATUS_STEPS.map((step) => {
+            const isCurrent = booking.status === step.key;
             const Icon = step.icon;
             return (
-              <div key={step.key} className="flex items-center flex-1">
-                <button
-                  onClick={() => setStatus(step.key as typeof status)}
-                  className="flex flex-col items-center group"
-                >
-                  <div
-                    className={cn(
-                      "w-9 h-9 rounded-full flex items-center justify-center transition-colors border-2",
-                      isCompleted
-                        ? "bg-forest border-forest text-cream"
-                        : isCurrent
-                        ? "bg-gold border-gold text-ink"
-                        : "bg-white border-neutral-300 text-neutral-400 group-hover:border-forest"
-                    )}
-                  >
-                    <Icon size={14} />
-                  </div>
-                  <span
-                    className={cn(
-                      "text-xs mt-1.5 font-medium",
-                      isCurrent ? "text-forest" : "text-ink/40"
-                    )}
-                  >
-                    {step.label}
-                  </span>
-                </button>
-                {i < STATUS_STEPS.length - 1 && (
-                  <div
-                    className={cn(
-                      "flex-1 h-0.5 mx-2 mb-5",
-                      i < statusIndex ? "bg-forest" : "bg-neutral-200"
-                    )}
-                  />
+              <button
+                key={step.key}
+                onClick={() => updateStatus(step.key)}
+                disabled={saving || isCurrent}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 text-sm font-medium border transition-all",
+                  isCurrent
+                    ? "bg-forest text-cream border-forest cursor-default"
+                    : "bg-white text-ink/60 border-neutral-200 hover:border-forest hover:text-forest"
                 )}
-              </div>
+              >
+                <Icon size={14} />
+                {step.label}
+              </button>
             );
           })}
         </div>
-        <p className="text-xs text-ink/40 mt-2">
-          Click a step to update booking status
-        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column */}
+        {/* Left */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Guest Info */}
+          {/* Guest */}
           <div className="bg-white border border-neutral-200 p-6">
-            <p className="text-xs font-mono text-ink/50 uppercase mb-4">
-              Guest Information
-            </p>
-            <div className="flex items-start space-x-4 mb-6">
+            <p className="text-xs font-mono text-ink/50 uppercase mb-4">Guest Information</p>
+            <div className="flex items-center gap-4 mb-4">
               <div className="w-14 h-14 rounded-full bg-forest/10 flex items-center justify-center flex-shrink-0">
-                <span className="font-display text-2xl text-forest">
-                  {booking.guestName[0]}
-                </span>
+                <span className="font-display text-2xl text-forest">{booking.guestName[0]}</span>
               </div>
               <div>
-                <p className="text-xl font-display text-forest">
-                  {booking.guestName}
-                </p>
-                <p className="text-sm text-ink/60">
-                  Booked {formatDate(booking.createdAt)} via{" "}
-                  {booking.source}
-                </p>
+                <p className="text-xl font-display text-forest">{booking.guestName}</p>
+                <p className="text-sm text-ink/50 font-mono">Booked {formatDate(booking.createdAt)}</p>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <a
-                href={`tel:${booking.guestPhone}`}
-                className="flex items-center space-x-2 p-3 bg-neutral-50 hover:bg-forest hover:text-cream transition-all group"
-              >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <a href={`tel:${booking.guestPhone}`}
+                className="flex items-center gap-2 p-3 bg-neutral-50 hover:bg-forest hover:text-cream transition-all group">
                 <Phone size={14} className="text-gold group-hover:text-cream" />
                 <span className="font-mono text-sm">{booking.guestPhone}</span>
               </a>
-              <a
-                href={`mailto:${booking.guestEmail}`}
-                className="flex items-center space-x-2 p-3 bg-neutral-50 hover:bg-forest hover:text-cream transition-all group col-span-1 md:col-span-2"
-              >
+              <a href={`mailto:${booking.guestEmail}`}
+                className="flex items-center gap-2 p-3 bg-neutral-50 hover:bg-forest hover:text-cream transition-all group">
                 <Mail size={14} className="text-gold group-hover:text-cream" />
-                <span className="font-mono text-sm truncate">
-                  {booking.guestEmail}
-                </span>
+                <span className="font-mono text-sm truncate">{booking.guestEmail}</span>
               </a>
             </div>
           </div>
 
-          {/* Stay Details */}
+          {/* Stay */}
           <div className="bg-white border border-neutral-200 p-6">
-            <p className="text-xs font-mono text-ink/50 uppercase mb-4">
-              Stay Details
-            </p>
+            <p className="text-xs font-mono text-ink/50 uppercase mb-4">Stay Details</p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div className="p-4 bg-neutral-50">
-                <div className="flex items-center space-x-2 mb-2">
-                  <Calendar size={14} className="text-gold" />
-                  <span className="text-xs font-mono text-ink/50">
-                    CHECK-IN
-                  </span>
+              {[
+                { icon: Calendar, label: "CHECK-IN", value: formatDate(booking.checkIn) },
+                { icon: Calendar, label: "CHECK-OUT", value: formatDate(booking.checkOut) },
+                { icon: Clock, label: "NIGHTS", value: String(nights) },
+                { icon: Users, label: "GUESTS", value: String(booking.guests) },
+              ].map(({ icon: Icon, label, value }) => (
+                <div key={label} className="p-4 bg-neutral-50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Icon size={14} className="text-gold" />
+                    <span className="text-xs font-mono text-ink/50">{label}</span>
+                  </div>
+                  <p className="font-mono text-sm font-medium">{value}</p>
                 </div>
-                <p className="font-mono text-sm font-medium">
-                  {formatDate(booking.checkIn)}
-                </p>
-                <p className="text-xs text-ink/40">{property.checkInTime}</p>
-              </div>
-              <div className="p-4 bg-neutral-50">
-                <div className="flex items-center space-x-2 mb-2">
-                  <Calendar size={14} className="text-gold" />
-                  <span className="text-xs font-mono text-ink/50">
-                    CHECK-OUT
-                  </span>
-                </div>
-                <p className="font-mono text-sm font-medium">
-                  {formatDate(booking.checkOut)}
-                </p>
-                <p className="text-xs text-ink/40">{property.checkOutTime}</p>
-              </div>
-              <div className="p-4 bg-neutral-50">
-                <div className="flex items-center space-x-2 mb-2">
-                  <Clock size={14} className="text-gold" />
-                  <span className="text-xs font-mono text-ink/50">NIGHTS</span>
-                </div>
-                <p className="font-mono text-sm font-medium">{nights}</p>
-              </div>
-              <div className="p-4 bg-neutral-50">
-                <div className="flex items-center space-x-2 mb-2">
-                  <Users size={14} className="text-gold" />
-                  <span className="text-xs font-mono text-ink/50">GUESTS</span>
-                </div>
-                <p className="font-mono text-sm font-medium">
-                  {booking.guestsCount}
-                </p>
-              </div>
+              ))}
             </div>
-
-            <div className="flex items-start space-x-3 p-4 border border-forest/10 bg-forest/5">
-              <MapPin size={16} className="text-gold mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-medium text-forest">{property.name}</p>
-                <p className="text-sm text-ink/60 font-mono">
-                  {property.address}
-                </p>
+            {address && (
+              <div className="flex items-start gap-3 p-4 border border-forest/10 bg-forest/5">
+                <MapPin size={16} className="text-gold mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-forest">{booking.propertyName}</p>
+                  <p className="text-sm text-ink/60 font-mono">{address}</p>
+                </div>
               </div>
-            </div>
+            )}
+            {booking.specialRequests && (
+              <div className="mt-4 p-4 bg-amber-50 border border-amber-100">
+                <p className="text-xs font-mono text-amber-600 uppercase mb-1">Special Requests / Notes</p>
+                <p className="text-sm text-ink/70 whitespace-pre-wrap">{booking.specialRequests}</p>
+              </div>
+            )}
           </div>
 
           {/* Notes */}
           <div className="bg-white border border-neutral-200 p-6">
-            <p className="text-xs font-mono text-ink/50 uppercase mb-4">
-              Internal Notes
-            </p>
-            {notes.map((n, i) => (
-              <div
-                key={i}
-                className="flex items-start space-x-3 mb-3 p-3 bg-yellow-50 border border-yellow-100"
-              >
-                <FileText
-                  size={14}
-                  className="text-yellow-600 flex-shrink-0 mt-0.5"
-                />
-                <p className="text-sm text-ink/70">{n}</p>
-              </div>
-            ))}
+            <p className="text-xs font-mono text-ink/50 uppercase mb-4">Add Internal Note</p>
             <div className="space-y-3">
               <Textarea
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="Add a note for this booking..."
+                placeholder="Add an internal note…"
                 rows={3}
                 className="text-sm"
               />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleAddNote}
-                disabled={!note.trim()}
-              >
-                Add Note
+              <Button variant="outline" size="sm" onClick={addNote} disabled={!note.trim() || saving}>
+                <FileText size={14} className="mr-2" />
+                {saving ? "Saving…" : "Save Note"}
               </Button>
             </div>
           </div>
         </div>
 
-        {/* Right Column — Invoice & Actions */}
+        {/* Right */}
         <div className="space-y-6">
-          {/* Payment Summary */}
+          {/* Payment */}
           <div className="bg-white border border-neutral-200 p-6">
-            <p className="text-xs font-mono text-ink/50 uppercase mb-4">
-              Payment Summary
-            </p>
+            <p className="text-xs font-mono text-ink/50 uppercase mb-4">Payment</p>
             <div className="space-y-2 text-sm font-mono mb-4">
               <div className="flex justify-between text-ink/60">
-                <span>
-                  {formatCurrency(property.baseRate)} × {nights}n
-                </span>
-                <span>{formatCurrency(subtotal - cleaningFee)}</span>
+                <span>Base ({nights} nights)</span>
+                <span>{formatCurrency(booking.baseAmount)}</span>
               </div>
               <div className="flex justify-between text-ink/60">
                 <span>Cleaning fee</span>
-                <span>{formatCurrency(cleaningFee)}</span>
+                <span>{formatCurrency(booking.cleaningFee)}</span>
               </div>
-              <div className="flex justify-between font-bold text-forest border-t border-neutral-200 pt-2 mt-1">
+              <div className="flex justify-between text-ink/60">
+                <span>Taxes (GST)</span>
+                <span>{formatCurrency(booking.taxes)}</span>
+              </div>
+              <div className="flex justify-between font-bold text-forest border-t border-neutral-200 pt-2">
                 <span>Total</span>
                 <span>{formatCurrency(booking.totalAmount)}</span>
               </div>
             </div>
-
-            <div className="flex items-center justify-between py-3 border-t border-neutral-100">
-              <span className="text-sm text-ink/70">Payment Status</span>
-              <span
-                className={cn(
-                  "text-xs px-3 py-1 rounded-full font-medium",
-                  booking.paymentStatus === "PAID"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-yellow-100 text-yellow-700"
-                )}
-              >
-                {booking.paymentStatus}
-              </span>
+            <div className="flex items-center justify-between py-3 border-t border-neutral-100 text-sm">
+              <span className="text-ink/60">Payment ID</span>
+              <span className="font-mono text-xs text-ink/50">{booking.paymentId || "—"}</span>
             </div>
-
-            <Button variant="outline" size="sm" className="w-full mt-4">
-              <FileText size={14} className="mr-2" />
-              Download Invoice
-            </Button>
           </div>
 
-          {/* Quick Actions */}
+          {/* Actions */}
           <div className="bg-white border border-neutral-200 p-6">
-            <p className="text-xs font-mono text-ink/50 uppercase mb-4">
-              Quick Actions
-            </p>
+            <p className="text-xs font-mono text-ink/50 uppercase mb-4">Quick Actions</p>
             <div className="space-y-3">
               <a
                 href={`https://wa.me/91${booking.guestPhone}?text=${encodeURIComponent(
-                  `Hi ${booking.guestName}! Confirming your stay at ${property.name} from ${formatDate(booking.checkIn)} to ${formatDate(booking.checkOut)}.`
+                  `Hi ${booking.guestName}! Your booking at ${booking.propertyName} (${booking.bookingNumber}) is confirmed. Check-in: ${formatDate(booking.checkIn)}. Looking forward to hosting you!`
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center space-x-3 p-3 bg-green-50 hover:bg-green-100 transition-colors w-full text-left"
+                className="flex items-center gap-3 p-3 bg-green-50 hover:bg-green-100 transition-colors w-full text-left"
               >
                 <MessageCircle size={16} className="text-green-600" />
-                <span className="text-sm text-green-700 font-medium">
-                  WhatsApp Guest
-                </span>
+                <span className="text-sm text-green-700 font-medium">WhatsApp Guest</span>
               </a>
-              <a
-                href={`tel:${booking.guestPhone}`}
-                className="flex items-center space-x-3 p-3 bg-neutral-50 hover:bg-neutral-100 transition-colors w-full text-left"
-              >
+              <a href={`tel:${booking.guestPhone}`}
+                className="flex items-center gap-3 p-3 bg-neutral-50 hover:bg-neutral-100 transition-colors w-full">
                 <Phone size={16} className="text-ink/60" />
                 <span className="text-sm text-ink/70">Call Guest</span>
               </a>
-              <a
-                href={`mailto:${booking.guestEmail}`}
-                className="flex items-center space-x-3 p-3 bg-neutral-50 hover:bg-neutral-100 transition-colors w-full text-left"
-              >
+              <a href={`mailto:${booking.guestEmail}`}
+                className="flex items-center gap-3 p-3 bg-neutral-50 hover:bg-neutral-100 transition-colors w-full">
                 <Mail size={16} className="text-ink/60" />
                 <span className="text-sm text-ink/70">Email Guest</span>
               </a>
