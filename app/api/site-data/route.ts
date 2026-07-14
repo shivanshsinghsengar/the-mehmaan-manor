@@ -1,20 +1,17 @@
-/**
- * Single endpoint that returns everything the public site needs.
- * Public pages call this to get live content without touching code.
- */
 import { NextResponse } from "next/server";
-import { getProperties, getPhotos, getContent } from "@/lib/store";
+import { prisma } from "@/lib/prisma";
 
 export async function GET() {
-  const properties = getProperties();
-  const photos = getPhotos();
-  const content = getContent();
+  const [properties, photos, content] = await Promise.all([
+    prisma.property.findMany({ where: { isActive: true }, orderBy: { id: "asc" } }),
+    prisma.photo.findMany({ orderBy: { order: "asc" } }),
+    prisma.siteContent.findUnique({ where: { id: "singleton" } }),
+  ]);
 
   return NextResponse.json({
     properties,
     photos,
     content,
-    // Pre-group photos for easy consumption
     heroPhotos: photos.filter((p) => p.section === "hero"),
     instagramPhotos: photos.filter((p) => p.section === "instagram"),
     propertyCards: {

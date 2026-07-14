@@ -1,32 +1,50 @@
 import { NextResponse } from "next/server";
-import { getBookingById, saveBooking } from "@/lib/bookings-store";
+import { prisma } from "@/lib/prisma";
 import { sendBookingConfirmationToGuest, sendNewBookingAlertToOwner } from "@/lib/email";
 
 export async function POST(request: Request) {
   const { bookingId, paymentId } = await request.json();
 
-  const booking = getBookingById(bookingId);
+  const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
   if (!booking) {
     return NextResponse.json({ error: "Booking not found" }, { status: 404 });
   }
 
-  // Mark as confirmed
-  const confirmed = {
-    ...booking,
-    status: "CONFIRMED" as const,
-    paymentId: paymentId || null,
-  };
-  saveBooking(confirmed);
+  const confirmed = await prisma.booking.update({
+    where: { id: bookingId },
+    data: { status: "CONFIRMED", paymentId: paymentId || null },
+  });
 
-  // Send emails in parallel — don't let email failures block the response
+  // Send emails (non-blocking)
+  const emailData = {
+    id: confirmed.id,
+    bookingNumber: confirmed.bookingNumber,
+    propertyId: confirmed.propertyId,
+    propertyName: confirmed.propertyName,
+    guestName: confirmed.guestName,
+    guestEmail: confirmed.guestEmail,
+    guestPhone: confirmed.guestPhone,
+    checkIn: confirmed.checkIn,
+    checkOut: confirmed.checkOut,
+    nights: confirmed.nights,
+    guests: confirmed.guests,
+    baseAmount: confirmed.baseAmount,
+    cleaningFee: confirmed.cleaningFee,
+    taxes: confirmed.taxes,
+    totalAmount: confirmed.totalAmount,
+    status: "CONFIRMED" as const,
+    paymentId: confirmed.paymentId,
+    razorpayOrderId: confirmed.razorpayOrderId,
+    specialRequests: confirmed.specialRequests,
+    createdAt: confirmed.createdAt,
+  };
+
   Promise.allSettled([
-    sendBookingConfirmationToGuest(confirmed),
-    sendNewBookingAlertToOwner(confirmed),
+    sendBookingConfirmationToGuest(emailData),
+    sendNewBookingAlertToOwner(emailData),
   ]).then((results) => {
     results.forEach((r, i) => {
-      if (r.status === "rejected") {
-        console.error(`Email ${i === 0 ? "guest confirmation" : "owner alert"} failed:`, r.reason);
-      }
+      if (r.status === "rejected") console.error(`Email ${i} failed:`, r.reason);
     });
   });
 

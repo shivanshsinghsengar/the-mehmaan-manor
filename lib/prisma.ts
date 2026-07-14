@@ -1,12 +1,13 @@
-/**
- * Prisma client stub.
- * The app currently uses in-memory stores (lib/store.ts, lib/bookings-store.ts).
- * Connect a real database and uncomment the lines below when ready.
- */
+import { PrismaClient } from "@prisma/client";
 
-// import { PrismaClient } from '@prisma/client'
-// const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined }
-// export const prisma = globalForPrisma.prisma ?? new PrismaClient()
-// if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+declare global {
+  // eslint-disable-next-line no-var
+  var __prisma: PrismaClient | undefined;
+}
 
-export const prisma = null;
+// Reuse the client across hot-reloads in development
+export const prisma = global.__prisma ?? new PrismaClient();
+
+if (process.env.NODE_ENV !== "production") {
+  global.__prisma = prisma;
+}

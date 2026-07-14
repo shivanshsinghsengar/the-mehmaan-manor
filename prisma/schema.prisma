@@ -1,166 +1,114 @@
-// Prisma schema for The Mehmaan Manor
-// Database: PostgreSQL
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-enum UserRole {
-  OWNER
-  MANAGER
-  STAFF
-}
+// ── Bookings ─────────────────────────────────────────────────────────────────
 
-enum BookingStatus {
-  PENDING
-  CONFIRMED
-  CHECKED_IN
-  CHECKED_OUT
-  CANCELLED
-}
+model Booking {
+  id             String   @id @default(cuid())
+  bookingNumber  String   @unique
+  propertyId     String
+  propertyName   String
+  guestName      String
+  guestEmail     String
+  guestPhone     String
+  checkIn        String   // ISO date string "YYYY-MM-DD"
+  checkOut       String
+  nights         Int
+  guests         Int
+  baseAmount     Float
+  cleaningFee    Float
+  taxes          Float
+  totalAmount    Float
+  status         String   @default("PENDING_PAYMENT") // PENDING_PAYMENT | CONFIRMED | CANCELLED
+  paymentId      String?
+  razorpayOrderId String?
+  specialRequests String  @default("")
+  createdAt      String   // ISO datetime string
 
-enum PaymentStatus {
-  PENDING
-  PAID
-  REFUNDED
-  FAILED
-}
-
-enum InquiryStatus {
-  NEW
-  REPLIED
-  BOOKED
-  CLOSED
-}
-
-enum BookingSource {
-  DIRECT
-  AIRBNB
-  MAKEMYTRIP
-  REFERRAL
-  OTHER
-}
-
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String
-  phone     String?
-  role      UserRole @default(STAFF)
-  avatar    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  bookingsCreated Booking[]
-  inquiriesHandled Inquiry[]
-}
-
-model Property {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  address     String
-  pincode     String?
-  coordinates String?
-  description String   @db.Text
-  vibe        String   @db.Text
-  baseRate    Float
-  weekendRate Float?
-  cleaningFee Float?
-  maxGuests   Int
-  checkInTime String   @default("14:00")
-  checkOutTime String  @default("11:00")
-  amenities   String[]
-  policies    String   @db.Text
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  photos   Photo[]
-  bookings Booking[]
-  inquiries Inquiry[]
-}
-
-model Photo {
-  id         String   @id @default(cuid())
-  propertyId String
-  url        String
-  alt        String
-  order      Int      @default(0)
-  isHero     Boolean  @default(false)
-  tags       String[]
-  createdAt  DateTime @default(now())
-
-  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-
+  @@index([status])
+  @@index([checkIn])
+  @@index([guestEmail])
   @@index([propertyId])
 }
 
-model Guest {
+// ── Properties ───────────────────────────────────────────────────────────────
+
+model Property {
+  id           String   @id
+  name         String
+  slug         String   @unique
+  address      String
+  coordinates  String   @default("")
+  description  String
+  vibe         String
+  baseRate     Float
+  weekendRate  Float
+  cleaningFee  Float
+  maxGuests    Int
+  checkInTime  String   @default("14:00")
+  checkOutTime String   @default("11:00")
+  amenities    String[]
+  policies     String
+  isActive     Boolean  @default(true)
+  heroPhotoId  String?
+
+  photos Photo[]
+}
+
+// ── Photos ────────────────────────────────────────────────────────────────────
+
+model Photo {
+  id         String   @id @default(cuid())
+  url        String
+  alt        String
+  propertyId String?
+  section    String   @default("gallery")
+  order      Int      @default(0)
+  isFeatured Boolean  @default(false)
+  tags       String[]
+  uploadedAt String
+
+  property Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+
+  @@index([propertyId])
+  @@index([section])
+}
+
+// ── Site Content ──────────────────────────────────────────────────────────────
+
+model SiteContent {
+  id                 String @id @default("singleton")
+  heroHeadline       String @default("The Mehmaan Experience")
+  heroSubtitle       String @default("Two homes in Gurugram. Endless ways to feel at home.")
+  philosophyText     String
+  taglinePrimary     String @default("Not just a stay — it's the Mehmaan experience.")
+  taglineSecondary   String @default("Two homes. One promise. Endless memories.")
+  taglineCloser      String @default("Come as a guest, leave as family.")
+  instagramHandle    String @default("@themehmaanmanor")
+  teamSimranPhone    String @default("8828352311")
+  teamVipinPhone     String @default("8796568003")
+  teamJyotiPhone     String @default("8796568002")
+}
+
+// ── Inquiries ─────────────────────────────────────────────────────────────────
+
+model Inquiry {
   id        String   @id @default(cuid())
   name      String
   email     String
   phone     String
-  notes     String?  @db.Text
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  bookings Booking[]
-
-  @@index([email])
-  @@index([phone])
-}
-
-model Booking {
-  id            String        @id @default(cuid())
-  bookingNumber String        @unique @default(cuid())
-  propertyId    String
-  guestId       String
-  userId        String?
-  checkIn       DateTime
-  checkOut      DateTime
-  guestsCount   Int
-  totalAmount   Float
-  status        BookingStatus @default(PENDING)
-  paymentStatus PaymentStatus @default(PENDING)
-  source        BookingSource @default(DIRECT)
-  notes         String?       @db.Text
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-
-  property Property @relation(fields: [propertyId], references: [id])
-  guest    Guest    @relation(fields: [guestId], references: [id])
-  user     User?    @relation(fields: [userId], references: [id])
-
-  @@index([propertyId])
-  @@index([guestId])
-  @@index([checkIn])
-  @@index([checkOut])
-  @@index([status])
-}
-
-model Inquiry {
-  id         String        @id @default(cuid())
-  name       String
-  email      String
-  phone      String
-  propertyId String?
-  dates      String?
-  message    String        @db.Text
-  status     InquiryStatus @default(NEW)
-  userId     String?
-  reply      String?       @db.Text
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
-
-  property Property? @relation(fields: [propertyId], references: [id])
-  user     User?     @relation(fields: [userId], references: [id])
+  property  String   @default("")
+  dates     String   @default("")
+  message   String
+  status    String   @default("NEW") // NEW | READ | REPLIED
+  createdAt String
 
   @@index([status])
   @@index([createdAt])
