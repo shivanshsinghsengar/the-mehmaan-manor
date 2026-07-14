@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     const {
       propertyId, propertyName, guestName, guestEmail, guestPhone,
       checkIn, checkOut, nights, guests, baseAmount, cleaningFee, taxes,
-      totalAmount, specialRequests,
+      totalAmount, specialRequests, status, paymentId,
     } = body;
 
     if (!propertyId || !guestName || !guestEmail || !guestPhone || !checkIn || !checkOut) {
@@ -38,7 +38,8 @@ export async function POST(request: Request) {
         cleaningFee: Number(cleaningFee) || 0,
         taxes: Number(taxes) || 0,
         totalAmount: Number(totalAmount) || 0,
-        status: "PENDING_PAYMENT",
+        status: status || "PENDING_PAYMENT",
+        paymentId: paymentId || null,
         specialRequests: specialRequests || "",
         createdAt: new Date().toISOString(),
       },

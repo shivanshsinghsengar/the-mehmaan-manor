@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Edit,
@@ -21,10 +21,22 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PlaceholderImage } from "@/components/placeholder-image";
-import { mockProperties } from "@/lib/mock-data";
 import { formatCurrency } from "@/lib/utils";
 
 export default function PropertiesPage() {
+  const [properties, setProperties] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/properties")
+      .then((r) => r.json())
+      .then((data) => {
+        setProperties(data || []);
+      })
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -36,16 +48,22 @@ export default function PropertiesPage() {
       </div>
 
       {/* Property Cards */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-        {mockProperties.map((property) => (
-          <PropertyCard key={property.id} property={property} />
-        ))}
-      </div>
+      {loading ? (
+        <div className="py-24 text-center text-ink/40 font-mono text-sm">Loading properties…</div>
+      ) : properties.length === 0 ? (
+        <div className="py-24 text-center text-ink/40">No properties found.</div>
+      ) : (
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+          {properties.map((property) => (
+            <PropertyCard key={property.id} property={property} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
-function PropertyCard({ property }: { property: (typeof mockProperties)[0] }) {
+function PropertyCard({ property }: { property: any }) {
   const [activeTab, setActiveTab] = useState<
     "overview" | "amenities" | "pricing" | "policies"
   >("overview");

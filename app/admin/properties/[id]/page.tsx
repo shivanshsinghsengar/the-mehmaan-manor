@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save, Plus, X } from "lucide-react";
@@ -42,28 +42,74 @@ export default function PropertyEditorPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [property, setProperty] = useState<any>(null);
 
-  const property = mockProperties.find((p) => p.id === params.id) ?? mockProperties[0];
-
-  const [form, setForm] = useState({
-    name: property.name,
-    address: property.address,
-    coordinates: property.coordinates ?? "",
-    description: property.description,
-    vibe: property.vibe,
-    baseRate: property.baseRate,
-    weekendRate: property.weekendRate ?? 0,
-    cleaningFee: property.cleaningFee ?? 0,
-    checkInTime: property.checkInTime,
-    checkOutTime: property.checkOutTime,
-    maxGuests: property.maxGuests,
-    policies: property.policies,
-    amenities: [...property.amenities],
+  const [form, setForm] = useState<any>({
+    name: "",
+    address: "",
+    coordinates: "",
+    description: "",
+    vibe: "",
+    baseRate: 0,
+    weekendRate: 0,
+    cleaningFee: 0,
+    checkInTime: "14:00",
+    checkOutTime: "11:00",
+    maxGuests: 4,
+    policies: "",
+    amenities: [],
   });
 
-  const handleSave = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+  useEffect(() => {
+    fetch(`/api/properties/${params.id}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data && !data.error) {
+          setProperty(data);
+          setForm({
+            name: data.name || "",
+            address: data.address || "",
+            coordinates: data.coordinates || "",
+            description: data.description || "",
+            vibe: data.vibe || "",
+            baseRate: data.baseRate || 0,
+            weekendRate: data.weekendRate || 0,
+            cleaningFee: data.cleaningFee || 0,
+            checkInTime: data.checkInTime || "14:00",
+            checkOutTime: data.checkOutTime || "11:00",
+            maxGuests: data.maxGuests || 4,
+            policies: data.policies || "",
+            amenities: data.amenities || [],
+          });
+        }
+      })
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false));
+  }, [params.id]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/properties/${params.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2500);
+      } else {
+        alert(data.error || "Failed to save changes");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save changes");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const toggleAmenity = (amenity: string) => {
