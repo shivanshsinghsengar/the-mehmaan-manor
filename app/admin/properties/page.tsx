@@ -238,7 +238,7 @@ function PropertyCard({ property }: { property: any }) {
 
         {activeTab === "amenities" && (
           <div className="grid grid-cols-2 gap-2">
-            {property.amenities.map((amenity, i) => {
+            {property.amenities.map((amenity: string, i: number) => {
               const Icon = iconMap[amenity] || Home;
               return (
                 <div

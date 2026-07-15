@@ -113,10 +113,10 @@ export default function PropertyEditorPage() {
   };
 
   const toggleAmenity = (amenity: string) => {
-    setForm((f) => ({
+    setForm((f: any) => ({
       ...f,
       amenities: f.amenities.includes(amenity)
-        ? f.amenities.filter((a) => a !== amenity)
+        ? f.amenities.filter((a: string) => a !== amenity)
         : [...f.amenities, amenity],
     }));
   };

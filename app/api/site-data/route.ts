@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const [properties, photos, content] = await Promise.all([
     prisma.property.findMany({ where: { isActive: true }, orderBy: { id: "asc" } }),
