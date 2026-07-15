@@ -94,7 +94,7 @@ export default function BookPage() {
     setError("");
     setPaying(true);
     try {
-      // 1. Create booking record
+      // 1. Create booking record in DB
       const res = await fetch("/api/bookings/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -117,42 +117,72 @@ export default function BookPage() {
       const data = await res.json();
       if (!data.success) throw new Error(data.error || "Booking failed");
 
-      // 2. Open Razorpay
-      // ── For DEMO mode (no live keys), skip Razorpay and go straight to confirmation ──
-      const RAZORPAY_KEY = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-      if (!RAZORPAY_KEY || RAZORPAY_KEY === "your-razorpay-key-id") {
-        // Demo: simulate successful payment
+      // 2. Create Razorpay order server-side
+      const orderRes = await fetch("/api/razorpay/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId: data.bookingId }),
+      });
+      const orderData = await orderRes.json();
+
+      // 3. If Razorpay not configured → demo mode (skip payment)
+      if (orderRes.status === 503 || !orderData.orderId) {
+        await fetch("/api/bookings/confirm", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ bookingId: data.bookingId, paymentId: "DEMO" }),
+        });
         setBooking({ bookingNumber: data.bookingNumber, bookingId: data.bookingId });
         setStep(4);
         setPaying(false);
         return;
       }
 
-      // Live Razorpay flow
+      // 4. Open Razorpay checkout modal
       const rzp = new window.Razorpay({
-        key: RAZORPAY_KEY,
-        amount: pricing.total * 100,
-        currency: "INR",
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
         name: "The Mehmaan Manor",
-        description: `${prop.name} · ${pricing.nights} nights`,
-        order_id: data.razorpayOrderId,
-        prefill: { name: form.name, email: form.email, contact: "+91" + form.phone },
-        theme: { color: "oklch(0.75 0.12 85)" },
-        handler: async (response: { razorpay_payment_id: string }) => {
-          // Confirm payment on backend
-          await fetch("/api/bookings/confirm", {
+        description: `${prop.name} · ${pricing.nights} night${pricing.nights > 1 ? "s" : ""}`,
+        order_id: orderData.orderId,
+        prefill: {
+          name: form.name,
+          email: form.email,
+          contact: `+91${form.phone}`,
+        },
+        theme: { color: "#c9a84c" },
+        handler: async (response: {
+          razorpay_payment_id: string;
+          razorpay_order_id: string;
+          razorpay_signature: string;
+        }) => {
+          // 5. Verify signature on server — confirms payment is authentic
+          const verifyRes = await fetch("/api/razorpay/verify", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
               bookingId: data.bookingId,
-              paymentId: response.razorpay_payment_id,
             }),
           });
-          setBooking({ bookingNumber: data.bookingNumber, bookingId: data.bookingId });
-          setStep(4);
+          const verifyData = await verifyRes.json();
+          if (verifyData.success) {
+            setBooking({ bookingNumber: data.bookingNumber, bookingId: data.bookingId });
+            setStep(4);
+          } else {
+            setError("Payment verification failed. Please contact us.");
+          }
           setPaying(false);
         },
-        modal: { ondismiss: () => setPaying(false) },
+        modal: {
+          ondismiss: () => {
+            setPaying(false);
+            setError("Payment was cancelled. Your booking is saved — try again when ready.");
+          },
+        },
       });
       rzp.open();
     } catch (err: unknown) {
