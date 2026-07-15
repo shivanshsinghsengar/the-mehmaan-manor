@@ -1,239 +1,182 @@
 "use client";
 
-import { useState } from "react";
-import {
-  MessageSquare,
-  Phone,
-  Mail,
-  Calendar,
-  Home,
-  CheckCircle,
-  X,
-  Send,
-  ArrowRight,
-} from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { MessageSquare, Phone, Mail, Calendar, Home, RefreshCw, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { mockInquiries } from "@/lib/mock-data";
 import { formatDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
-type StatusType = "NEW" | "REPLIED" | "BOOKED" | "CLOSED";
-type Inquiry = (typeof mockInquiries)[0];
+interface Inquiry {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  property: string;
+  dates: string;
+  message: string;
+  status: string;
+  createdAt: string;
+}
 
-const STATUS_CONFIG: Record<StatusType, { label: string; color: string }> = {
-  NEW: { label: "New", color: "bg-blue-100 text-blue-700" },
+const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+  NEW:     { label: "New",     color: "bg-blue-100 text-blue-700" },
+  READ:    { label: "Read",    color: "bg-neutral-100 text-neutral-600" },
   REPLIED: { label: "Replied", color: "bg-yellow-100 text-yellow-700" },
-  BOOKED: { label: "Booked", color: "bg-green-100 text-green-700" },
-  CLOSED: { label: "Closed", color: "bg-neutral-100 text-neutral-600" },
+  BOOKED:  { label: "Booked",  color: "bg-green-100 text-green-700" },
+};
+
+const PROPERTY_LABELS: Record<string, string> = {
+  "sushant-lok": "Sushant Lok",
+  "jharsa-village": "Jharsa Village",
+  "either": "Either works",
+  "": "Not specified",
 };
 
 export default function InquiriesPage() {
-  const [inquiries, setInquiries] = useState(mockInquiries);
-  const [selected, setSelected] = useState<Inquiry | null>(inquiries[0]);
-  const [filter, setFilter] = useState<"ALL" | StatusType>("ALL");
-  const [replyText, setReplyText] = useState(selected?.reply ?? "");
-  const [sending, setSending] = useState(false);
+  const [inquiries, setInquiries] = useState<Inquiry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<Inquiry | null>(null);
+  const [filter, setFilter] = useState("ALL");
 
-  const filtered = inquiries.filter((i) =>
-    filter === "ALL" ? true : i.status === filter
-  );
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/inquiries");
+      const data = await res.json();
+      const list = data.inquiries || [];
+      setInquiries(list);
+      if (!selected && list.length > 0) setSelected(list[0]);
+    } catch {/* ignore */}
+    finally { setLoading(false); }
+  }, [selected]);
 
-  const handleSelect = (inq: Inquiry) => {
-    setSelected(inq);
-    setReplyText(inq.reply ?? "");
+  useEffect(() => { load(); }, []); // eslint-disable-line
+
+  const updateStatus = async (id: string, status: string) => {
+    await fetch("/api/admin/inquiries", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, status }),
+    });
+    setInquiries((prev) => prev.map((i) => i.id === id ? { ...i, status } : i));
+    if (selected?.id === id) setSelected((prev) => prev ? { ...prev, status } : null);
   };
 
-  const handleStatusChange = (id: string, status: StatusType) => {
-    setInquiries((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, status } : i))
-    );
-    if (selected?.id === id) {
-      setSelected((prev) => (prev ? { ...prev, status } : null));
-    }
-  };
-
-  const handleSendReply = async () => {
-    if (!selected || !replyText.trim()) return;
-    setSending(true);
-    await new Promise((r) => setTimeout(r, 900));
-    setInquiries((prev) =>
-      prev.map((i) =>
-        i.id === selected.id ? { ...i, reply: replyText, status: "REPLIED" } : i
-      )
-    );
-    setSelected((prev) =>
-      prev ? { ...prev, reply: replyText, status: "REPLIED" } : null
-    );
-    setSending(false);
-  };
-
-  const handleConvertToBooking = () => {
-    if (!selected) return;
-    handleStatusChange(selected.id, "BOOKED");
-    alert(
-      `Inquiry from ${selected.name} converted to booking!\n\nIn production, this opens the New Booking form pre-filled with their details.`
-    );
-  };
+  const filtered = inquiries.filter((i) => filter === "ALL" || i.status === filter);
+  const newCount = inquiries.filter((i) => i.status === "NEW").length;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-display text-forest mb-2">Inquiries</h1>
-          <p className="text-ink/60">
-            {inquiries.filter((i) => i.status === "NEW").length} new inquiries
-          </p>
+          <p className="text-ink/60">{newCount} new {newCount === 1 ? "inquiry" : "inquiries"}</p>
         </div>
+        <button onClick={load} className="flex items-center gap-2 text-sm text-ink/50 hover:text-forest transition-colors">
+          <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+          Refresh
+        </button>
       </div>
 
-      {/* Filter Pills */}
+      {/* Filter pills */}
       <div className="flex items-center gap-2 flex-wrap">
-        {(["ALL", "NEW", "REPLIED", "BOOKED", "CLOSED"] as const).map((s) => (
-          <button
-            key={s}
-            onClick={() => setFilter(s)}
+        {["ALL", "NEW", "READ", "REPLIED", "BOOKED"].map((s) => (
+          <button key={s} onClick={() => setFilter(s)}
             className={cn(
               "px-4 py-1.5 text-sm font-medium transition-colors border",
-              filter === s
-                ? "bg-forest text-cream border-forest"
-                : "bg-white text-ink/60 border-neutral-200 hover:border-neutral-400"
-            )}
-          >
-            {s === "ALL" ? "All" : STATUS_CONFIG[s].label}
+              filter === s ? "bg-forest text-cream border-forest" : "bg-white text-ink/60 border-neutral-200 hover:border-neutral-400"
+            )}>
+            {s === "ALL" ? "All" : (STATUS_CONFIG[s]?.label || s)}
             <span className="ml-1.5 font-mono text-xs opacity-60">
-              {s === "ALL"
-                ? inquiries.length
-                : inquiries.filter((i) => i.status === s).length}
+              {s === "ALL" ? inquiries.length : inquiries.filter((i) => i.status === s).length}
             </span>
           </button>
         ))}
       </div>
 
-      {/* Two-panel layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 min-h-[600px]">
-        {/* Inquiry List */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 min-h-[500px]">
+        {/* List */}
         <div className="lg:col-span-2 bg-white border border-neutral-200 overflow-hidden">
-          <div className="divide-y divide-neutral-100">
-            {filtered.length === 0 && (
-              <div className="p-12 text-center">
-                <MessageSquare
-                  size={32}
-                  className="mx-auto text-neutral-300 mb-3"
-                />
-                <p className="text-ink/50 text-sm">No inquiries found</p>
-              </div>
-            )}
-            {filtered.map((inq) => {
-              const cfg = STATUS_CONFIG[inq.status as StatusType];
-              return (
-                <button
-                  key={inq.id}
-                  onClick={() => handleSelect(inq)}
-                  className={cn(
-                    "w-full text-left p-5 transition-colors hover:bg-neutral-50",
-                    selected?.id === inq.id && "bg-gold/5 border-l-2 border-gold"
-                  )}
-                >
-                  <div className="flex items-start justify-between mb-1">
-                    <p className="font-medium text-forest text-sm">
-                      {inq.name}
-                      {inq.status === "NEW" && (
-                        <span className="ml-2 inline-block w-2 h-2 bg-blue-500 rounded-full" />
-                      )}
-                    </p>
-                    <span
-                      className={`text-xs px-2 py-0.5 rounded-full ${cfg.color}`}
-                    >
-                      {cfg.label}
-                    </span>
-                  </div>
-                  <p className="text-xs text-ink/50 font-mono mb-2">
-                    {formatDate(inq.createdAt)}
-                  </p>
-                  <p className="text-sm text-ink/70 line-clamp-2">
-                    {inq.message}
-                  </p>
-                  {inq.propertyName && (
-                    <p className="text-xs text-gold mt-2 font-mono">
-                      → {inq.propertyName}
-                    </p>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+          {loading ? (
+            <div className="py-16 text-center text-ink/40 font-mono text-sm">Loading…</div>
+          ) : filtered.length === 0 ? (
+            <div className="py-16 text-center">
+              <MessageSquare size={32} className="mx-auto text-neutral-300 mb-3" />
+              <p className="text-ink/50 text-sm">
+                {filter === "ALL" ? "No inquiries yet. They appear when guests submit the contact form." : `No ${filter.toLowerCase()} inquiries.`}
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-neutral-100">
+              {filtered.map((inq) => {
+                const cfg = STATUS_CONFIG[inq.status] || { label: inq.status, color: "bg-neutral-100 text-neutral-600" };
+                return (
+                  <button key={inq.id} onClick={() => { setSelected(inq); if (inq.status === "NEW") updateStatus(inq.id, "READ"); }}
+                    className={cn(
+                      "w-full text-left p-5 transition-colors hover:bg-neutral-50",
+                      selected?.id === inq.id && "bg-gold/5 border-l-2 border-gold"
+                    )}>
+                    <div className="flex items-start justify-between mb-1">
+                      <p className="font-medium text-forest text-sm">
+                        {inq.name}
+                        {inq.status === "NEW" && <span className="ml-2 inline-block w-2 h-2 bg-blue-500 rounded-full" />}
+                      </p>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${cfg.color}`}>{cfg.label}</span>
+                    </div>
+                    <p className="text-xs text-ink/50 font-mono mb-2">{formatDate(inq.createdAt)}</p>
+                    <p className="text-sm text-ink/70 line-clamp-2">{inq.message}</p>
+                    {inq.property && inq.property !== "" && (
+                      <p className="text-xs text-gold mt-2 font-mono">→ {PROPERTY_LABELS[inq.property] || inq.property}</p>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        {/* Detail Panel */}
+        {/* Detail */}
         <div className="lg:col-span-3 bg-white border border-neutral-200">
           {selected ? (
             <div className="h-full flex flex-col">
-              {/* Inquiry Header */}
               <div className="p-6 border-b border-neutral-100">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h2 className="text-xl font-display text-forest">
-                      {selected.name}
-                    </h2>
-                    <p className="text-xs font-mono text-ink/50">
-                      Received {formatDate(selected.createdAt)}
-                    </p>
+                    <h2 className="text-xl font-display text-forest">{selected.name}</h2>
+                    <p className="text-xs font-mono text-ink/50">Received {formatDate(selected.createdAt)}</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <select
-                      value={selected.status}
-                      onChange={(e) =>
-                        handleStatusChange(
-                          selected.id,
-                          e.target.value as StatusType
-                        )
-                      }
-                      className="text-xs border border-neutral-200 px-3 py-1.5 rounded focus:outline-none focus:ring-2 focus:ring-gold"
-                    >
-                      <option value="NEW">New</option>
-                      <option value="REPLIED">Replied</option>
-                      <option value="BOOKED">Booked</option>
-                      <option value="CLOSED">Closed</option>
-                    </select>
-                  </div>
+                  <select value={selected.status}
+                    onChange={(e) => updateStatus(selected.id, e.target.value)}
+                    className="text-xs border border-neutral-200 px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-gold">
+                    {["NEW","READ","REPLIED","BOOKED"].map((s) => (
+                      <option key={s} value={s}>{STATUS_CONFIG[s]?.label || s}</option>
+                    ))}
+                  </select>
                 </div>
 
-                {/* Contact Info */}
                 <div className="grid grid-cols-2 gap-3">
-                  <a
-                    href={`tel:+91${selected.phone}`}
-                    className="flex items-center space-x-2 p-3 bg-neutral-50 hover:bg-forest hover:text-cream transition-all group text-sm"
-                  >
-                    <Phone
-                      size={14}
-                      className="text-gold group-hover:text-cream"
-                    />
+                  <a href={`tel:+91${selected.phone}`}
+                    className="flex items-center gap-2 p-3 bg-neutral-50 hover:bg-forest hover:text-cream transition-all group text-sm">
+                    <Phone size={14} className="text-gold group-hover:text-cream" />
                     <span className="font-mono">{selected.phone}</span>
                   </a>
-                  <a
-                    href={`mailto:${selected.email}`}
-                    className="flex items-center space-x-2 p-3 bg-neutral-50 hover:bg-forest hover:text-cream transition-all group text-sm"
-                  >
-                    <Mail
-                      size={14}
-                      className="text-gold group-hover:text-cream"
-                    />
+                  <a href={`mailto:${selected.email}`}
+                    className="flex items-center gap-2 p-3 bg-neutral-50 hover:bg-forest hover:text-cream transition-all group text-sm">
+                    <Mail size={14} className="text-gold group-hover:text-cream" />
                     <span className="font-mono truncate">{selected.email}</span>
                   </a>
                 </div>
 
-                {/* Inquiry Details */}
-                <div className="grid grid-cols-2 gap-3 mt-3">
-                  {selected.propertyName && (
-                    <div className="flex items-center space-x-2 text-sm text-ink/70">
+                <div className="flex flex-wrap gap-4 mt-3">
+                  {selected.property && selected.property !== "" && (
+                    <div className="flex items-center gap-2 text-sm text-ink/70">
                       <Home size={14} className="text-gold" />
-                      <span>{selected.propertyName}</span>
+                      <span>{PROPERTY_LABELS[selected.property] || selected.property}</span>
                     </div>
                   )}
                   {selected.dates && (
-                    <div className="flex items-center space-x-2 text-sm text-ink/70">
+                    <div className="flex items-center gap-2 text-sm text-ink/70">
                       <Calendar size={14} className="text-gold" />
                       <span className="font-mono">{selected.dates}</span>
                     </div>
@@ -241,85 +184,41 @@ export default function InquiriesPage() {
                 </div>
               </div>
 
-              {/* Message Thread */}
-              <div className="flex-1 p-6 space-y-4 overflow-y-auto">
-                {/* Guest message */}
-                <div className="flex items-start space-x-3">
+              <div className="flex-1 p-6">
+                <div className="flex items-start gap-3">
                   <div className="w-9 h-9 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-sm font-medium text-ink/60">
-                      {selected.name[0]}
-                    </span>
+                    <span className="text-sm font-medium text-ink/60">{selected.name[0]}</span>
                   </div>
                   <div className="flex-1">
                     <div className="bg-neutral-50 p-4">
-                      <p className="text-sm text-ink/80 leading-relaxed">
-                        {selected.message}
-                      </p>
+                      <p className="text-sm text-ink/80 leading-relaxed whitespace-pre-wrap">{selected.message}</p>
                     </div>
-                    <p className="text-xs text-ink/40 mt-1 font-mono">
-                      {formatDate(selected.createdAt)} · Guest
-                    </p>
+                    <p className="text-xs text-ink/40 mt-1 font-mono">{formatDate(selected.createdAt)}</p>
                   </div>
                 </div>
-
-                {/* Reply thread */}
-                {selected.reply && (
-                  <div className="flex items-start space-x-3 flex-row-reverse">
-                    <div className="w-9 h-9 rounded-full bg-forest flex items-center justify-center flex-shrink-0">
-                      <span className="text-sm font-medium text-cream">S</span>
-                    </div>
-                    <div className="flex-1 text-right">
-                      <div className="bg-forest/5 border border-forest/10 p-4 text-left">
-                        <p className="text-sm text-ink/80 leading-relaxed">
-                          {selected.reply}
-                        </p>
-                      </div>
-                      <p className="text-xs text-ink/40 mt-1 font-mono">
-                        You · Team Mehmaan
-                      </p>
-                    </div>
-                  </div>
-                )}
               </div>
 
-              {/* Reply Box */}
-              <div className="p-5 border-t border-neutral-100 space-y-3">
-                <Textarea
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
-                  placeholder="Type your reply..."
-                  rows={3}
-                  className="text-sm resize-none"
-                />
-                <div className="flex items-center justify-between">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleConvertToBooking}
-                    disabled={selected.status === "BOOKED"}
-                  >
-                    <ArrowRight size={14} className="mr-2" />
-                    Convert to Booking
-                  </Button>
-                  <Button
-                    variant="gold"
-                    size="sm"
-                    onClick={handleSendReply}
-                    disabled={!replyText.trim() || sending}
-                  >
-                    <Send size={14} className="mr-2" />
-                    {sending ? "Sending..." : "Send Reply"}
-                  </Button>
-                </div>
+              <div className="p-5 border-t border-neutral-100 flex items-center gap-3">
+                <a href={`https://wa.me/91${selected.phone}?text=${encodeURIComponent(`Hi ${selected.name}! Thank you for your inquiry about The Mehmaan Manor. `)}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white text-sm font-medium transition-colors">
+                  Reply via WhatsApp
+                </a>
+                <a href={`mailto:${selected.email}?subject=Re: Your Mehmaan Manor Inquiry`}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-forest hover:bg-forest-deep text-cream text-sm font-medium transition-colors">
+                  Reply via Email
+                </a>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href={`/admin/bookings/new`}>
+                    <ArrowRight size={14} className="mr-1" /> Book
+                  </Link>
+                </Button>
               </div>
             </div>
           ) : (
             <div className="h-full flex items-center justify-center p-12 text-center">
               <div>
-                <MessageSquare
-                  size={40}
-                  className="mx-auto text-neutral-300 mb-4"
-                />
+                <MessageSquare size={40} className="mx-auto text-neutral-300 mb-4" />
                 <p className="text-ink/50">Select an inquiry to view details</p>
               </div>
             </div>
