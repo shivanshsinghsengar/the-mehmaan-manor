@@ -1,5 +1,14 @@
 import type { Config } from "tailwindcss";
 
+/**
+ * Color conversions from oklch to hex (for maximum browser compatibility):
+ * forest   oklch(0.32 0.05 155)  → #1a3328  (dark green)
+ * forest-deep oklch(0.22 0.04 155) → #0f2119  (deeper green)
+ * gold     oklch(0.75 0.12 85)   → #c9a84c  (warm gold)
+ * cream    oklch(0.97 0.015 85)  → #f5f0e8  (warm off-white)
+ * ink      oklch(0.20 0.02 155)  → #1a2420  (near-black)
+ */
+
 const config: Config = {
   darkMode: ["class"],
   content: [
@@ -11,61 +20,61 @@ const config: Config = {
     extend: {
       colors: {
         forest: {
-          DEFAULT: "oklch(0.32 0.05 155)",
-          deep: "oklch(0.22 0.04 155)",
+          DEFAULT: "#1a3328",
+          deep: "#0f2119",
         },
         gold: {
-          DEFAULT: "oklch(0.75 0.12 85)",
+          DEFAULT: "#c9a84c",
         },
         cream: {
-          DEFAULT: "oklch(0.97 0.015 85)",
+          DEFAULT: "#f5f0e8",
         },
         ink: {
-          DEFAULT: "oklch(0.20 0.02 155)",
+          DEFAULT: "#1a2420",
         },
-        border: "oklch(0.89 0.01 155)",
-        input: "oklch(0.89 0.01 155)",
-        ring: "oklch(0.32 0.05 155)",
-        background: "oklch(0.97 0.015 85)",
-        foreground: "oklch(0.20 0.02 155)",
+        border:     "#ddd8cc",
+        input:      "#ddd8cc",
+        ring:       "#1a3328",
+        background: "#f5f0e8",
+        foreground: "#1a2420",
         primary: {
-          DEFAULT: "oklch(0.32 0.05 155)",
-          foreground: "oklch(0.97 0.015 85)",
+          DEFAULT:    "#1a3328",
+          foreground: "#f5f0e8",
         },
         secondary: {
-          DEFAULT: "oklch(0.95 0.01 155)",
-          foreground: "oklch(0.20 0.02 155)",
+          DEFAULT:    "#ede8de",
+          foreground: "#1a2420",
         },
         accent: {
-          DEFAULT: "oklch(0.75 0.12 85)",
-          foreground: "oklch(0.20 0.02 155)",
+          DEFAULT:    "#c9a84c",
+          foreground: "#1a2420",
         },
         muted: {
-          DEFAULT: "oklch(0.95 0.01 155)",
-          foreground: "oklch(0.45 0.02 155)",
+          DEFAULT:    "#ede8de",
+          foreground: "#4a5e58",
         },
       },
       fontFamily: {
         display: ["var(--font-cormorant)", "serif"],
-        sans: ["var(--font-inter)", "sans-serif"],
-        mono: ["var(--font-jetbrains)", "monospace"],
+        sans:    ["var(--font-inter)", "sans-serif"],
+        mono:    ["var(--font-jetbrains)", "monospace"],
       },
       fontSize: {
-        hero: ["clamp(4rem, 10vw, 8.75rem)", { lineHeight: "0.95", letterSpacing: "-0.02em" }],
-        display: ["clamp(2.5rem, 5vw, 4.5rem)", { lineHeight: "1.1", letterSpacing: "-0.01em" }],
-        title: ["clamp(1.75rem, 3vw, 2.5rem)", { lineHeight: "1.2", letterSpacing: "-0.01em" }],
+        hero:    ["clamp(4rem, 10vw, 8.75rem)", { lineHeight: "0.95", letterSpacing: "-0.02em" }],
+        display: ["clamp(2.5rem, 5vw, 4.5rem)",  { lineHeight: "1.1",  letterSpacing: "-0.01em" }],
+        title:   ["clamp(1.75rem, 3vw, 2.5rem)", { lineHeight: "1.2",  letterSpacing: "-0.01em" }],
       },
       transitionDuration: {
-        "800": "800ms",
+        "800":  "800ms",
         "1200": "1200ms",
       },
       keyframes: {
         "fade-up": {
-          "0%": { opacity: "0", transform: "translateY(20px)" },
+          "0%":   { opacity: "0", transform: "translateY(20px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
         "fade-in": {
-          "0%": { opacity: "0" },
+          "0%":   { opacity: "0" },
           "100%": { opacity: "1" },
         },
       },
