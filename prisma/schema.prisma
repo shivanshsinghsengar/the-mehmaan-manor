@@ -41,23 +41,26 @@ model Booking {
 // ── Properties ───────────────────────────────────────────────────────────────
 
 model Property {
-  id           String   @id
-  name         String
-  slug         String   @unique
-  address      String
-  coordinates  String   @default("")
-  description  String
-  vibe         String
-  baseRate     Float
-  weekendRate  Float
-  cleaningFee  Float
-  maxGuests    Int
-  checkInTime  String   @default("14:00")
-  checkOutTime String   @default("11:00")
-  amenities    String[]
-  policies     String
-  isActive     Boolean  @default(true)
-  heroPhotoId  String?
+  id                 String   @id
+  name               String
+  slug               String   @unique
+  address            String
+  coordinates        String   @default("")
+  description        String
+  vibe               String
+  baseRate           Float
+  weekendRate        Float
+  cleaningFee        Float
+  maxGuests          Int
+  checkInTime        String   @default("14:00")
+  checkOutTime       String   @default("11:00")
+  amenities          String[]
+  policies           String
+  blockedDates       String[]
+  cancellationPolicy String   @default("Moderate")
+  guestRules         String   @default("{}")
+  isActive           Boolean  @default(true)
+  heroPhotoId        String?
 
   photos Photo[]
 }
