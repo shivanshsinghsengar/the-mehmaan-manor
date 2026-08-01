@@ -56,9 +56,9 @@ model Property {
   checkOutTime       String   @default("11:00")
   amenities          String[]
   policies           String
-  blockedDates       String[]
-  cancellationPolicy String   @default("Moderate")
-  guestRules         String   @default("{}")
+  blockedDates       String[]  @default([])
+  cancellationPolicy String    @default("Moderate")
+  guestRules         String    @default("{}")
   isActive           Boolean  @default(true)
   heroPhotoId        String?
 

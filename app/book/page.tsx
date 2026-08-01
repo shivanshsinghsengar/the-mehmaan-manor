@@ -115,7 +115,7 @@ export default function BookPage() {
         }),
       });
       const data = await res.json();
-      if (!data.success) throw new Error(data.error || "Booking failed");
+      if (!data.success) throw new Error(data.error + (data.detail ? `: ${data.detail}` : ""));
 
       // 2. Create Razorpay order server-side
       const orderRes = await fetch("/api/razorpay/order", {
