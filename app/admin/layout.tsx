@@ -18,6 +18,7 @@ import {
   Plus,
   LogOut,
   Layers,
+  Camera,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
@@ -27,6 +28,7 @@ const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Bookings", href: "/admin/bookings", icon: Calendar },
   { name: "Properties", href: "/admin/properties", icon: Home },
+  { name: "Photos", href: "/admin/photos", icon: Camera },
   { name: "Site Manager", href: "/admin/cms", icon: Layers },
   { name: "Guests", href: "/admin/guests", icon: Users },
   { name: "Inquiries", href: "/admin/inquiries", icon: MessageSquare },

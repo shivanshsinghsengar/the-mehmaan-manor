@@ -353,19 +353,26 @@ export default function HomePage() {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {[
-                { variant: "sushant" as const, num: "HOME 01", name: "Sushant Lok",
+                { variant: "sushant" as const, num: "HOME 01", name: "Sushant Lok", id: "1",
                   loc: "Sector 57, Phase 2 · Gurugram", coords: "28.4212° N  77.0761° E",
                   vibe: "Peaceful surroundings, great connectivity — perfect for work or to unwind.",
                   rate: "from ₹4,500/night", href: "/homes/sushant-lok" },
-                { variant: "jharsa" as const, num: "HOME 02", name: "Jharsa Village",
+                { variant: "jharsa" as const, num: "HOME 02", name: "Jharsa Village", id: "2",
                   loc: "Sector 39 · Gurugram", coords: "28.4594° N  77.0266° E",
                   vibe: "Cozy neighborhood, close to everything — your happy place in the city.",
                   rate: "from ₹4,000/night", href: "/homes/jharsa-village" },
-              ].map((p, i) => (
+              ].map((p, i) => {
+                const cardPhoto = siteData?.propertyCards?.[p.id]?.[0];
+                return (
                 <TiltCard key={p.num} intensity={8} className="reveal" style={{ animationDelay: `${i * 150}ms` }}>
                   <Link href={p.href} className="group relative block overflow-hidden">
                     <div className="relative h-[520px] lg:h-[640px]">
-                      <PropertyScene variant={p.variant} />
+                      {cardPhoto ? (
+                        <img src={cardPhoto.url} alt={cardPhoto.alt || p.name}
+                          className="absolute inset-0 w-full h-full object-cover" />
+                      ) : (
+                        <PropertyScene variant={p.variant} />
+                      )}
                       <div className="absolute inset-0 bg-forest-deep/0 group-hover:bg-forest-deep/20 transition-colors duration-700" />
                       <div className="absolute inset-0 flex flex-col justify-between p-8">
                         <div className="flex items-start justify-between">
@@ -388,7 +395,8 @@ export default function HomePage() {
                     </div>
                   </Link>
                 </TiltCard>
-              ))}
+                );
+              })}
             </div>
             <div className="text-center mt-8 reveal">
               <Link href="/homes"
