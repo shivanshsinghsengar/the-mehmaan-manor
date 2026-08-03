@@ -10,15 +10,20 @@ export async function GET() {
     prisma.siteContent.findUnique({ where: { id: "singleton" } }),
   ]);
 
+  // Build propertyCards dynamically for any number of properties
+  const propertyCards: Record<string, typeof photos> = {};
+  for (const property of properties) {
+    propertyCards[property.id] = photos.filter(
+      (p) => p.propertyId === property.id && p.section === "property-card"
+    );
+  }
+
   return NextResponse.json({
     properties,
     photos,
     content,
     heroPhotos: photos.filter((p) => p.section === "hero"),
     instagramPhotos: photos.filter((p) => p.section === "instagram"),
-    propertyCards: {
-      "1": photos.filter((p) => p.propertyId === "1" && p.section === "property-card"),
-      "2": photos.filter((p) => p.propertyId === "2" && p.section === "property-card"),
-    },
+    propertyCards,
   });
 }

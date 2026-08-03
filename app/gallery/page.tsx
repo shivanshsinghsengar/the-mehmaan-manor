@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { PlaceholderImage } from "@/components/placeholder-image";
@@ -16,6 +16,30 @@ type Photo = {
   tags: string[];
 };
 
+/** Human-readable label for a raw section slug */
+function sectionLabel(section: string): string {
+  const MAP: Record<string, string> = {
+    "sushant-lok": "Sushant Lok",
+    "jharsa-village": "Jharsa Village",
+    "property-hero": "Properties",
+    "property-card": "Properties",
+    "interiors": "Interiors",
+    "interior": "Interiors",
+    "details": "Details",
+    "detail": "Details",
+    "lifestyle": "Lifestyle",
+    "hero": "Hero",
+    "instagram": "Instagram",
+    "gallery": "Gallery",
+  };
+  if (MAP[section]) return MAP[section];
+  // Fallback: title-case the slug
+  return section
+    .split(/[-_]/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
 const FALLBACK_IMAGES = [
   { id: "f1", caption: "SUSHANT LOK — Exterior dusk view", section: "sushant-lok" },
   { id: "f2", caption: "INTERIOR — Living room warmth", section: "interiors" },
@@ -30,17 +54,6 @@ const FALLBACK_IMAGES = [
   { id: "f11", caption: "JHARSA — Neighborhood character", section: "jharsa-village" },
   { id: "f12", caption: "DETAIL — Textured throws, plants", section: "details" },
 ];
-
-const CATEGORIES = ["All", "Sushant Lok", "Jharsa Village", "Interiors", "Details", "Lifestyle"];
-
-const SECTION_MAP: Record<string, string[]> = {
-  "All": [],
-  "Sushant Lok": ["sushant-lok", "property-hero"],
-  "Jharsa Village": ["jharsa-village"],
-  "Interiors": ["interiors", "interior"],
-  "Details": ["details", "detail"],
-  "Lifestyle": ["lifestyle"],
-};
 
 export default function GalleryPage() {
   const [activeCategory, setActiveCategory] = useState("All");
@@ -68,21 +81,46 @@ export default function GalleryPage() {
 
   const useReal = loaded && photos.length > 0;
 
-  const filteredReal = useReal
-    ? photos.filter((p) => {
-        if (activeCategory === "All") return true;
-        const sections = SECTION_MAP[activeCategory] ?? [];
-        return sections.some((s) => p.section?.includes(s) || p.tags?.includes(s));
-      })
-    : [];
+  /**
+   * Build category tabs dynamically from the sections that actually exist in the photos.
+   * Deduplicate by label so "interiors" and "interior" collapse into one "Interiors" tab.
+   */
+  const categories = useMemo(() => {
+    if (!useReal) {
+      // Static fallback categories
+      return ["All", "Sushant Lok", "Jharsa Village", "Interiors", "Details", "Lifestyle"];
+    }
+    const labelSet = new Set<string>();
+    for (const photo of photos) {
+      const label = sectionLabel(photo.section);
+      // Skip internal/admin sections from public tabs
+      if (["Hero", "Instagram"].includes(label)) continue;
+      labelSet.add(label);
+    }
+    return ["All", ...Array.from(labelSet).sort()];
+  }, [photos, useReal]);
 
-  const filteredFallback = !useReal
-    ? FALLBACK_IMAGES.filter((img) => {
-        if (activeCategory === "All") return true;
-        const sections = SECTION_MAP[activeCategory] ?? [];
-        return sections.some((s) => img.section?.includes(s));
-      })
-    : [];
+  // Reset to "All" when available categories change and the current one is no longer present
+  useEffect(() => {
+    if (activeCategory !== "All" && !categories.includes(activeCategory)) {
+      setActiveCategory("All");
+    }
+  }, [categories, activeCategory]);
+
+  const filteredReal = useMemo(() => {
+    if (!useReal) return [];
+    if (activeCategory === "All") return photos;
+    return photos.filter((p) => {
+      const label = sectionLabel(p.section);
+      return label === activeCategory;
+    });
+  }, [photos, useReal, activeCategory]);
+
+  const filteredFallback = useMemo(() => {
+    if (useReal) return [];
+    if (activeCategory === "All") return FALLBACK_IMAGES;
+    return FALLBACK_IMAGES.filter((img) => sectionLabel(img.section) === activeCategory);
+  }, [useReal, activeCategory]);
 
   return (
     <div className="min-h-screen bg-cream">
@@ -97,14 +135,21 @@ export default function GalleryPage() {
           </div>
         </section>
 
-        {/* Filter Tabs */}
+        {/* Filter Tabs — built from real data */}
         <section className="pb-12 px-6">
           <div className="container mx-auto max-w-7xl">
             <div className="flex flex-wrap items-center justify-center gap-3">
-              {CATEGORIES.map((category) => (
-                <button key={category} onClick={() => setActiveCategory(category)}
-                  className={cn("px-6 py-2 text-sm font-medium transition-all duration-300",
-                    activeCategory === category ? "bg-forest text-cream" : "bg-cream text-forest border border-forest/20 hover:border-forest")}>
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setActiveCategory(category)}
+                  className={cn(
+                    "px-6 py-2 text-sm font-medium transition-all duration-300",
+                    activeCategory === category
+                      ? "bg-forest text-cream"
+                      : "bg-cream text-forest border border-forest/20 hover:border-forest"
+                  )}
+                >
                   {category}
                 </button>
               ))}
@@ -115,13 +160,26 @@ export default function GalleryPage() {
         {/* Gallery Grid */}
         <section className="pb-24 px-6">
           <div className="container mx-auto max-w-7xl">
-            {useReal ? (
+            {/* Loading state */}
+            {!loaded && (
+              <div className="py-24 text-center">
+                <div className="w-8 h-8 border-2 border-forest border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                <p className="font-mono text-sm text-ink/50">Loading photos…</p>
+              </div>
+            )}
+
+            {/* Real photos from DB */}
+            {useReal && (
               filteredReal.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {filteredReal.map((photo, i) => (
                     <div key={photo.id} className="reveal image-hover" style={{ animationDelay: `${i * 50}ms` }}>
                       <div className="aspect-square overflow-hidden bg-neutral-100">
-                        <img src={photo.url} alt={photo.alt || "Gallery photo"} className="w-full h-full object-cover" />
+                        <img
+                          src={photo.url}
+                          alt={photo.alt || "Gallery photo"}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                       {photo.alt && (
                         <p className="text-xs font-mono text-ink/50 mt-1 px-1 truncate">{photo.alt}</p>
@@ -130,16 +188,57 @@ export default function GalleryPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-center text-ink/50 py-16">No photos in this category.</p>
-              )
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {filteredFallback.map((image, i) => (
-                  <div key={image.id} className="reveal image-hover" style={{ animationDelay: `${i * 50}ms` }}>
-                    <PlaceholderImage caption={image.caption} aspectRatio="portrait" />
+                /* No photos in this category */
+                <div className="py-24 text-center">
+                  <div className="w-16 h-16 bg-forest/5 flex items-center justify-center mx-auto mb-6 border border-forest/10">
+                    <span className="text-2xl text-forest/20">◻</span>
                   </div>
-                ))}
-              </div>
+                  <h3 className="font-display text-xl text-forest mb-2">Photos coming soon</h3>
+                  <p className="text-ink/50 text-sm max-w-xs mx-auto">
+                    {activeCategory === "All"
+                      ? "No photos have been uploaded yet. Check back soon."
+                      : `No photos in the "${activeCategory}" category yet.`}
+                  </p>
+                  {activeCategory !== "All" && (
+                    <button
+                      onClick={() => setActiveCategory("All")}
+                      className="mt-6 font-mono text-sm text-gold hover:underline"
+                    >
+                      ← View all photos
+                    </button>
+                  )}
+                </div>
+              )
+            )}
+
+            {/* Fallback placeholder grid (no real photos uploaded yet) */}
+            {loaded && !useReal && (
+              filteredFallback.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {filteredFallback.map((image, i) => (
+                    <div key={image.id} className="reveal image-hover" style={{ animationDelay: `${i * 50}ms` }}>
+                      <PlaceholderImage caption={image.caption} aspectRatio="portrait" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-24 text-center">
+                  <h3 className="font-display text-xl text-forest mb-2">Photos coming soon</h3>
+                  <p className="text-ink/50 text-sm">
+                    {activeCategory === "All"
+                      ? "No photos have been uploaded yet."
+                      : `No photos in the "${activeCategory}" category yet.`}
+                  </p>
+                  {activeCategory !== "All" && (
+                    <button
+                      onClick={() => setActiveCategory("All")}
+                      className="mt-6 font-mono text-sm text-gold hover:underline"
+                    >
+                      ← View all photos
+                    </button>
+                  )}
+                </div>
+              )
             )}
           </div>
         </section>

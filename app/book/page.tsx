@@ -12,20 +12,18 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
-const PROPERTIES = [
-  {
-    id: "1", name: "Sushant Lok", slug: "sushant-lok",
-    address: "Sector 57, Phase 2, Gurugram",
-    baseRate: 4500, weekendRate: 5500, cleaningFee: 500, maxGuests: 6,
-    checkIn: "14:00", checkOut: "11:00",
-  },
-  {
-    id: "2", name: "Jharsa Village", slug: "jharsa-village",
-    address: "Sector 39, Gurugram",
-    baseRate: 4000, weekendRate: 5000, cleaningFee: 500, maxGuests: 4,
-    checkIn: "14:00", checkOut: "11:00",
-  },
-];
+interface Property {
+  id: string;
+  name: string;
+  slug: string;
+  address: string;
+  baseRate: number;
+  weekendRate: number;
+  cleaningFee: number;
+  maxGuests: number;
+  checkInTime: string;
+  checkOutTime: string;
+}
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -40,11 +38,9 @@ function isWeekend(dateStr: string) {
   return d === 0 || d === 5 || d === 6;
 }
 
-function calcPrice(propId: string, checkIn: string, checkOut: string) {
-  const prop = PROPERTIES.find((p) => p.id === propId)!;
+function calcPrice(prop: Property, checkIn: string, checkOut: string) {
   const nights = calcNights(checkIn, checkOut);
-  if (!nights) return { subtotal: 0, nights: 0, cleaningFee: 0, taxes: 0, total: 0 };
-  // Simple: weekend rate if check-in is Fri/Sat/Sun
+  if (!nights) return { subtotal: 0, nights: 0, cleaningFee: 0, taxes: 0, total: 0, rate: prop.baseRate };
   const rate = isWeekend(checkIn) ? prop.weekendRate : prop.baseRate;
   const subtotal = rate * nights;
   const cleaning = prop.cleaningFee;
@@ -64,8 +60,11 @@ declare global {
 }
 
 export default function BookPage() {
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [propertiesLoading, setPropertiesLoading] = useState(true);
+
   const [step, setStep] = useState<Step>(1);
-  const [propId, setPropId] = useState("1");
+  const [propId, setPropId] = useState("");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(2);
@@ -74,9 +73,19 @@ export default function BookPage() {
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState("");
 
-  const prop = PROPERTIES.find((p) => p.id === propId)!;
-  const pricing = calcPrice(propId, checkIn, checkOut);
-  const today = new Date().toISOString().split("T")[0];
+  // Fetch properties from DB on mount
+  useEffect(() => {
+    fetch("/api/properties")
+      .then((r) => r.json())
+      .then((data: Property[]) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setProperties(data);
+          setPropId(data[0].id); // default to first property
+        }
+      })
+      .catch(() => {})
+      .finally(() => setPropertiesLoading(false));
+  }, []);
 
   // Load Razorpay script
   useEffect(() => {
@@ -86,11 +95,16 @@ export default function BookPage() {
     document.body.appendChild(s);
   }, []);
 
+  const prop = properties.find((p) => p.id === propId);
+  const pricing = prop ? calcPrice(prop, checkIn, checkOut) : { subtotal: 0, nights: 0, cleaningFee: 0, taxes: 0, total: 0, rate: 0 };
+  const today = new Date().toISOString().split("T")[0];
+
   const canStep1 = propId && checkIn && checkOut && pricing.nights > 0 && guests >= 1;
   const canStep2 = form.name.trim() && form.email.trim() && form.phone.trim();
 
   // Create booking + trigger payment
   const handlePay = async () => {
+    if (!prop) return;
     setError("");
     setPaying(true);
     try {
@@ -157,7 +171,7 @@ export default function BookPage() {
           razorpay_order_id: string;
           razorpay_signature: string;
         }) => {
-          // 5. Verify signature on server — confirms payment is authentic
+          // 5. Verify signature on server
           const verifyRes = await fetch("/api/razorpay/verify", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -244,81 +258,100 @@ export default function BookPage() {
               <div className="p-8 space-y-7">
                 <h2 className="font-display text-xl text-forest">Choose your home & dates</h2>
 
-                {/* Property selector */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {PROPERTIES.map((p) => (
-                    <button key={p.id} onClick={() => setPropId(p.id)}
-                      className={cn(
-                        "text-left p-5 border-2 transition-all",
-                        propId === p.id ? "border-forest bg-forest/5" : "border-neutral-200 hover:border-neutral-400"
-                      )}>
-                      <div className="flex items-start justify-between mb-2">
-                        <p className="font-display text-lg text-forest">{p.name}</p>
-                        {propId === p.id && <Check size={16} className="text-forest mt-1" />}
-                      </div>
-                      <div className="flex items-center gap-1.5 text-xs text-ink/50 font-mono mb-3">
-                        <MapPin size={11} /> {p.address}
-                      </div>
-                      <div className="flex items-center gap-4 text-sm">
-                        <span className="text-forest font-medium">{fmt(p.baseRate)}<span className="text-ink/40 text-xs">/night</span></span>
-                        <span className="text-ink/40 text-xs">·</span>
-                        <span className="text-ink/60 flex items-center gap-1"><Users size={11} /> max {p.maxGuests}</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
+                {/* Property selector — fully dynamic */}
+                {propertiesLoading ? (
+                  <div className="flex items-center justify-center py-8 gap-3 text-ink/50">
+                    <div className="w-5 h-5 border-2 border-forest border-t-transparent rounded-full animate-spin" />
+                    <span className="font-mono text-sm">Loading properties…</span>
+                  </div>
+                ) : properties.length === 0 ? (
+                  <div className="py-8 text-center text-ink/50 font-mono text-sm">
+                    No properties available at the moment.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {properties.map((p) => (
+                      <button key={p.id} onClick={() => setPropId(p.id)}
+                        className={cn(
+                          "text-left p-5 border-2 transition-all",
+                          propId === p.id ? "border-forest bg-forest/5" : "border-neutral-200 hover:border-neutral-400"
+                        )}>
+                        <div className="flex items-start justify-between mb-2">
+                          <p className="font-display text-lg text-forest">{p.name}</p>
+                          {propId === p.id && <Check size={16} className="text-forest mt-1" />}
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs text-ink/50 font-mono mb-3">
+                          <MapPin size={11} /> {p.address}
+                        </div>
+                        <div className="flex items-center gap-4 text-sm">
+                          <span className="text-forest font-medium">
+                            {fmt(p.baseRate)}<span className="text-ink/40 text-xs">/night</span>
+                          </span>
+                          <span className="text-ink/40 text-xs">·</span>
+                          <span className="text-ink/60 flex items-center gap-1">
+                            <Users size={11} /> max {p.maxGuests}
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
 
                 {/* Dates */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div>
-                    <label className="block text-xs font-mono text-ink/50 uppercase mb-2">Check-in Date *</label>
-                    <Input type="date" min={today} value={checkIn}
-                      onChange={(e) => { setCheckIn(e.target.value); if (checkOut && e.target.value >= checkOut) setCheckOut(""); }}
-                      className="font-mono" />
-                    {checkIn && <p className="text-xs text-ink/50 mt-1 font-mono">From {prop.checkIn}</p>}
-                  </div>
-                  <div>
-                    <label className="block text-xs font-mono text-ink/50 uppercase mb-2">Check-out Date *</label>
-                    <Input type="date" min={checkIn || today} value={checkOut}
-                      onChange={(e) => setCheckOut(e.target.value)}
-                      className="font-mono" disabled={!checkIn} />
-                    {checkOut && <p className="text-xs text-ink/50 mt-1 font-mono">By {prop.checkOut}</p>}
-                  </div>
-                </div>
-
-                {/* Guests */}
-                <div>
-                  <label className="block text-xs font-mono text-ink/50 uppercase mb-2">Number of Guests *</label>
-                  <div className="flex items-center gap-4">
-                    <button onClick={() => setGuests(Math.max(1, guests - 1))}
-                      className="w-10 h-10 border border-neutral-300 flex items-center justify-center text-xl hover:border-forest transition-colors">−</button>
-                    <span className="font-display text-2xl text-forest w-8 text-center">{guests}</span>
-                    <button onClick={() => setGuests(Math.min(prop.maxGuests, guests + 1))}
-                      className="w-10 h-10 border border-neutral-300 flex items-center justify-center text-xl hover:border-forest transition-colors">+</button>
-                    <span className="text-sm text-ink/50">max {prop.maxGuests}</span>
-                  </div>
-                </div>
-
-                {/* Pricing preview */}
-                {pricing.nights > 0 && (
-                  <div className="bg-forest/5 border border-forest/10 p-5 space-y-2">
-                    <p className="text-xs font-mono text-ink/50 uppercase mb-3">Price Summary</p>
-                    <div className="space-y-1.5 text-sm font-mono">
-                      <div className="flex justify-between text-ink/70">
-                        <span>{fmt(pricing.rate ?? prop.baseRate)} × {pricing.nights} night{pricing.nights > 1 ? "s" : ""}</span>
-                        <span>{fmt(pricing.subtotal)}</span>
+                {prop && (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div>
+                        <label className="block text-xs font-mono text-ink/50 uppercase mb-2">Check-in Date *</label>
+                        <Input type="date" min={today} value={checkIn}
+                          onChange={(e) => { setCheckIn(e.target.value); if (checkOut && e.target.value >= checkOut) setCheckOut(""); }}
+                          className="font-mono" />
+                        {checkIn && <p className="text-xs text-ink/50 mt-1 font-mono">From {prop.checkInTime}</p>}
                       </div>
-                      <div className="flex justify-between text-ink/70">
-                        <span>Cleaning fee</span><span>{fmt(pricing.cleaningFee)}</span>
-                      </div>
-                      <div className="flex justify-between text-ink/70">
-                        <span>GST (18%)</span><span>{fmt(pricing.taxes)}</span>
-                      </div>
-                      <div className="flex justify-between font-bold text-forest border-t border-forest/10 pt-2 mt-1">
-                        <span>Total</span><span>{fmt(pricing.total)}</span>
+                      <div>
+                        <label className="block text-xs font-mono text-ink/50 uppercase mb-2">Check-out Date *</label>
+                        <Input type="date" min={checkIn || today} value={checkOut}
+                          onChange={(e) => setCheckOut(e.target.value)}
+                          className="font-mono" disabled={!checkIn} />
+                        {checkOut && <p className="text-xs text-ink/50 mt-1 font-mono">By {prop.checkOutTime}</p>}
                       </div>
                     </div>
-                  </div>
+
+                    {/* Guests */}
+                    <div>
+                      <label className="block text-xs font-mono text-ink/50 uppercase mb-2">Number of Guests *</label>
+                      <div className="flex items-center gap-4">
+                        <button onClick={() => setGuests(Math.max(1, guests - 1))}
+                          className="w-10 h-10 border border-neutral-300 flex items-center justify-center text-xl hover:border-forest transition-colors">−</button>
+                        <span className="font-display text-2xl text-forest w-8 text-center">{guests}</span>
+                        <button onClick={() => setGuests(Math.min(prop.maxGuests, guests + 1))}
+                          className="w-10 h-10 border border-neutral-300 flex items-center justify-center text-xl hover:border-forest transition-colors">+</button>
+                        <span className="text-sm text-ink/50">max {prop.maxGuests}</span>
+                      </div>
+                    </div>
+
+                    {/* Pricing preview */}
+                    {pricing.nights > 0 && (
+                      <div className="bg-forest/5 border border-forest/10 p-5 space-y-2">
+                        <p className="text-xs font-mono text-ink/50 uppercase mb-3">Price Summary</p>
+                        <div className="space-y-1.5 text-sm font-mono">
+                          <div className="flex justify-between text-ink/70">
+                            <span>{fmt(pricing.rate)} × {pricing.nights} night{pricing.nights > 1 ? "s" : ""}</span>
+                            <span>{fmt(pricing.subtotal)}</span>
+                          </div>
+                          <div className="flex justify-between text-ink/70">
+                            <span>Cleaning fee</span><span>{fmt(pricing.cleaningFee)}</span>
+                          </div>
+                          <div className="flex justify-between text-ink/70">
+                            <span>GST (18%)</span><span>{fmt(pricing.taxes)}</span>
+                          </div>
+                          <div className="flex justify-between font-bold text-forest border-t border-forest/10 pt-2 mt-1">
+                            <span>Total</span><span>{fmt(pricing.total)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
 
                 <button onClick={() => setStep(2)} disabled={!canStep1}
@@ -379,7 +412,7 @@ export default function BookPage() {
             )}
 
             {/* ── STEP 3: Review + Pay ── */}
-            {step === 3 && (
+            {step === 3 && prop && (
               <div className="p-8 space-y-6">
                 <h2 className="font-display text-xl text-forest">Review & Pay</h2>
 
@@ -463,7 +496,7 @@ export default function BookPage() {
             )}
 
             {/* ── STEP 4: Confirmed ── */}
-            {step === 4 && booking && (
+            {step === 4 && booking && prop && (
               <div className="p-8 text-center space-y-6">
                 <div className="w-16 h-16 bg-forest rounded-full flex items-center justify-center mx-auto">
                   <Check size={28} className="text-cream" />
@@ -484,11 +517,11 @@ export default function BookPage() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-ink/60">Check-in</span>
-                    <span className="font-mono">{checkIn} · {prop.checkIn}</span>
+                    <span className="font-mono">{checkIn} · {prop.checkInTime}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-ink/60">Check-out</span>
-                    <span className="font-mono">{checkOut} · {prop.checkOut}</span>
+                    <span className="font-mono">{checkOut} · {prop.checkOutTime}</span>
                   </div>
                   <div className="flex justify-between text-sm border-t border-forest/10 pt-3">
                     <span className="text-ink/60">Amount Paid</span>
@@ -501,7 +534,7 @@ export default function BookPage() {
                     Our host Simran will WhatsApp you with check-in details.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                    <a href={`https://wa.me/918828352311`} target="_blank" rel="noopener noreferrer"
+                    <a href="https://wa.me/918828352311" target="_blank" rel="noopener noreferrer"
                       className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-green-500 text-white font-medium text-sm hover:bg-green-600 transition-colors">
                       <MessageCircle size={16} /> WhatsApp Simran
                     </a>

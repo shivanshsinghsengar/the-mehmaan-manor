@@ -8,7 +8,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
+interface Property {
+  id: string;
+  name: string;
+  slug: string;
+  address: string;
+  coordinates: string;
+}
+
 export default function ContactPage() {
+  const [properties, setProperties] = useState<Property[]>([]);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -22,6 +32,12 @@ export default function ContactPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    // Fetch properties for the dropdown
+    fetch("/api/properties")
+      .then((r) => r.json())
+      .then((data) => { if (Array.isArray(data)) setProperties(data); })
+      .catch(() => {});
+
     const observer = new IntersectionObserver(
       (entries) =>
         entries.forEach(
@@ -271,8 +287,9 @@ export default function ContactPage() {
                       className="flex h-12 w-full rounded-none border border-input bg-cream px-4 py-3 text-base transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
                     >
                       <option value="">Not sure yet</option>
-                      <option value="sushant-lok">Sushant Lok</option>
-                      <option value="jharsa-village">Jharsa Village</option>
+                      {properties.map((p) => (
+                        <option key={p.id} value={p.slug}>{p.name}</option>
+                      ))}
                       <option value="either">Either works</option>
                     </select>
                   </div>
@@ -333,30 +350,49 @@ export default function ContactPage() {
               <div className="reveal space-y-8">
                 <h2 className="text-2xl font-display text-forest mb-6">Our Homes</h2>
                 <div className="space-y-6">
-                  <div className="flex items-start space-x-4 p-6 border border-forest/10">
-                    <MapPin size={20} className="text-gold flex-shrink-0 mt-1" />
-                    <div>
-                      <h3 className="font-display text-xl text-forest mb-2">Sushant Lok</h3>
-                      <p className="font-mono text-sm text-ink/60 leading-relaxed">
-                        Sector 57, Phase 2<br />
-                        Sushant Lok, Gurugram<br />
-                        Haryana - 122011<br />
-                        <span className="text-xs">28.4212° N, 77.0761° E</span>
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-4 p-6 border border-forest/10">
-                    <MapPin size={20} className="text-gold flex-shrink-0 mt-1" />
-                    <div>
-                      <h3 className="font-display text-xl text-forest mb-2">Jharsa Village</h3>
-                      <p className="font-mono text-sm text-ink/60 leading-relaxed">
-                        593, Durga Colony<br />
-                        Jharsa Village, Sector 39<br />
-                        Gurugram, Haryana - 122003<br />
-                        <span className="text-xs">28.4594° N, 77.0266° E</span>
-                      </p>
-                    </div>
-                  </div>
+                  {properties.length > 0 ? (
+                    properties.map((property) => (
+                      <div key={property.id} className="flex items-start space-x-4 p-6 border border-forest/10">
+                        <MapPin size={20} className="text-gold flex-shrink-0 mt-1" />
+                        <div>
+                          <h3 className="font-display text-xl text-forest mb-2">{property.name}</h3>
+                          <p className="font-mono text-sm text-ink/60 leading-relaxed">
+                            {property.address}
+                            {property.coordinates && (
+                              <><br /><br /><span className="text-xs">{property.coordinates}</span></>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <>
+                      <div className="flex items-start space-x-4 p-6 border border-forest/10">
+                        <MapPin size={20} className="text-gold flex-shrink-0 mt-1" />
+                        <div>
+                          <h3 className="font-display text-xl text-forest mb-2">Sushant Lok</h3>
+                          <p className="font-mono text-sm text-ink/60 leading-relaxed">
+                            Sector 57, Phase 2<br />
+                            Sushant Lok, Gurugram<br />
+                            Haryana - 122011<br />
+                            <span className="text-xs">28.4212° N, 77.0761° E</span>
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start space-x-4 p-6 border border-forest/10">
+                        <MapPin size={20} className="text-gold flex-shrink-0 mt-1" />
+                        <div>
+                          <h3 className="font-display text-xl text-forest mb-2">Jharsa Village</h3>
+                          <p className="font-mono text-sm text-ink/60 leading-relaxed">
+                            593, Durga Colony<br />
+                            Jharsa Village, Sector 39<br />
+                            Gurugram, Haryana - 122003<br />
+                            <span className="text-xs">28.4594° N, 77.0266° E</span>
+                          </p>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
