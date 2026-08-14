@@ -362,19 +362,21 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
                         ) : (
                           <PropertyScene variant={sceneVariant} />
                         )}
-                        <div className="absolute inset-0 bg-forest-deep/0 group-hover:bg-forest-deep/20 transition-colors duration-700" />
+                        {/* Strong gradient so text is always readable over any photo */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/70 to-ink/10" />
+                        <div className="absolute inset-0 bg-forest-deep/0 group-hover:bg-forest-deep/15 transition-colors duration-700" />
                         <div className="absolute inset-0 flex flex-col justify-between p-8">
                           <div className="flex items-start justify-between">
-                            <span className="font-mono text-gold text-xs tracking-[0.25em] bg-ink/40 px-3 py-1.5 backdrop-blur-sm">HOME {String(i + 1).padStart(2, "0")}</span>
-                            {p.coordinates && <span className="font-mono text-cream/50 text-xs">{p.coordinates}</span>}
+                            <span className="font-mono text-gold text-xs tracking-[0.25em] bg-ink/60 px-3 py-1.5 backdrop-blur-sm">HOME {String(i + 1).padStart(2, "0")}</span>
+                            {p.coordinates && <span className="font-mono text-cream/70 text-xs bg-ink/40 px-2 py-1 backdrop-blur-sm">{p.coordinates}</span>}
                           </div>
                           <div>
-                            <p className="font-mono text-cream/50 text-xs mb-2 tracking-widest">{p.address}</p>
-                            <h3 className="font-display text-cream leading-none mb-3 group-hover:text-gold transition-colors duration-500" style={{ fontSize: "clamp(2rem, 3.5vw, 3rem)" }}>{p.name}</h3>
-                            <p className="text-cream/70 text-sm leading-relaxed mb-6 max-w-sm">{p.vibe}</p>
+                            <p className="font-mono text-cream/70 text-xs mb-2 tracking-widest drop-shadow-md">{p.address}</p>
+                            <h3 className="font-display text-cream leading-none mb-3 group-hover:text-gold transition-colors duration-500 drop-shadow-lg" style={{ fontSize: "clamp(2rem, 3.5vw, 3rem)" }}>{p.name}</h3>
+                            <p className="text-cream/90 text-sm leading-relaxed mb-6 max-w-sm drop-shadow-md">{p.vibe}</p>
                             <div className="flex items-center justify-between">
-                              <span className="font-mono text-gold text-sm">from ₹{p.baseRate.toLocaleString("en-IN")}/night</span>
-                              <span className="flex items-center gap-2 text-cream/70 text-sm group-hover:text-gold group-hover:gap-3 transition-all duration-300">Explore <ArrowRight size={16} /></span>
+                              <span className="font-mono text-gold text-sm font-medium">from ₹{p.baseRate.toLocaleString("en-IN")}/night</span>
+                              <span className="flex items-center gap-2 text-cream text-sm font-medium group-hover:text-gold group-hover:gap-3 transition-all duration-300">Explore <ArrowRight size={16} /></span>
                             </div>
                           </div>
                         </div>
