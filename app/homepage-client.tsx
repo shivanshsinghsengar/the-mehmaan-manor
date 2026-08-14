@@ -282,7 +282,7 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
         </section>
 
         {/* === MANIFESTO ================================================= */}
-        <section className="bg-forest-deep py-16 md:py-28 px-4 md:px-6 relative overflow-hidden">
+        <section className="bg-forest-deep py-12 md:py-28 px-4 md:px-6 relative overflow-hidden">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-16 border-2 border-gold/20 rounded-t-full" />
           <div className="container mx-auto max-w-3xl text-center relative">
             <p className="font-mono text-gold/70 text-xs tracking-[0.3em] uppercase mb-10 reveal">Our Philosophy</p>
@@ -302,7 +302,7 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
         </section>
 
         {/* === THREE PILLARS ============================================= */}
-        <section className="py-16 md:py-28 px-4 md:px-6 bg-cream">
+        <section className="py-10 md:py-28 px-4 md:px-6 bg-cream">
           <div className="container mx-auto max-w-7xl">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
               <div className="lg:col-span-4 flex flex-col justify-center pb-12 lg:pb-0 lg:pr-16 lg:border-r border-forest/10">
@@ -319,7 +319,7 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
                   { num: "03", title: "Your Time", body: "No rigid check-in theatre. Arrive when you do. Breathe. The home waits for you." },
                 ].map(({ num, title, body }, i) => (
                   <Reveal3D key={num} delay={i * 0.12} direction="up">
-                    <div className="flex flex-col justify-between p-8 md:px-10 group">
+                    <div className="flex flex-col justify-between p-5 md:p-8 md:px-10 group">
                       <div className="font-mono text-gold/50 text-xs mb-6">{num}</div>
                       <div>
                         <h3 className="font-display text-forest mb-4 group-hover:text-gold transition-colors duration-500"
@@ -337,11 +337,11 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
         </section>
 
         {/* === TWO HOMES ================================================= */}
-        <section className="bg-ink py-8 md:py-6 px-4 md:px-6">
+        <section className="bg-ink py-8 md:py-12 px-3 md:px-6">
           <div className="container mx-auto max-w-7xl">
-            <div className="text-center mb-12">
+            <div className="text-center mb-8 md:mb-12">
               <p className="font-mono text-gold/70 text-xs tracking-[0.3em] uppercase mb-4 reveal">Our Properties</p>
-              <h2 className="font-display text-cream reveal" style={{ fontSize: "clamp(2rem, 4vw, 3.5rem)" }}>
+              <h2 className="font-display text-cream reveal" style={{ fontSize: "clamp(1.8rem, 4vw, 3.5rem)" }}>
                 {properties.length !== 2
                   ? `${properties.length} Home${properties.length !== 1 ? "s" : ""}. One Promise.`
                   : "Two Homes. One Promise."}
@@ -349,14 +349,14 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
             </div>
 
             {/* Properties — always rendered immediately from server-provided props */}
-            <div className={`grid grid-cols-1 ${properties.length >= 3 ? "lg:grid-cols-3" : "lg:grid-cols-2"} gap-4`}>
+            <div className={`grid grid-cols-1 ${properties.length >= 3 ? "lg:grid-cols-3" : "lg:grid-cols-2"} gap-3 md:gap-4`}>
               {properties.map((p, i) => {
                 const cardPhoto = propertyCards[p.id]?.[0];
                 const sceneVariant: "sushant" | "jharsa" = p.id === "1" ? "sushant" : "jharsa";
                 return (
                   <TiltCard key={p.id} intensity={8} className="reveal" style={{ animationDelay: `${i * 150}ms` }}>
                     <Link href={`/homes/${p.slug}`} className="group relative block overflow-hidden">
-                      <div className="relative h-[520px] lg:h-[640px]">
+                      <div className="relative h-[420px] sm:h-[480px] lg:h-[640px]">
                         {cardPhoto ? (
                           <img src={cardPhoto.url} alt={cardPhoto.alt || p.name} className="absolute inset-0 w-full h-full object-cover" />
                         ) : (
@@ -365,15 +365,15 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
                         {/* Strong gradient so text is always readable over any photo */}
                         <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/70 to-ink/10" />
                         <div className="absolute inset-0 bg-forest-deep/0 group-hover:bg-forest-deep/15 transition-colors duration-700" />
-                        <div className="absolute inset-0 flex flex-col justify-between p-8">
+                        <div className="absolute inset-0 flex flex-col justify-between p-5 md:p-8">
                           <div className="flex items-start justify-between">
                             <span className="font-mono text-gold text-xs tracking-[0.25em] bg-ink/60 px-3 py-1.5 backdrop-blur-sm">HOME {String(i + 1).padStart(2, "0")}</span>
-                            {p.coordinates && <span className="font-mono text-cream/70 text-xs bg-ink/40 px-2 py-1 backdrop-blur-sm">{p.coordinates}</span>}
+                            {p.coordinates && <span className="font-mono text-cream/70 text-[10px] bg-ink/40 px-2 py-1 backdrop-blur-sm hidden sm:block">{p.coordinates}</span>}
                           </div>
                           <div>
-                            <p className="font-mono text-cream/70 text-xs mb-2 tracking-widest drop-shadow-md">{p.address}</p>
-                            <h3 className="font-display text-cream leading-none mb-3 group-hover:text-gold transition-colors duration-500 drop-shadow-lg" style={{ fontSize: "clamp(2rem, 3.5vw, 3rem)" }}>{p.name}</h3>
-                            <p className="text-cream/90 text-sm leading-relaxed mb-6 max-w-sm drop-shadow-md">{p.vibe}</p>
+                            <p className="font-mono text-cream/70 text-[10px] md:text-xs mb-1.5 tracking-widest drop-shadow-md line-clamp-2">{p.address}</p>
+                            <h3 className="font-display text-cream leading-tight mb-2 md:mb-3 group-hover:text-gold transition-colors duration-500 drop-shadow-lg" style={{ fontSize: "clamp(1.6rem, 3.5vw, 3rem)" }}>{p.name}</h3>
+                            <p className="text-cream/90 text-xs md:text-sm leading-relaxed mb-4 md:mb-6 max-w-sm drop-shadow-md line-clamp-3">{p.vibe}</p>
                             <div className="flex items-center justify-between">
                               <span className="font-mono text-gold text-sm font-medium">from ₹{p.baseRate.toLocaleString("en-IN")}/night</span>
                               <span className="flex items-center gap-2 text-cream text-sm font-medium group-hover:text-gold group-hover:gap-3 transition-all duration-300">Explore <ArrowRight size={16} /></span>
@@ -396,12 +396,12 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
         </section>
 
         {/* === AMENITIES ================================================= */}
-        <section className="py-28 px-6 bg-cream">
+        <section className="py-12 md:py-28 px-4 md:px-6 bg-cream">
           <div className="container mx-auto max-w-7xl">
-            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between mb-16 gap-6">
+            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between mb-8 md:mb-16 gap-4 md:gap-6">
               <div>
-                <p className="font-mono text-gold text-xs tracking-[0.3em] uppercase mb-4 reveal">What's Included</p>
-                <h2 className="font-display text-forest reveal" style={{ fontSize: "clamp(2rem, 3.5vw, 3rem)" }}>
+                <p className="font-mono text-gold text-xs tracking-[0.3em] uppercase mb-3 md:mb-4 reveal">What's Included</p>
+                <h2 className="font-display text-forest reveal" style={{ fontSize: "clamp(1.8rem, 3.5vw, 3rem)" }}>
                   Everything you need.<br />Nothing you don't.
                 </h2>
               </div>
@@ -418,7 +418,7 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
                 { num: "04", title: "Prime Locations", sub: "Gurugram at your doorstep.", icon: "⌖" },
               ].map(({ num, title, sub, icon }, i) => (
                 <TiltCard key={num} intensity={10} className="reveal border-r border-b border-forest/10" style={{ animationDelay: `${i * 80}ms` }}>
-                  <div className="p-8 group hover:bg-forest hover:text-cream transition-all duration-500 h-full">
+                  <div className="p-5 md:p-8 group hover:bg-forest hover:text-cream transition-all duration-500 h-full">
                     <div className="flex items-start justify-between mb-8">
                       <span className="font-mono text-gold text-xs group-hover:text-gold/70">{num}</span>
                       <span className="text-2xl text-forest/20 group-hover:text-cream/20 transition-colors">{icon}</span>
@@ -433,7 +433,7 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
         </section>
 
         {/* === PULL QUOTE ================================================ */}
-        <section className="relative py-36 px-6 bg-forest overflow-hidden">
+        <section className="relative py-16 md:py-36 px-6 bg-forest overflow-hidden">
           <ParallaxLayer speed={0.3} className="absolute inset-0 pointer-events-none">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 border-2 border-gold/10 rounded-t-full" aria-hidden="true" />
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-48 border border-gold/5 rounded-t-full" aria-hidden="true" />
@@ -457,12 +457,12 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
         </section>
 
         {/* === INSTAGRAM ================================================= */}
-        <section className="py-24 px-6 bg-cream border-t border-forest/8">
+        <section className="py-12 md:py-24 px-4 md:px-6 bg-cream border-t border-forest/8">
           <div className="container mx-auto max-w-7xl">
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-10 gap-4">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-6 md:mb-10 gap-3 md:gap-4">
               <div className="reveal">
                 <p className="font-mono text-gold text-xs tracking-[0.3em] uppercase mb-2">Follow the story</p>
-                <h2 className="font-display text-forest" style={{ fontSize: "clamp(1.6rem, 2.5vw, 2.2rem)" }}>
+                <h2 className="font-display text-forest" style={{ fontSize: "clamp(1.4rem, 2.5vw, 2.2rem)" }}>
                   @themehmaanmanor
                 </h2>
               </div>
@@ -471,7 +471,7 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
                 <Instagram size={14} /> Open Instagram
               </a>
             </div>
-            <div className="grid grid-cols-3 lg:grid-cols-6 gap-2 reveal">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 reveal">
               {["Living room, golden hour","Detail · brass fixture","Morning coffee ritual",
                 "Bedroom · clean lines","Textured throw, ceramic","Plant corner, diffused light"
               ].map((cap, i) => (
@@ -502,7 +502,7 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
         </section>
 
         {/* === FINAL CTA ================================================= */}
-        <section className="py-28 px-6 bg-gold relative overflow-hidden">
+        <section className="py-16 md:py-28 px-5 md:px-6 bg-gold relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-px bg-ink/10" />
           <div className="container mx-auto max-w-4xl relative z-10">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">

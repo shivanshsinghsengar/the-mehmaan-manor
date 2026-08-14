@@ -81,26 +81,26 @@ export default function ContactPage() {
 
       <main id="main-content">
         {/* Hero */}
-        <section className="pt-40 pb-24 px-6">
+        <section className="pt-28 md:pt-40 pb-10 md:pb-24 px-4 md:px-6">
           <div className="container mx-auto max-w-5xl text-center">
-            <p className="font-mono text-gold text-sm tracking-widest uppercase mb-6 animate-fade-in">
+            <p className="font-mono text-gold text-xs md:text-sm tracking-widest uppercase mb-4 md:mb-6 animate-fade-in">
               Contact & Book
             </p>
-            <h1 className="text-display font-display text-forest mb-6 animate-fade-up">
+            <h1 className="text-display font-display text-forest mb-4 md:mb-6 animate-fade-up">
               Let's Plan Your Stay
             </h1>
-            <p className="text-lg text-ink/80 max-w-2xl mx-auto animate-fade-up">
+            <p className="text-base md:text-lg text-ink/80 max-w-2xl mx-auto animate-fade-up">
               Ready to make yourself at home? Reach out to our team directly.
             </p>
           </div>
         </section>
 
         {/* Contact Methods */}
-        <section className="pb-16 px-6">
+        <section className="pb-8 md:pb-16 px-4 md:px-6">
           <div className="container mx-auto max-w-7xl">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-8">
               {/* Simran */}
-              <div className="reveal bg-forest-deep text-cream p-8 space-y-4">
+              <div className="reveal bg-forest-deep text-cream p-5 md:p-8 space-y-3 md:space-y-4">
                 <div className="w-16 h-16 bg-gold/10 flex items-center justify-center mb-4">
                   <span className="font-display text-3xl text-gold">S</span>
                 </div>
@@ -133,7 +133,7 @@ export default function ContactPage() {
 
               {/* Vipin */}
               <div
-                className="reveal bg-forest-deep text-cream p-8 space-y-4"
+                className="reveal bg-forest-deep text-cream p-5 md:p-8 space-y-3 md:space-y-4"
                 style={{ animationDelay: "150ms" }}
               >
                 <div className="w-16 h-16 bg-gold/10 flex items-center justify-center mb-4">
@@ -168,7 +168,7 @@ export default function ContactPage() {
 
               {/* Jyoti */}
               <div
-                className="reveal bg-forest-deep text-cream p-8 space-y-4"
+                className="reveal bg-forest-deep text-cream p-5 md:p-8 space-y-3 md:space-y-4"
                 style={{ animationDelay: "300ms" }}
               >
                 <div className="w-16 h-16 bg-gold/10 flex items-center justify-center mb-4">
@@ -205,9 +205,9 @@ export default function ContactPage() {
         </section>
 
         {/* Inquiry Form */}
-        <section className="py-24 px-6 bg-forest/5">
+        <section className="py-10 md:py-24 px-4 md:px-6 bg-forest/5">
           <div className="container mx-auto max-w-3xl">
-            <div className="text-center mb-12 reveal">
+            <div className="text-center mb-8 md:mb-12 reveal">
               <h2 className="text-3xl font-display text-forest mb-4">
                 Send Us an Inquiry
               </h2>
@@ -232,7 +232,7 @@ export default function ContactPage() {
                 </Button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="reveal bg-cream p-8 space-y-6">
+              <form onSubmit={handleSubmit} className="reveal bg-cream p-5 md:p-8 space-y-5 md:space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-forest mb-2">
@@ -343,7 +343,7 @@ export default function ContactPage() {
         </section>
 
         {/* Properties & Instagram */}
-        <section className="py-24 px-6">
+        <section className="py-10 md:py-24 px-4 md:px-6">
           <div className="container mx-auto max-w-7xl">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
               {/* Property Addresses */}

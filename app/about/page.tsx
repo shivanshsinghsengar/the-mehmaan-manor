@@ -56,21 +56,21 @@ export default function AboutPage() {
 
       <main id="main-content">
         {/* Hero */}
-        <section className="pt-40 pb-24 px-6">
+        <section className="pt-28 md:pt-40 pb-10 md:pb-24 px-4 md:px-6">
           <div className="container mx-auto max-w-5xl text-center">
-            <p className="font-mono text-gold text-sm tracking-widest uppercase mb-6 animate-fade-in">
+            <p className="font-mono text-gold text-xs md:text-sm tracking-widest uppercase mb-4 md:mb-6 animate-fade-in">
               About Us
             </p>
             <DepthText
               as="h1"
-              className="text-display font-display text-forest mb-6 animate-fade-up"
+              className="text-display font-display text-forest mb-4 md:mb-6 animate-fade-up"
               color="oklch(0.75 0.12 85)"
             >
               More Than Hosts.
               <br />
               <span className="italic">Your Gurugram Family.</span>
             </DepthText>
-            <p className="text-lg text-ink/80 max-w-2xl mx-auto animate-fade-up">
+            <p className="text-base md:text-lg text-ink/80 max-w-2xl mx-auto animate-fade-up">
               The story behind The Mehmaan Manor — and the people who make it
               feel like home.
             </p>
@@ -78,9 +78,9 @@ export default function AboutPage() {
         </section>
 
         {/* Origin Story */}
-        <section className="py-16 px-6">
+        <section className="py-8 md:py-16 px-4 md:px-6">
           <div className="container mx-auto max-w-4xl">
-            <div className="reveal space-y-6 text-lg text-ink/80 leading-relaxed">
+            <div className="reveal space-y-5 text-base md:text-lg text-ink/80 leading-relaxed">
               <p>
                 <span className="text-gold italic font-display text-2xl">
                   Mehmaan
@@ -115,15 +115,15 @@ export default function AboutPage() {
         </section>
 
         {/* Divider */}
-        <div className="arch-divider my-24" />
+        <div className="arch-divider my-10 md:my-24" />
 
         {/* Our Values */}
-        <section className="py-16 px-6 bg-forest/5">
+        <section className="py-10 md:py-16 px-4 md:px-6 bg-forest/5">
           <div className="container mx-auto max-w-5xl">
-            <h2 className="text-display font-display text-center text-forest mb-16 reveal">
+            <h2 className="text-display font-display text-center text-forest mb-8 md:mb-16 reveal">
               What We Believe
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
               <Reveal3D delay={0} direction="up">
                 <div className="text-center">
                   <div className="font-mono text-gold text-sm mb-3">01</div>
@@ -168,21 +168,21 @@ export default function AboutPage() {
         </section>
 
         {/* Team */}
-        <section className="py-24 px-6">
+        <section className="py-12 md:py-24 px-4 md:px-6">
           <div className="container mx-auto max-w-6xl">
-            <h2 className="text-display font-display text-center text-forest mb-4 reveal">
+            <h2 className="text-display font-display text-center text-forest mb-3 md:mb-4 reveal">
               Meet the Team
             </h2>
-            <p className="text-center text-ink/70 mb-16 reveal">
+            <p className="text-center text-ink/70 mb-8 md:mb-16 reveal">
               The people who make every stay a Mehmaan experience.
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8">
               {team.map((member, i) => (
                 <TiltCard
                   key={i}
                   intensity={10}
-                  className="reveal text-center space-y-4 p-6 rounded-sm"
+                  className="reveal text-center space-y-3 md:space-y-4 p-5 md:p-6 rounded-sm"
                   style={{ animationDelay: `${i * 150}ms` }}
                 >
                   <Float amplitude={6} duration={3 + i * 0.5}>
@@ -227,9 +227,9 @@ export default function AboutPage() {
         </section>
 
         {/* Final Quote */}
-        <section className="py-32 px-6 bg-gold">
+        <section className="py-16 md:py-32 px-4 md:px-6 bg-gold">
           <div className="container mx-auto max-w-4xl text-center reveal">
-            <blockquote className="text-4xl md:text-5xl font-display leading-tight text-ink">
+            <blockquote className="text-3xl md:text-5xl font-display leading-tight text-ink">
               "Come as a guest,
               <br />
               leave as family."

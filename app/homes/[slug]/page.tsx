@@ -144,12 +144,12 @@ export default function PropertyPage() {
       <Navigation />
       <main id="main-content">
         {/* Hero */}
-        <section className="pt-24 relative">
+        <section className="pt-20 md:pt-24 relative">
           {heroPhoto ? (
-            <div className="w-full aspect-video relative overflow-hidden">
+            <div className="w-full aspect-[4/3] sm:aspect-video relative overflow-hidden">
               <img src={heroPhoto.url} alt={heroPhoto.alt || property.name}
                 className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-ink/60 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-ink/70 to-transparent" />
             </div>
           ) : (
             <div className="relative">
@@ -158,22 +158,22 @@ export default function PropertyPage() {
                 className="w-full" aspectRatio="video" />
             </div>
           )}
-          <div className="absolute inset-0 flex items-end" style={{ top: "96px" }}>
-            <div className="container mx-auto px-6 pb-12">
-              <Link href="/homes" className="inline-flex items-center text-cream/80 hover:text-cream mb-6 transition-colors">
+          <div className="absolute inset-x-0 bottom-0 top-20 md:top-24 flex items-end">
+            <div className="container mx-auto px-4 md:px-6 pb-6 md:pb-12">
+              <Link href="/homes" className="inline-flex items-center text-cream/80 hover:text-cream mb-4 md:mb-6 transition-colors">
                 <ArrowLeft size={16} className="mr-2" />
                 <span className="font-mono text-sm">All Homes</span>
               </Link>
-              <p className="font-mono text-gold text-sm tracking-widest mb-2">
+              <p className="font-mono text-gold text-xs md:text-sm tracking-widest mb-1 md:mb-2">
                 HOME {String(property.id).padStart(2, "0")}
               </p>
-              <h1 className="text-4xl md:text-6xl font-display text-cream">{property.name}</h1>
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-display text-cream leading-tight">{property.name}</h1>
             </div>
           </div>
         </section>
 
         {/* Details */}
-        <section className="py-16 px-6">
+        <section className="py-8 md:py-16 px-4 md:px-6">
           <div className="container mx-auto max-w-7xl">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
               {/* Main */}
