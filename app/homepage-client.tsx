@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect } from "react";
 import type React from "react";
@@ -231,15 +231,14 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
       <main id="main-content">
 
         {/* === HERO ====================================================== */}
-        <section className="relative h-screen min-h-[700px] flex items-center overflow-hidden">
+        <section className="relative min-h-[600px] h-screen flex items-center overflow-hidden">
           <MouseParallax intensity={18} className="absolute inset-0">
             <HeroScene />
           </MouseParallax>
 
-          {/* Left content */}
-          <div className="relative z-10 w-full px-8 md:px-16 lg:px-24 xl:px-32">
+          <div className="relative z-10 w-full px-5 md:px-16 lg:px-24 xl:px-32 pt-24 md:pt-0">
             <div className="max-w-2xl">
-              <div className="flex items-center gap-3 mb-8 animate-fade-in">
+              <div className="flex items-center gap-3 mb-6 md:mb-8 animate-fade-in">
                 <div className="w-8 h-px bg-gold/70" />
                 <span className="font-mono text-gold text-xs tracking-[0.25em] uppercase">
                   Gurugram · India
@@ -248,49 +247,48 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
 
               <DepthText
                 as="h1"
-                className="font-display text-cream leading-[0.92] tracking-[-0.02em] mb-8 animate-fade-up"
-                style={{ fontSize: "clamp(3.2rem, 7vw, 7rem)" } as React.CSSProperties}
+                className="font-display text-cream leading-[0.92] tracking-[-0.02em] mb-6 md:mb-8 animate-fade-up"
+                style={{ fontSize: "clamp(2.4rem, 8vw, 7rem)" } as React.CSSProperties}
               >
                 The<br />
                 <em className="not-italic text-gold">Mehmaan</em><br />
                 Experience
               </DepthText>
 
-              <p className="text-cream/70 text-lg md:text-xl font-sans font-light leading-relaxed mb-10 max-w-md animate-fade-up"
+              <p className="text-cream/70 text-base md:text-xl font-sans font-light leading-relaxed mb-8 md:mb-10 max-w-md animate-fade-up"
                 style={{ animationDelay: "200ms" }}>
                 {subtitle}
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 animate-fade-up" style={{ animationDelay: "350ms" }}>
+              <div className="flex flex-col gap-3 sm:flex-row sm:gap-4 animate-fade-up w-full sm:w-auto" style={{ animationDelay: "350ms" }}>
                 <Link href="/contact"
-                  className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-gold text-ink font-medium text-base hover:bg-gold/90 transition-colors duration-300 group">
+                  className="inline-flex items-center justify-center gap-3 px-6 py-4 bg-gold text-ink font-medium text-sm md:text-base hover:bg-gold/90 transition-colors duration-300 group min-h-[52px]">
                   Reserve Your Stay
                   <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link href="/homes"
-                  className="inline-flex items-center justify-center px-8 py-4 border border-cream/30 text-cream font-medium text-base hover:border-cream/70 hover:bg-cream/5 transition-all duration-300">
+                  className="inline-flex items-center justify-center px-6 py-4 border border-cream/30 text-cream font-medium text-sm md:text-base hover:border-cream/70 hover:bg-cream/5 transition-all duration-300 min-h-[52px]">
                   Explore Our Homes
                 </Link>
               </div>
             </div>
           </div>
 
-          {/* Scroll cue */}
-          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10 animate-fade-in"
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10 animate-fade-in"
             style={{ animationDelay: "800ms" }} aria-hidden="true">
             <span className="font-mono text-cream/30 text-[10px] tracking-[0.3em] uppercase">Scroll</span>
-            <div className="w-px h-12 bg-gradient-to-b from-cream/30 to-transparent" />
+            <div className="w-px h-10 bg-gradient-to-b from-cream/30 to-transparent" />
           </div>
         </section>
 
         {/* === MANIFESTO ================================================= */}
-        <section className="bg-forest-deep py-28 px-6 relative overflow-hidden">
+        <section className="bg-forest-deep py-16 md:py-28 px-4 md:px-6 relative overflow-hidden">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-16 border-2 border-gold/20 rounded-t-full" />
           <div className="container mx-auto max-w-3xl text-center relative">
             <p className="font-mono text-gold/70 text-xs tracking-[0.3em] uppercase mb-10 reveal">Our Philosophy</p>
             <p className="font-display text-cream leading-[1.3] reveal"
               style={{ fontSize: "clamp(1.6rem, 3.2vw, 2.4rem)" }}>
-              <em className="text-gold not-italic">Mehmaan</em> — the Hindi word for guest — carries a
+              <em className="text-gold not-italic">Mehmaan</em> ΓÇö the Hindi word for guest ΓÇö carries a
               cultural weight that no translation captures. It's not a transaction. It's a
               relationship. Two beautifully curated homes. One unforgettable promise.
               This isn't a hotel. This is your <em className="text-gold not-italic">Mehmaan</em> moment.
@@ -304,7 +302,7 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
         </section>
 
         {/* === THREE PILLARS ============================================= */}
-        <section className="py-28 px-6 bg-cream">
+        <section className="py-16 md:py-28 px-4 md:px-6 bg-cream">
           <div className="container mx-auto max-w-7xl">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
               <div className="lg:col-span-4 flex flex-col justify-center pb-12 lg:pb-0 lg:pr-16 lg:border-r border-forest/10">
@@ -316,7 +314,7 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
               </div>
               <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-forest/10">
                 {[
-                  { num: "01", title: "Your Vibe", body: "Work, unwind, celebrate — the space reads you and adapts. No mood is wrong here." },
+                  { num: "01", title: "Your Vibe", body: "Work, unwind, celebrate ΓÇö the space reads you and adapts. No mood is wrong here." },
                   { num: "02", title: "Your Space", body: "Rooms that feel lived-in with intention. Styled but never sterile. Yours for the night." },
                   { num: "03", title: "Your Time", body: "No rigid check-in theatre. Arrive when you do. Breathe. The home waits for you." },
                 ].map(({ num, title, body }, i) => (
@@ -339,7 +337,7 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
         </section>
 
         {/* === TWO HOMES ================================================= */}
-        <section className="bg-ink py-6 px-6">
+        <section className="bg-ink py-8 md:py-6 px-4 md:px-6">
           <div className="container mx-auto max-w-7xl">
             <div className="text-center mb-12">
               <p className="font-mono text-gold/70 text-xs tracking-[0.3em] uppercase mb-4 reveal">Our Properties</p>
@@ -350,7 +348,7 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
               </h2>
             </div>
 
-            {/* Properties — always rendered immediately from server-provided props */}
+            {/* Properties ΓÇö always rendered immediately from server-provided props */}
             <div className={`grid grid-cols-1 ${properties.length >= 3 ? "lg:grid-cols-3" : "lg:grid-cols-2"} gap-4`}>
               {properties.map((p, i) => {
                 const cardPhoto = propertyCards[p.id]?.[0];
@@ -375,7 +373,7 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
                             <h3 className="font-display text-cream leading-none mb-3 group-hover:text-gold transition-colors duration-500" style={{ fontSize: "clamp(2rem, 3.5vw, 3rem)" }}>{p.name}</h3>
                             <p className="text-cream/70 text-sm leading-relaxed mb-6 max-w-sm">{p.vibe}</p>
                             <div className="flex items-center justify-between">
-                              <span className="font-mono text-gold text-sm">from ₹{p.baseRate.toLocaleString("en-IN")}/night</span>
+                              <span className="font-mono text-gold text-sm">from Γé╣{p.baseRate.toLocaleString("en-IN")}/night</span>
                               <span className="flex items-center gap-2 text-cream/70 text-sm group-hover:text-gold group-hover:gap-3 transition-all duration-300">Explore <ArrowRight size={16} /></span>
                             </div>
                           </div>
@@ -412,10 +410,10 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0 border-l border-t border-forest/10">
               {[
-                { num: "01", title: "High-Speed Wi-Fi", sub: "For the meetings that can't wait.", icon: "✪" },
-                { num: "02", title: "Smart TV & Chill", sub: "Your streaming queue, our big screen.", icon: "✼" },
-                { num: "03", title: "Spotless & Styled", sub: "Cleaned, arranged, ready for you.", icon: "✦" },
-                { num: "04", title: "Prime Locations", sub: "Gurugram at your doorstep.", icon: "◈" },
+                { num: "01", title: "High-Speed Wi-Fi", sub: "For the meetings that can't wait.", icon: "Γ£¬" },
+                { num: "02", title: "Smart TV & Chill", sub: "Your streaming queue, our big screen.", icon: "Γ£╝" },
+                { num: "03", title: "Spotless & Styled", sub: "Cleaned, arranged, ready for you.", icon: "Γ£ª" },
+                { num: "04", title: "Prime Locations", sub: "Gurugram at your doorstep.", icon: "Γùê" },
               ].map(({ num, title, sub, icon }, i) => (
                 <TiltCard key={num} intensity={10} className="reveal border-r border-b border-forest/10" style={{ animationDelay: `${i * 80}ms` }}>
                   <div className="p-8 group hover:bg-forest hover:text-cream transition-all duration-500 h-full">
@@ -451,7 +449,7 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
                 <span className="text-gold italic">leave as family."</span>
               </DepthText>
             </Reveal3D>
-            <p className="mt-8 font-mono text-cream/30 text-xs tracking-[0.2em] reveal">— The Mehmaan Manor Promise</p>
+            <p className="mt-8 font-mono text-cream/30 text-xs tracking-[0.2em] reveal">ΓÇö The Mehmaan Manor Promise</p>
           </div>
           <div className="absolute bottom-0 left-0 right-0 h-px bg-gold/20" />
         </section>
@@ -472,8 +470,8 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
               </a>
             </div>
             <div className="grid grid-cols-3 lg:grid-cols-6 gap-2 reveal">
-              {["Living room, golden hour","Detail · brass fixture","Morning coffee ritual",
-                "Bedroom · clean lines","Textured throw, ceramic","Plant corner, diffused light"
+              {["Living room, golden hour","Detail ┬╖ brass fixture","Morning coffee ritual",
+                "Bedroom ┬╖ clean lines","Textured throw, ceramic","Plant corner, diffused light"
               ].map((cap, i) => (
                 <div key={i} className="aspect-square relative overflow-hidden group cursor-pointer bg-forest/10">
                   <svg xmlns="http://www.w3.org/2000/svg" className="absolute inset-0 w-full h-full"
@@ -514,7 +512,7 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
               </div>
               <div className="reveal space-y-5" style={{ animationDelay: "150ms" }}>
                 <p className="text-ink/70 leading-relaxed">
-                  Speak directly with Simran or Jyoti — real hosts, real warmth. No booking bots. No hidden fees.
+                  Speak directly with Simran or Jyoti ΓÇö real hosts, real warmth. No booking bots. No hidden fees.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Link href="/contact"
@@ -527,7 +525,7 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
                     WhatsApp Us
                   </a>
                 </div>
-                <p className="font-mono text-ink/40 text-xs tracking-wider">Simran · +91 88283 52311</p>
+                <p className="font-mono text-ink/40 text-xs tracking-wider">Simran ┬╖ +91 88283 52311</p>
               </div>
             </div>
           </div>
@@ -538,3 +536,4 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
     </div>
   );
 }
+

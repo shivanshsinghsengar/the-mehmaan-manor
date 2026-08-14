@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Menu, X, Instagram, Phone } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { cn } from "@/lib/utils";
@@ -11,6 +12,7 @@ import { Float } from "@/components/3d-effects";
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,6 +21,23 @@ export function Navigation() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Close menu on route change
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
+
+  // Prevent body scroll when menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
 
   const navLinks = [
     { href: "/", label: "Home" },
@@ -39,22 +58,22 @@ export function Navigation() {
             : "bg-transparent"
         )}
       >
-        <div className="container mx-auto px-6 py-4">
+        <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
-            {/* Logo */}
+            {/* Logo — always visible */}
             <Link
               href="/"
-              className="flex items-center space-x-3 group"
+              className="flex items-center space-x-2 md:space-x-3 group min-h-[44px]"
               aria-label="The Mehmaan Manor Home"
             >
               <Float amplitude={4} duration={5}>
                 <Logo
-                  size={44}
-                  className="transition-transform duration-500 group-hover:scale-105 flex-shrink-0"
+                  size={36}
+                  className="transition-transform duration-500 group-hover:scale-105 flex-shrink-0 md:w-11 md:h-11"
                 />
               </Float>
               <span className={cn(
-                "hidden md:block font-display text-lg transition-colors duration-300",
+                "font-display text-base md:text-lg transition-colors duration-300",
                 isScrolled ? "text-forest" : "text-forest"
               )}>
                 The Mehmaan Manor
@@ -78,11 +97,11 @@ export function Navigation() {
               </Button>
             </div>
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Menu Button — 44×44px touch target */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="lg:hidden w-10 h-10 flex items-center justify-center text-forest hover:text-gold transition-colors"
-              aria-label="Toggle menu"
+              className="lg:hidden min-w-[44px] min-h-[44px] flex items-center justify-center text-forest hover:text-gold transition-colors"
+              aria-label={isOpen ? "Close menu" : "Open menu"}
               aria-expanded={isOpen}
             >
               {isOpen ? <X size={24} /> : <Menu size={24} />}
@@ -91,20 +110,23 @@ export function Navigation() {
         </div>
       </nav>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu — full screen overlay */}
       <div
         className={cn(
-          "fixed inset-0 z-50 bg-forest text-cream transition-transform duration-500 lg:hidden",
+          "fixed inset-0 z-50 bg-forest text-cream transition-transform duration-500 lg:hidden overflow-y-auto",
           isOpen ? "translate-x-0" : "translate-x-full"
         )}
+        aria-hidden={!isOpen}
       >
-        <div className="flex flex-col h-full p-8">
-          {/* Close Button */}
-          <div className="flex justify-between items-center mb-12">
-            <Logo size={52} />
+        <div className="flex flex-col min-h-full p-6 md:p-8">
+          {/* Header row */}
+          <div className="flex justify-between items-center mb-10">
+            <Link href="/" onClick={() => setIsOpen(false)}>
+              <Logo size={44} />
+            </Link>
             <button
               onClick={() => setIsOpen(false)}
-              className="w-10 h-10 flex items-center justify-center text-cream hover:text-gold transition-colors"
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center text-cream hover:text-gold transition-colors"
               aria-label="Close menu"
             >
               <X size={28} />
@@ -112,15 +134,15 @@ export function Navigation() {
           </div>
 
           {/* Mobile Nav Links */}
-          <nav className="flex-1 flex flex-col space-y-6">
+          <nav className="flex-1 flex flex-col space-y-2">
             {navLinks.map((link, index) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setIsOpen(false)}
-                className="font-display text-4xl md:text-5xl text-cream hover:text-gold transition-colors duration-300"
+                className="font-display text-3xl md:text-4xl text-cream hover:text-gold transition-colors duration-300 py-2 min-h-[44px] flex items-center"
                 style={{
-                  animationDelay: `${index * 100}ms`,
+                  animationDelay: `${index * 80}ms`,
                 }}
               >
                 {link.label}
@@ -129,12 +151,12 @@ export function Navigation() {
           </nav>
 
           {/* Mobile Footer */}
-          <div className="space-y-6 pt-8 border-t border-cream/20">
+          <div className="space-y-5 pt-6 border-t border-cream/20 mt-6">
             <Button
               asChild
               variant="gold"
               size="lg"
-              className="w-full"
+              className="w-full min-h-[52px] text-base"
               onClick={() => setIsOpen(false)}
             >
               <Link href="/book">Reserve Your Stay</Link>
@@ -145,14 +167,14 @@ export function Navigation() {
                 href="https://www.instagram.com/themehmaanmanor"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-cream hover:text-gold transition-colors"
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center text-cream hover:text-gold transition-colors"
                 aria-label="Instagram"
               >
                 <Instagram size={24} />
               </a>
               <a
                 href="tel:+918828352311"
-                className="text-cream hover:text-gold transition-colors"
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center text-cream hover:text-gold transition-colors"
                 aria-label="Call us"
               >
                 <Phone size={24} />

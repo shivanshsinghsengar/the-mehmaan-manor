@@ -4,12 +4,13 @@ import { Logo } from "@/components/logo";
 
 export function Footer() {
   return (
-    <footer className="bg-forest-deep text-cream py-16">
-      <div className="container mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+    <footer className="bg-forest-deep text-cream py-12 md:py-16">
+      <div className="container mx-auto px-4 md:px-6">
+        {/* 1-col on mobile → 2-col on tablet → 4-col on desktop */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 mb-10 md:mb-12">
           {/* Logo & Tagline */}
-          <div className="space-y-4">
-            <Logo size={80} />
+          <div className="space-y-4 sm:col-span-2 lg:col-span-1">
+            <Logo size={64} />
             <p className="text-cream/80 text-sm leading-relaxed">
               Thoughtful stays. Warm hospitality. Memories that stay.
             </p>
@@ -17,7 +18,7 @@ export function Footer() {
 
           {/* Properties */}
           <div>
-            <h3 className="font-display text-xl mb-4 text-gold">
+            <h3 className="font-display text-lg md:text-xl mb-4 text-gold">
               Our Homes
             </h3>
             <div className="space-y-3 font-mono text-sm text-cream/80">
@@ -40,56 +41,41 @@ export function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-display text-xl mb-4 text-gold">
+            <h3 className="font-display text-lg md:text-xl mb-4 text-gold">
               Quick Links
             </h3>
-            <nav className="space-y-2">
-              <Link
-                href="/homes"
-                className="block text-cream/80 hover:text-gold transition-colors text-sm"
-              >
-                Our Homes
-              </Link>
-              <Link
-                href="/experience"
-                className="block text-cream/80 hover:text-gold transition-colors text-sm"
-              >
-                Experience
-              </Link>
-              <Link
-                href="/gallery"
-                className="block text-cream/80 hover:text-gold transition-colors text-sm"
-              >
-                Gallery
-              </Link>
-              <Link
-                href="/about"
-                className="block text-cream/80 hover:text-gold transition-colors text-sm"
-              >
-                About
-              </Link>
-              <Link
-                href="/contact"
-                className="block text-cream/80 hover:text-gold transition-colors text-sm"
-              >
-                Contact & Book
-              </Link>
+            <nav className="space-y-1">
+              {[
+                { href: "/homes", label: "Our Homes" },
+                { href: "/experience", label: "Experience" },
+                { href: "/gallery", label: "Gallery" },
+                { href: "/about", label: "About" },
+                { href: "/contact", label: "Contact & Book" },
+              ].map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="block text-cream/80 hover:text-gold transition-colors text-sm min-h-[44px] flex items-center"
+                >
+                  {link.label}
+                </Link>
+              ))}
             </nav>
           </div>
 
           {/* Contact */}
           <div>
-            <h3 className="font-display text-xl mb-4 text-gold">
+            <h3 className="font-display text-lg md:text-xl mb-4 text-gold">
               Get in Touch
             </h3>
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="flex items-start space-x-3">
                 <Phone size={16} className="text-gold mt-1 flex-shrink-0" />
                 <div className="text-sm">
                   <p className="text-cream font-medium">Simran</p>
                   <a
                     href="tel:+918828352311"
-                    className="text-cream/80 hover:text-gold transition-colors font-mono"
+                    className="text-cream/80 hover:text-gold transition-colors font-mono min-h-[44px] flex items-center"
                   >
                     +91 88283 52311
                   </a>
@@ -103,7 +89,7 @@ export function Footer() {
                     href="https://www.instagram.com/themehmaanmanor"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-cream/80 hover:text-gold transition-colors font-mono"
+                    className="text-cream/80 hover:text-gold transition-colors font-mono min-h-[44px] flex items-center"
                   >
                     @themehmaanmanor
                   </a>
@@ -114,9 +100,9 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-cream/10">
-          <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
-            <p className="text-cream/60 text-sm">
+        <div className="pt-6 md:pt-8 border-t border-cream/10">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-3 md:gap-0">
+            <p className="text-cream/60 text-sm text-center md:text-left">
               © {new Date().getFullYear()} The Mehmaan Manor. All rights
               reserved.
             </p>
@@ -126,7 +112,7 @@ export function Footer() {
             {/* Staff-only admin link — subtle, no label visible to guests */}
             <Link
               href="/admin/login"
-              className="text-cream/20 hover:text-cream/50 transition-colors text-xs font-mono"
+              className="text-cream/20 hover:text-cream/50 transition-colors text-xs font-mono min-h-[44px] flex items-center"
               title="Staff Login"
             >
               ·
