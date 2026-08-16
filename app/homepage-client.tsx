@@ -473,40 +473,35 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
                 <Instagram size={14} /> Open Instagram
               </a>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 reveal">
-              {instagramPhotos.length > 0
-                ? instagramPhotos.slice(0, 6).map((photo, i) => (
-                  <a key={photo.url + i}
-                    href="https://www.instagram.com/themehmaanmanor"
-                    target="_blank" rel="noopener noreferrer"
-                    className="aspect-square relative overflow-hidden group cursor-pointer bg-forest/10 block">
-                    <img
-                      src={photo.url}
-                      alt={photo.alt || "The Mehmaan Manor"}
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-forest-deep/0 group-hover:bg-forest-deep/50 transition-all duration-500 flex items-center justify-center">
-                      <Instagram size={20} className="text-cream opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+            {/* Stories-style grid */}
+            <div className="flex gap-3 md:gap-4 overflow-x-auto pb-2 md:grid md:grid-cols-6 md:overflow-visible reveal">
+              {(instagramPhotos.length > 0 ? instagramPhotos : photos_fallback).slice(0, 6).map((photo, i) => (
+                <a
+                  key={photo.url + i}
+                  href="https://www.instagram.com/themehmaanmanor"
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex-shrink-0 flex flex-col items-center gap-2 group"
+                  style={{ minWidth: "88px" }}
+                >
+                  {/* Story ring — green gradient border */}
+                  <div className="p-[3px] rounded-full bg-gradient-to-tr from-forest via-[#2d6a4f] to-gold">
+                    <div className="p-[2px] rounded-full bg-cream">
+                      <div className="w-16 h-16 md:w-full md:h-auto md:aspect-square rounded-full overflow-hidden">
+                        <img
+                          src={photo.url}
+                          alt={photo.alt || "The Mehmaan Manor"}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                      </div>
                     </div>
-                  </a>
-                ))
-                : /* fallback: gallery photos if no instagram section photos */
-                photos_fallback.slice(0, 6).map((photo, i) => (
-                  <a key={photo.url + i}
-                    href="https://www.instagram.com/themehmaanmanor"
-                    target="_blank" rel="noopener noreferrer"
-                    className="aspect-square relative overflow-hidden group cursor-pointer bg-forest/10 block">
-                    <img
-                      src={photo.url}
-                      alt={photo.alt || "The Mehmaan Manor"}
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-forest-deep/0 group-hover:bg-forest-deep/50 transition-all duration-500 flex items-center justify-center">
-                      <Instagram size={20} className="text-cream opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    </div>
-                  </a>
-                ))
-              }
+                  </div>
+                  {/* Caption below like stories username */}
+                  <p className="font-mono text-[9px] md:text-[10px] text-ink/40 group-hover:text-forest transition-colors text-center truncate w-full px-1">
+                    {["Bedroom", "Living area", "Balcony", "Exterior", "Kitchen", "Bathroom"][i] ?? "View"}
+                  </p>
+                </a>
+              ))}
             </div>
           </div>
         </section>
