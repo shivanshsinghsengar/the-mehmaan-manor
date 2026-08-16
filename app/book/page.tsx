@@ -27,6 +27,21 @@ interface Property {
 
 type Step = 1 | 2 | 3 | 4;
 
+// Room types config — same as property page
+const ROOM_TYPES: Record<string, {
+  key: string; label: string; shortLabel: string;
+  baseRate: number; weekendRate: number; maxGuests: number; description: string;
+}[]> = {
+  "jharsa-village": [
+    { key: "1rk", shortLabel: "1RK Studio", label: "1RK Studio",
+      baseRate: 1999, weekendRate: 2299, maxGuests: 3,
+      description: "Compact studio — perfect for solo travelers & couples." },
+    { key: "2bhk", shortLabel: "2BHK Apartment", label: "2BHK Apartment",
+      baseRate: 2999, weekendRate: 3299, maxGuests: 6,
+      description: "Spacious 2-bedroom — ideal for families & groups." },
+  ],
+};
+
 function calcNights(from: string, to: string) {
   if (!from || !to) return 0;
   const diff = new Date(to).getTime() - new Date(from).getTime();
@@ -38,21 +53,19 @@ function isWeekend(dateStr: string) {
   return d === 0 || d === 5 || d === 6;
 }
 
-function calcPrice(prop: Property, checkIn: string, checkOut: string) {
+function calcPriceFromRates(baseRate: number, weekendRate: number, cleaningFee: number, checkIn: string, checkOut: string) {
   const nights = calcNights(checkIn, checkOut);
-  if (!nights) return { subtotal: 0, nights: 0, cleaningFee: 0, taxes: 0, total: 0, rate: prop.baseRate };
-  const rate = isWeekend(checkIn) ? prop.weekendRate : prop.baseRate;
+  if (!nights) return { subtotal: 0, nights: 0, cleaningFee: 0, taxes: 0, total: 0, rate: baseRate };
+  const rate = isWeekend(checkIn) ? weekendRate : baseRate;
   const subtotal = rate * nights;
-  const cleaning = prop.cleaningFee;
   const taxes = Math.round(subtotal * 0.18);
-  return { subtotal, nights, cleaningFee: cleaning, taxes, total: subtotal + cleaning + taxes, rate };
+  return { subtotal, nights, cleaningFee, taxes, total: subtotal + cleaningFee + taxes, rate };
 }
 
 function fmt(n: number) {
   return "₹" + n.toLocaleString("en-IN");
 }
 
-// Razorpay global type
 declare global {
   interface Window {
     Razorpay: new (opts: object) => { open(): void };
@@ -65,6 +78,7 @@ export default function BookPage() {
 
   const [step, setStep] = useState<Step>(1);
   const [propId, setPropId] = useState("");
+  const [selectedRoomKey, setSelectedRoomKey] = useState<string | null>(null);
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(2);
@@ -110,11 +124,39 @@ export default function BookPage() {
   }, []);
 
   const prop = properties.find((p) => p.id === propId);
-  const pricing = prop ? calcPrice(prop, checkIn, checkOut) : { subtotal: 0, nights: 0, cleaningFee: 0, taxes: 0, total: 0, rate: 0 };
-  const today = new Date().toISOString().split("T")[0];
+  
+  // Room types for selected property
+  const roomTypes = prop ? (ROOM_TYPES[prop.slug] ?? null) : null;
+  const selectedRoom = roomTypes?.find((r) => r.key === selectedRoomKey) ?? null;
 
+  // Auto-select first room type when property changes
+  useEffect(() => {
+    if (roomTypes && roomTypes.length > 0) {
+      setSelectedRoomKey(roomTypes[0].key);
+    } else {
+      setSelectedRoomKey(null);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [propId]);
+
+  // Effective rates — use room type rates if selected, else property DB rates
+  const effectiveBaseRate = selectedRoom?.baseRate ?? prop?.baseRate ?? 0;
+  const effectiveWeekendRate = selectedRoom?.weekendRate ?? prop?.weekendRate ?? 0;
+  const effectiveMaxGuests = selectedRoom?.maxGuests ?? prop?.maxGuests ?? 1;
+  const effectiveCleaningFee = prop?.cleaningFee ?? 0;
+
+  const pricing = prop
+    ? calcPriceFromRates(effectiveBaseRate, effectiveWeekendRate, effectiveCleaningFee, checkIn, checkOut)
+    : { subtotal: 0, nights: 0, cleaningFee: 0, taxes: 0, total: 0, rate: 0 };
+
+  const today = new Date().toISOString().split("T")[0];
   const canStep1 = propId && checkIn && checkOut && pricing.nights > 0 && guests >= 1;
   const canStep2 = form.name.trim() && form.email.trim() && form.phone.trim();
+
+  // Booking property name includes room type if applicable
+  const bookingPropertyName = selectedRoom
+    ? `${prop?.name ?? ""} — ${selectedRoom.label}`
+    : prop?.name ?? "";
 
   // Create booking + trigger payment
   const handlePay = async () => {
@@ -128,7 +170,7 @@ export default function BookPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           propertyId: propId,
-          propertyName: prop.name,
+          propertyName: bookingPropertyName,
           guestName: form.name,
           guestEmail: form.email,
           guestPhone: form.phone,
@@ -299,16 +341,53 @@ export default function BookPage() {
                         </div>
                         <div className="flex items-center gap-4 text-sm">
                           <span className="text-forest font-medium">
-                            {fmt(p.baseRate)}<span className="text-ink/40 text-xs">/night</span>
+                            from {fmt(ROOM_TYPES[p.slug]?.[0]?.baseRate ?? p.baseRate)}
+                            <span className="text-ink/40 text-xs">/night</span>
                           </span>
                           <span className="text-ink/40 text-xs">·</span>
                           <span className="text-ink/60 flex items-center gap-1">
                             <Users size={11} /> max {p.maxGuests}
                           </span>
                         </div>
+                        {ROOM_TYPES[p.slug] && (
+                          <p className="text-xs font-mono text-gold mt-2">
+                            {ROOM_TYPES[p.slug].map(r => r.shortLabel).join(" · ")} available
+                          </p>
+                        )}
                       </button>
                     ))}
                   </div>
+
+                  {/* Room type selector — shown when property has multiple room types */}
+                  {prop && roomTypes && (
+                    <div className="border border-forest/20 bg-forest/3 p-4 space-y-3">
+                      <p className="text-xs font-mono text-ink/50 uppercase">Select Room Type</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        {roomTypes.map((room) => (
+                          <button
+                            key={room.key}
+                            onClick={() => { setSelectedRoomKey(room.key); setGuests(Math.min(guests, room.maxGuests)); }}
+                            className={cn(
+                              "p-4 border-2 text-left transition-all",
+                              selectedRoomKey === room.key
+                                ? "border-forest bg-forest/5"
+                                : "border-neutral-200 hover:border-forest/50"
+                            )}
+                          >
+                            <div className="flex justify-between items-start mb-1">
+                              <p className="font-display text-base text-forest">{room.shortLabel}</p>
+                              {selectedRoomKey === room.key && <Check size={14} className="text-forest mt-0.5" />}
+                            </div>
+                            <p className="text-xs text-ink/60 mb-2">{room.description}</p>
+                            <p className="font-mono text-sm text-forest font-medium">
+                              {fmt(room.baseRate)}<span className="text-ink/40 text-xs">/night</span>
+                            </p>
+                            <p className="font-mono text-xs text-ink/50">max {room.maxGuests} guests</p>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 )}
 
                 {/* Dates */}
@@ -338,9 +417,9 @@ export default function BookPage() {
                         <button onClick={() => setGuests(Math.max(1, guests - 1))}
                           className="w-10 h-10 border border-neutral-300 flex items-center justify-center text-xl hover:border-forest transition-colors">−</button>
                         <span className="font-display text-2xl text-forest w-8 text-center">{guests}</span>
-                        <button onClick={() => setGuests(Math.min(prop.maxGuests, guests + 1))}
+                        <button onClick={() => setGuests(Math.min(effectiveMaxGuests, guests + 1))}
                           className="w-10 h-10 border border-neutral-300 flex items-center justify-center text-xl hover:border-forest transition-colors">+</button>
-                        <span className="text-sm text-ink/50">max {prop.maxGuests}</span>
+                        <span className="text-sm text-ink/50">max {effectiveMaxGuests}</span>
                       </div>
                     </div>
 
@@ -435,6 +514,9 @@ export default function BookPage() {
                   <div className="bg-neutral-50 p-4">
                     <p className="text-xs font-mono text-ink/50 uppercase mb-2">Property</p>
                     <p className="font-display text-lg text-forest">{prop.name}</p>
+                    {selectedRoom && (
+                      <p className="text-xs font-mono text-gold mt-1">{selectedRoom.label}</p>
+                    )}
                     <p className="text-xs text-ink/50 font-mono">{prop.address}</p>
                   </div>
                   <div className="bg-neutral-50 p-4">
