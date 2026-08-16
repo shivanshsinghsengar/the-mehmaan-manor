@@ -240,9 +240,27 @@ export default function PropertyPage() {
               <p className="font-mono text-gold text-xs md:text-sm tracking-widest mb-1 md:mb-2">
                 HOME {String(property.id).padStart(2, "0")}
               </p>
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-display text-cream leading-tight">
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-display text-cream leading-tight mb-4 md:mb-6">
                 {property.name}
               </h1>
+              {/* Hero CTA buttons — visible immediately without scrolling */}
+              <div className="flex flex-wrap gap-3">
+                <a
+                  href={`https://wa.me/918828352311?text=${waMessage}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-3 bg-gold text-ink text-sm font-medium hover:bg-gold/90 transition-colors"
+                >
+                  <MessageCircle size={16} />
+                  Reserve via WhatsApp
+                </a>
+                <a
+                  href="tel:+918828352311"
+                  className="inline-flex items-center gap-2 px-5 py-3 bg-cream/10 backdrop-blur-sm border border-cream/40 text-cream text-sm font-medium hover:bg-cream/20 transition-colors"
+                >
+                  <Phone size={16} />
+                  Call Simran
+                </a>
+              </div>
             </div>
           </div>
         </section>
