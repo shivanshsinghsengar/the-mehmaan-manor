@@ -325,6 +325,7 @@ export default function BookPage() {
                     No properties available at the moment.
                   </div>
                 ) : (
+                  <>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {properties.map((p) => (
                       <button key={p.id} onClick={() => setPropId(p.id)}
@@ -360,7 +361,7 @@ export default function BookPage() {
 
                   {/* Room type selector — shown when property has multiple room types */}
                   {prop && roomTypes && (
-                    <div className="border border-forest/20 bg-forest/3 p-4 space-y-3">
+                    <div className="border border-forest/20 bg-forest/5 p-4 space-y-3">
                       <p className="text-xs font-mono text-ink/50 uppercase">Select Room Type</p>
                       <div className="grid grid-cols-2 gap-3">
                         {roomTypes.map((room) => (
@@ -388,6 +389,7 @@ export default function BookPage() {
                       </div>
                     </div>
                   )}
+                  </>
                 )}
 
                 {/* Dates */}
