@@ -178,18 +178,21 @@ export default function PropertyPage() {
     );
   }
 
-  // Filter photos by selected room type (if property has room types)
-  // For hero/property-hero: prefer room-typed photo, fallback to any
+  // Filter photos by selected room type tag — always fallback to all if none match
   const filterByRoom = (photoList: Photo[]) => {
     if (!selectedRoom) return photoList;
-    const tagged = photoList.filter((p) => p.tags?.includes(selectedRoom.tag));
+    const tagged = photoList.filter((p) => Array.isArray(p.tags) && p.tags.includes(selectedRoom.tag));
     return tagged.length > 0 ? tagged : photoList;
   };
 
   const allHeroPhotos = photos.filter((p) => p.section === "property-hero");
   const allGalleryPhotos = photos.filter((p) => p.section === "gallery");
 
-  const heroPhoto = filterByRoom(allHeroPhotos)[0] ?? allHeroPhotos[0] ?? null;
+  // Always show a hero — tagged first, then any property-hero, then null
+  const heroPhoto = (selectedRoom
+    ? allHeroPhotos.find((p) => Array.isArray(p.tags) && p.tags.includes(selectedRoom.tag))
+    : null) ?? allHeroPhotos[0] ?? null;
+
   const galleryPhotos = filterByRoom(allGalleryPhotos);
 
   // Displayed rate — from room type if selected, else from DB
