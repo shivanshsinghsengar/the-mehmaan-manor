@@ -30,6 +30,7 @@ export default async function HomePage() {
     })),
     heroPhotos: photos.filter((p) => p.section === "hero").map((p) => ({ url: p.url, alt: p.alt })),
     instagramPhotos: photos.filter((p) => p.section === "instagram").map((p) => ({ url: p.url, alt: p.alt })),
+    galleryPhotos: photos.filter((p) => p.section === "gallery").map((p) => ({ url: p.url, alt: p.alt })),
     propertyCards,
     content: {
       heroHeadline: content?.heroHeadline || "The Mehmaan Experience",

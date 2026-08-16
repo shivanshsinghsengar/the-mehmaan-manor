@@ -15,6 +15,7 @@ interface SiteData {
   }[];
   heroPhotos: { url: string; alt: string }[];
   instagramPhotos: { url: string; alt: string }[];
+  galleryPhotos: { url: string; alt: string }[];
   propertyCards: Record<string, { url: string; alt: string }[]>;
   content: {
     heroHeadline: string; heroSubtitle: string;
@@ -218,7 +219,8 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
     return () => io.disconnect();
   }, []);
 
-  const { properties, heroPhotos, instagramPhotos, propertyCards, content } = siteData;
+  const { properties, heroPhotos, instagramPhotos, galleryPhotos, propertyCards, content } = siteData;
+  const photos_fallback = galleryPhotos;
   const headline = content.heroHeadline;
   const subtitle = content.heroSubtitle;
   const philosophy = content.philosophyText;
@@ -472,31 +474,39 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
               </a>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 reveal">
-              {["Living room, golden hour","Detail · brass fixture","Morning coffee ritual",
-                "Bedroom · clean lines","Textured throw, ceramic","Plant corner, diffused light"
-              ].map((cap, i) => (
-                <div key={i} className="aspect-square relative overflow-hidden group cursor-pointer bg-forest/10">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="absolute inset-0 w-full h-full"
-                    preserveAspectRatio="xMidYMid slice" viewBox="0 0 200 200" aria-hidden="true">
-                    <defs>
-                      <linearGradient id={`ig-${i}`} x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor={i % 2 === 0 ? "oklch(0.22 0.04 155)" : "oklch(0.18 0.04 155)"} />
-                        <stop offset="100%" stopColor={i % 2 === 0 ? "oklch(0.28 0.04 155)" : "oklch(0.24 0.04 155)"} />
-                      </linearGradient>
-                    </defs>
-                    <rect width="200" height="200" fill={`url(#ig-${i})`} />
-                    <rect x="0" y="130" width="200" height="70" fill="oklch(0.18 0.03 80)" opacity="0.5" />
-                    <rect x={110 + (i % 3) * 10} y="20" width="70" height="95" rx="1" fill="oklch(0.75 0.12 85)" opacity="0.12" />
-                    <ellipse cx="30" cy="115" rx="20" ry="16" fill="oklch(0.30 0.08 145)" opacity="0.7" />
-                    <rect x="27" y="130" width="6" height="30" fill="oklch(0.22 0.04 155)" />
-                    <rect width="200" height="200" fill="oklch(0.10 0.02 155)" opacity="0.35" />
-                    <polyline points="8,8 8,20 20,8" fill="none" stroke="oklch(0.75 0.12 85)" strokeWidth="1.5" opacity="0.5" />
-                  </svg>
-                  <div className="absolute inset-0 bg-forest-deep/0 group-hover:bg-forest-deep/40 transition-all duration-500 flex items-center justify-center">
-                    <p className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-mono text-cream/80 text-[9px] text-center px-3 uppercase tracking-wider leading-relaxed">{cap}</p>
-                  </div>
-                </div>
-              ))}
+              {instagramPhotos.length > 0
+                ? instagramPhotos.slice(0, 6).map((photo, i) => (
+                  <a key={photo.url + i}
+                    href="https://www.instagram.com/themehmaanmanor"
+                    target="_blank" rel="noopener noreferrer"
+                    className="aspect-square relative overflow-hidden group cursor-pointer bg-forest/10 block">
+                    <img
+                      src={photo.url}
+                      alt={photo.alt || "The Mehmaan Manor"}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-forest-deep/0 group-hover:bg-forest-deep/50 transition-all duration-500 flex items-center justify-center">
+                      <Instagram size={20} className="text-cream opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    </div>
+                  </a>
+                ))
+                : /* fallback: gallery photos if no instagram section photos */
+                photos_fallback.slice(0, 6).map((photo, i) => (
+                  <a key={photo.url + i}
+                    href="https://www.instagram.com/themehmaanmanor"
+                    target="_blank" rel="noopener noreferrer"
+                    className="aspect-square relative overflow-hidden group cursor-pointer bg-forest/10 block">
+                    <img
+                      src={photo.url}
+                      alt={photo.alt || "The Mehmaan Manor"}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-forest-deep/0 group-hover:bg-forest-deep/50 transition-all duration-500 flex items-center justify-center">
+                      <Instagram size={20} className="text-cream opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    </div>
+                  </a>
+                ))
+              }
             </div>
           </div>
         </section>
