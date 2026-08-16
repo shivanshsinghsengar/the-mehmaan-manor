@@ -73,18 +73,32 @@ export default function BookPage() {
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState("");
 
-  // Fetch properties from DB on mount
+  // Fetch properties from DB on mount + read query params for pre-fill
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const preProperty = params.get("property");
+    const preCheckIn = params.get("checkIn");
+    const preCheckOut = params.get("checkOut");
+
     fetch("/api/properties")
       .then((r) => r.json())
       .then((data: Property[]) => {
         if (Array.isArray(data) && data.length > 0) {
           setProperties(data);
-          setPropId(data[0].id); // default to first property
+          // Pre-fill from query params if provided, else default to first
+          if (preProperty) {
+            const found = data.find((p) => p.id === preProperty || p.slug === preProperty);
+            setPropId(found?.id ?? data[0].id);
+          } else {
+            setPropId(data[0].id);
+          }
         }
       })
       .catch(() => {})
       .finally(() => setPropertiesLoading(false));
+
+    if (preCheckIn) setCheckIn(preCheckIn);
+    if (preCheckOut) setCheckOut(preCheckOut);
   }, []);
 
   // Load Razorpay script

@@ -453,7 +453,16 @@ export default function PropertyPage() {
                       )}
                     </div>
                     <div className="space-y-3">
+                      {/* Primary CTA — direct website booking */}
                       <Button asChild variant="gold" size="lg" className="w-full">
+                        <Link href={`/book?property=${property.id}`}>
+                          <svg className="mr-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          Book Now
+                        </Link>
+                      </Button>
+                      <Button asChild variant="outline" size="lg" className="w-full">
                         <a href={`https://wa.me/918828352311?text=${waMessage}`}
                           target="_blank" rel="noopener noreferrer">
                           <MessageCircle size={18} className="mr-2" />Reserve via WhatsApp
@@ -463,9 +472,6 @@ export default function PropertyPage() {
                         <a href="tel:+918828352311">
                           <Phone size={18} className="mr-2" />Call Simran
                         </a>
-                      </Button>
-                      <Button asChild size="lg" className="w-full">
-                        <Link href="/contact">Send Enquiry</Link>
                       </Button>
                     </div>
                   </div>
@@ -494,10 +500,16 @@ export default function PropertyPage() {
             <p className="text-xl font-display text-forest">₹{displayRate.toLocaleString("en-IN")}</p>
             <p className="font-mono text-xs text-ink/50">per night</p>
           </div>
-          <Button asChild variant="gold" size="lg" className="flex-shrink-0">
-            <a href={`https://wa.me/918828352311?text=${waMessage}`}
-              target="_blank" rel="noopener noreferrer">Reserve Now</a>
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild variant="gold" size="lg" className="flex-shrink-0">
+              <Link href={`/book?property=${property.id}`}>Book Now</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="flex-shrink-0">
+              <a href={`https://wa.me/918828352311?text=${waMessage}`} target="_blank" rel="noopener noreferrer">
+                <MessageCircle size={16} />
+              </a>
+            </Button>
+          </div>
         </div>
       </div>
 
