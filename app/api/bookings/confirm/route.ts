@@ -15,7 +15,6 @@ export async function POST(request: Request) {
     data: { status: "CONFIRMED", paymentId: paymentId || null },
   });
 
-  // Send emails (non-blocking)
   const emailData = {
     id: confirmed.id,
     bookingNumber: confirmed.bookingNumber,
@@ -39,14 +38,15 @@ export async function POST(request: Request) {
     createdAt: confirmed.createdAt,
   };
 
-  Promise.allSettled([
-    sendBookingConfirmationToGuest(emailData),
-    sendNewBookingAlertToOwner(emailData),
-  ]).then((results) => {
-    results.forEach((r, i) => {
-      if (r.status === "rejected") console.error(`Email ${i} failed:`, r.reason);
-    });
-  });
+  // Awaited — Vercel must not terminate before emails are sent
+  try {
+    await Promise.allSettled([
+      sendBookingConfirmationToGuest(emailData),
+      sendNewBookingAlertToOwner(emailData),
+    ]);
+  } catch (e) {
+    console.error("Email send error:", e);
+  }
 
   return NextResponse.json({ success: true, booking: confirmed });
 }
