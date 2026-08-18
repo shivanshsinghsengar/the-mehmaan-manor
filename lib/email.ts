@@ -11,7 +11,7 @@
 import nodemailer from "nodemailer";
 import type { BookingRecord } from "@/lib/bookings-store";
 
-const OWNER_EMAIL = process.env.OWNER_EMAIL || "shivanshsingengar8@gmail.com";
+const OWNER_EMAIL = process.env.OWNER_EMAIL || "shivanshsinghsengar8@gmail.com";
 const GMAIL_USER  = process.env.GMAIL_USER  || "shivansh99pp@gmail.com";
 const SITE_NAME   = "The Mehmaan Manor";
 
