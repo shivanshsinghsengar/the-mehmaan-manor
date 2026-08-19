@@ -66,17 +66,17 @@ export default function ExperiencePage() {
 
       <main id="main-content">
         {/* Hero */}
-        <section className="pt-40 pb-24 px-6">
+        <section className="pt-28 md:pt-40 pb-10 md:pb-24 px-4 md:px-6">
           <div className="container mx-auto max-w-5xl text-center">
-            <p className="font-mono text-gold text-sm tracking-widest uppercase mb-6 animate-fade-in">
+            <p className="font-mono text-gold text-xs md:text-sm tracking-widest uppercase mb-4 md:mb-6 animate-fade-in">
               The Experience
             </p>
-            <h1 className="text-display font-display text-forest mb-6 animate-fade-up">
+            <h1 className="text-display font-display text-forest mb-4 md:mb-6 animate-fade-up">
               Not just a stay.
               <br />
               <span className="italic text-gold">The Mehmaan experience.</span>
             </h1>
-            <p className="text-lg text-ink/80 max-w-2xl mx-auto animate-fade-up">
+            <p className="text-base md:text-lg text-ink/80 max-w-2xl mx-auto animate-fade-up">
               Every detail considered. Every comfort provided. Every moment
               yours.
             </p>
@@ -87,11 +87,11 @@ export default function ExperiencePage() {
         {amenities.map((amenity, index) => (
           <section
             key={amenity.number}
-            className={`py-20 px-6 ${index % 2 === 1 ? "bg-forest/5" : ""}`}
+            className={`py-10 md:py-20 px-4 md:px-6 ${index % 2 === 1 ? "bg-forest/5" : ""}`}
           >
             <div className="container mx-auto max-w-7xl">
               <div
-                className={`grid grid-cols-1 lg:grid-cols-2 gap-12 items-center ${
+                className={`grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center ${
                   index % 2 === 1 ? "lg:grid-flow-dense" : ""
                 }`}
               >
@@ -101,21 +101,21 @@ export default function ExperiencePage() {
                     index % 2 === 1 ? "lg:col-start-2" : ""
                   )}
                 >
-                  <div className="flex items-center space-x-4 mb-6">
-                    <div className="w-12 h-12 bg-gold/10 flex items-center justify-center">
-                      <amenity.icon className="text-gold" size={24} />
+                  <div className="flex items-center space-x-4 mb-5 md:mb-6">
+                    <div className="w-10 h-10 md:w-12 md:h-12 bg-gold/10 flex items-center justify-center">
+                      <amenity.icon className="text-gold" size={22} />
                     </div>
                     <span className="font-mono text-gold text-sm">
                       {amenity.number}
                     </span>
                   </div>
-                  <h2 className="text-3xl md:text-4xl font-display text-forest mb-3">
+                  <h2 className="text-2xl md:text-4xl font-display text-forest mb-3">
                     {amenity.title}
                   </h2>
-                  <p className="text-xl italic text-ink/60 mb-6 font-display">
+                  <p className="text-lg italic text-ink/60 mb-4 md:mb-6 font-display">
                     {amenity.tagline}
                   </p>
-                  <p className="text-ink/80 leading-relaxed text-lg">
+                  <p className="text-ink/80 leading-relaxed text-base md:text-lg">
                     {amenity.description}
                   </p>
                 </div>
@@ -136,7 +136,7 @@ export default function ExperiencePage() {
         ))}
 
         {/* The Promise */}
-        <section className="py-32 px-6 bg-forest text-cream">
+        <section className="py-16 md:py-32 px-4 md:px-6 bg-forest text-cream">
           <div className="container mx-auto max-w-4xl text-center reveal">
             <h2 className="text-4xl md:text-5xl font-display mb-8">
               The Mehmaan Promise

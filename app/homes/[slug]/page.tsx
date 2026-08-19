@@ -150,6 +150,21 @@ export default function PropertyPage() {
     return () => { observer.disconnect(); window.removeEventListener("scroll", handleScroll); };
   }, [property]);
 
+  // Dynamic SEO
+  useEffect(() => {
+    if (!property) return;
+    const roomLabel = selectedRoom ? ` — ${selectedRoom.label}` : "";
+    const rate = selectedRoom?.baseRate ?? property.baseRate;
+    document.title = `${property.name}${roomLabel} | The Mehmaan Manor — Gurugram Homestay`;
+    let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
+    if (!meta) {
+      meta = document.createElement("meta") as HTMLMetaElement;
+      meta.setAttribute("name", "description");
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute("content", `${property.description} ${property.address}. Book directly from ₹${rate.toLocaleString("en-IN")}/night. Max ${property.maxGuests} guests. No booking fees.`);
+  }, [property, selectedRoom]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center">

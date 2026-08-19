@@ -37,6 +37,14 @@ export default function BookingsPage() {
 
   useEffect(() => { load(); }, [load]);
 
+  const deleteBooking = async (id: string, bookingNumber: string) => {
+    if (!confirm(`Delete booking ${bookingNumber}? This cannot be undone.`)) return;
+    try {
+      await fetch(`/api/admin/bookings/${id}`, { method: "DELETE" });
+      setBookings((prev) => prev.filter((b) => b.id !== id));
+    } catch { /* ignore */ }
+  };
+
   const filtered = bookings.filter((b) => {
     const matchStatus = filterStatus === "all" || b.status === filterStatus;
     const matchSearch =
@@ -166,6 +174,12 @@ export default function BookingsPage() {
                       <Link href={`/admin/bookings/${b.id}`} className="text-gold hover:text-forest transition-colors font-medium">
                         View →
                       </Link>
+                      <button
+                        onClick={() => deleteBooking(b.id, b.bookingNumber)}
+                        className="ml-4 text-red-400 hover:text-red-600 transition-colors text-xs font-mono"
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 );
