@@ -1,5 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "pdqt9y1o",
+  api_key: process.env.CLOUDINARY_API_KEY || "659975391527599",
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function POST(request: Request) {
   try {
@@ -18,7 +25,7 @@ export async function POST(request: Request) {
     for (const file of files) {
       if (!file.size) continue;
 
-      // Convert to base64 data URL (works on Vercel serverless — no filesystem)
+      // Convert to base64 for Cloudinary upload
       const bytes = await file.arrayBuffer();
       const base64 = Buffer.from(bytes).toString("base64");
       const mimeType = file.type || "image/jpeg";
@@ -27,7 +34,25 @@ export async function POST(request: Request) {
       const ext = file.name.split(".").pop() || "jpg";
       const alt = altPrefix || file.name.replace(`.${ext}`, "").replace(/-/g, " ");
 
-      // Get current max order for this section
+      let url = dataUrl; // fallback
+
+      // Upload to Cloudinary
+      try {
+        const result = await cloudinary.uploader.upload(dataUrl, {
+          folder: "mehman-manor",
+          resource_type: "image",
+          transformation: [
+            { quality: "auto:good" },
+            { fetch_format: "auto" },
+          ],
+        });
+        url = result.secure_url;
+      } catch (cloudErr) {
+        console.error("Cloudinary upload failed, using base64 fallback:", cloudErr);
+        // Keep base64 as fallback
+      }
+
+      // Get current max order
       const maxOrderRow = await prisma.photo.aggregate({
         _max: { order: true },
         where: { section, ...(propertyId ? { propertyId } : {}) },
@@ -36,7 +61,7 @@ export async function POST(request: Request) {
 
       const photo = await prisma.photo.create({
         data: {
-          url: dataUrl,
+          url,
           alt,
           propertyId: propertyId || null,
           section,
