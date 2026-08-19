@@ -4,17 +4,27 @@ import { HomePageClient } from "./homepage-client";
 
 export default async function HomePage() {
   // Fetch all data server-side — arrives pre-loaded, zero blank flash
-  const [properties, photos, content] = await Promise.all([
+  // Only fetch photos needed for homepage sections to keep payload small
+  const [properties, heroPhotos, instagramPhotos, propertyCardPhotos, content] = await Promise.all([
     prisma.property.findMany({ where: { isActive: true }, orderBy: { id: "asc" } }).catch(() => []),
-    prisma.photo.findMany({ orderBy: { order: "asc" } }).catch(() => []),
+    prisma.photo.findMany({ where: { section: "hero" }, orderBy: { order: "asc" }, take: 1 }).catch(() => []),
+    prisma.photo.findMany({ where: { section: "instagram" }, orderBy: { order: "asc" }, take: 6 }).catch(() => []),
+    prisma.photo.findMany({ where: { section: "property-card" }, orderBy: { order: "asc" }, take: 6 }).catch(() => []),
     prisma.siteContent.findUnique({ where: { id: "singleton" } }).catch(() => null),
   ]);
+
+  // Also fetch gallery photos for instagram fallback (limit 6)
+  const galleryPhotos = instagramPhotos.length >= 6
+    ? []
+    : await prisma.photo.findMany({ where: { section: "gallery" }, orderBy: { order: "asc" }, take: 6 - instagramPhotos.length }).catch(() => []);
+
+  const allInstagram = [...instagramPhotos, ...galleryPhotos].slice(0, 6);
 
   // Build property card photos map
   const propertyCards: Record<string, { url: string; alt: string }[]> = {};
   for (const p of properties) {
-    propertyCards[p.id] = photos
-      .filter((ph) => ph.propertyId === p.id && ph.section === "property-card")
+    propertyCards[p.id] = propertyCardPhotos
+      .filter((ph) => ph.propertyId === p.id)
       .map((ph) => ({ url: ph.url, alt: ph.alt }));
   }
 
@@ -28,9 +38,9 @@ export default async function HomePage() {
       vibe: p.vibe,
       baseRate: p.baseRate,
     })),
-    heroPhotos: photos.filter((p) => p.section === "hero").map((p) => ({ url: p.url, alt: p.alt })),
-    instagramPhotos: photos.filter((p) => p.section === "instagram").map((p) => ({ url: p.url, alt: p.alt })),
-    galleryPhotos: photos.filter((p) => p.section === "gallery").map((p) => ({ url: p.url, alt: p.alt })),
+    heroPhotos: heroPhotos.map((p) => ({ url: p.url, alt: p.alt })),
+    instagramPhotos: allInstagram.map((p) => ({ url: p.url, alt: p.alt })),
+    galleryPhotos: allInstagram.map((p) => ({ url: p.url, alt: p.alt })),
     propertyCards,
     content: {
       heroHeadline: content?.heroHeadline || "The Mehmaan Experience",

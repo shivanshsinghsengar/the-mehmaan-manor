@@ -61,10 +61,16 @@ export default function GalleryPage() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
+    // Only fetch gallery-relevant sections for public display
     fetch("/api/photos")
       .then((r) => r.json())
       .then((data) => {
-        if (Array.isArray(data)) setPhotos(data);
+        if (Array.isArray(data)) {
+          // Filter out hero section from gallery display
+          setPhotos(data.filter((p: { section: string }) =>
+            !["hero"].includes(p.section)
+          ));
+        }
       })
       .catch(() => {})
       .finally(() => setLoaded(true));
