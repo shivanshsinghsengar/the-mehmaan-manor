@@ -63,21 +63,15 @@ export function Navigation() {
             {/* Logo — always visible */}
             <Link
               href="/"
-              className="flex items-center space-x-2 md:space-x-3 group min-h-[44px]"
+              className="flex items-center group min-h-[44px]"
               aria-label="The Mehmaan Manor Home"
             >
               <Float amplitude={4} duration={5}>
                 <Logo
-                  size={36}
-                  className="transition-transform duration-500 group-hover:scale-105 flex-shrink-0 md:w-11 md:h-11"
+                  size={52}
+                  className="transition-transform duration-500 group-hover:scale-105 flex-shrink-0"
                 />
               </Float>
-              <span className={cn(
-                "font-display text-base md:text-lg transition-colors duration-300",
-                isScrolled ? "text-forest" : "text-forest"
-              )}>
-                The Mehmaan Manor
-              </span>
             </Link>
 
             {/* Desktop Navigation */}
