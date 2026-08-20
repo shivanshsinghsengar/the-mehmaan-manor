@@ -82,6 +82,11 @@ export const metadata: Metadata = {
     "work-from-anywhere Gurugram",
   ],
   authors: [{ name: "The Mehmaan Manor" }],
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
   openGraph: {
     type: "website",
     locale: "en_IN",
