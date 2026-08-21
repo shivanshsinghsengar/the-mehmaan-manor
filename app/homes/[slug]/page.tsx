@@ -129,16 +129,11 @@ export default function PropertyPage() {
         const found = data.find((p) => p.slug === slug);
         setProperty(found || null);
         if (found) {
-          // Fetch hero + gallery only — limits payload size for faster load
-          Promise.all([
-            fetch(`/api/photos?propertyId=${found.id}&section=property-hero`).then(r => r.json()),
-            fetch(`/api/photos?propertyId=${found.id}&section=gallery`).then(r => r.json()),
-          ]).then(([heroData, galleryData]) => {
-            setPhotos([
-              ...(Array.isArray(heroData) ? heroData : []),
-              ...(Array.isArray(galleryData) ? galleryData : []),
-            ]);
-          }).catch(() => {});
+          // Fetch all photos for this property in one call
+          fetch(`/api/photos?propertyId=${found.id}`)
+            .then((r) => r.json())
+            .then((photoData) => setPhotos(Array.isArray(photoData) ? photoData : []))
+            .catch(() => {});
         }
       })
       .catch(() => {})
