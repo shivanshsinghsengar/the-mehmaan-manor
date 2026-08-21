@@ -422,47 +422,6 @@ export default function PropertyPage() {
                   )}
                 </div>
 
-                {/* Trust & Reviews */}
-                <div className="reveal space-y-4">
-                  <h2 className="text-xl md:text-2xl font-display text-forest">What Guests Say</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {[
-                      { name: "Priya S.", rating: 5, text: "Spotless, peaceful, and exactly as described. Simran was incredibly helpful — arranged early check-in without any fuss.", date: "July 2025" },
-                      { name: "Rahul M.", rating: 5, text: "Best short-stay in Gurugram. The Wi-Fi was fast, the room was clean, and the location was perfect for my work trip.", date: "June 2025" },
-                      { name: "Ananya K.", rating: 5, text: "Felt completely at home. The little touches — fresh towels, working AC, Netflix ready — made all the difference.", date: "May 2025" },
-                      { name: "Vikram T.", rating: 4, text: "Great value for money. Would definitely book again for my next Gurugram visit. Very responsive hosts.", date: "April 2025" },
-                    ].map((review, i) => (
-                      <div key={i} className="bg-white border border-forest/10 p-4 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-forest/10 flex items-center justify-center">
-                              <span className="text-xs font-display text-forest">{review.name[0]}</span>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-forest">{review.name}</p>
-                              <p className="text-[10px] font-mono text-ink/40">{review.date}</p>
-                            </div>
-                          </div>
-                          <div className="flex gap-0.5">
-                            {Array.from({ length: review.rating }).map((_, j) => (
-                              <span key={j} className="text-gold text-xs">★</span>
-                            ))}
-                          </div>
-                        </div>
-                        <p className="text-sm text-ink/70 leading-relaxed">"{review.text}"</p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex items-center gap-3 bg-gold/5 border border-gold/20 p-3">
-                    <span className="text-2xl font-display text-forest">4.9</span>
-                    <div>
-                      <div className="flex gap-0.5 mb-0.5">
-                        {[1,2,3,4,5].map(i => <span key={i} className="text-gold text-sm">★</span>)}
-                      </div>
-                      <p className="text-xs font-mono text-ink/50">Based on 40+ stays · Verified guests only</p>
-                    </div>
-                  </div>
-                </div>
               </div>
 
               {/* ── Sidebar ─────────────────────────────────────────── */}
