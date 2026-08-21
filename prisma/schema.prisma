@@ -89,6 +89,8 @@ model SiteContent {
   id                 String @id @default("singleton")
   heroHeadline       String @default("The Mehmaan Experience")
   heroSubtitle       String @default("Two homes in Gurugram. Endless ways to feel at home.")
+  heroMediaUrl       String @default("")
+  heroMediaType      String @default("photo")
   philosophyText     String
   taglinePrimary     String @default("Not just a stay — it's the Mehmaan experience.")
   taglineSecondary   String @default("Two homes. One promise. Endless memories.")

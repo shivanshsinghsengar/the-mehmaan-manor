@@ -7,6 +7,8 @@ const DEFAULT_CONTENT = {
   id: "singleton",
   heroHeadline: "The Mehmaan Experience",
   heroSubtitle: "Two homes in Gurugram. Endless ways to feel at home.",
+  heroMediaUrl: "",
+  heroMediaType: "photo",
   philosophyText: "Mehmaan — the Hindi word for guest — carries a cultural weight that no translation captures.",
   taglinePrimary: "Not just a stay — it's the Mehmaan experience.",
   taglineSecondary: "Two homes. One promise. Endless memories.",

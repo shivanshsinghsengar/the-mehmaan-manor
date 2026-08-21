@@ -47,6 +47,8 @@ export default async function HomePage() {
       heroSubtitle: content?.heroSubtitle || "Two homes in Gurugram. Endless ways to feel at home.",
       philosophyText: content?.philosophyText || "Mehmaan — the Hindi word for guest — carries a cultural weight that no translation captures. It's not a transaction. It's a relationship.",
       taglineCloser: content?.taglineCloser || "Come as a guest, leave as family.",
+      heroMediaUrl: content?.heroMediaUrl || "",
+      heroMediaType: content?.heroMediaType || "photo",
     },
   };
 

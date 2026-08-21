@@ -698,6 +698,8 @@ function ContentTab({
   const fields: { key: keyof SiteContent; label: string; multiline?: boolean; hint?: string }[] = [
     { key: "heroHeadline", label: "Hero Headline", hint: "Main headline visitors see first" },
     { key: "heroSubtitle", label: "Hero Subtitle", hint: "Small line below the headline" },
+    { key: "heroMediaUrl", label: "Hero Background URL", hint: "Paste Cloudinary/image URL, or upload via Photos → Hero section" },
+    { key: "heroMediaType", label: "Hero Media Type", hint: 'Type "photo" or "video"' },
     { key: "philosophyText", label: "Philosophy / Manifesto", multiline: true, hint: "The paragraph in the dark green section" },
     { key: "taglinePrimary", label: "Primary Tagline" },
     { key: "taglineSecondary", label: "Secondary Tagline" },
