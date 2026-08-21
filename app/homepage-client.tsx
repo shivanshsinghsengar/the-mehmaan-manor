@@ -232,77 +232,92 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
       <Navigation />
       <main id="main-content">
 
-        {/* === HERO ====================================================== */}
-        <section className="relative min-h-[600px] h-screen flex items-center overflow-hidden">
-          <MouseParallax intensity={18} className="absolute inset-0">
-            <HeroScene />
-          </MouseParallax>
+        {/* === HERO — Mobile-first with real photo ====================== */}
+        <section className="relative flex items-end overflow-hidden" style={{ minHeight: "100svh" }}>
+          {/* Background — real hero photo or SVG fallback */}
+          <div className="absolute inset-0">
+            {heroPhotos.length > 0 ? (
+              <>
+                <img
+                  src={heroPhotos[0].url}
+                  alt={heroPhotos[0].alt || "The Mehmaan Manor"}
+                  className="w-full h-full object-cover"
+                />
+                {/* Strong gradient for text readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/60 to-ink/20" />
+              </>
+            ) : (
+              <MouseParallax intensity={18} className="absolute inset-0">
+                <HeroScene />
+              </MouseParallax>
+            )}
+          </div>
 
-          <div className="relative z-10 w-full px-5 md:px-16 lg:px-24 xl:px-32 pt-24 md:pt-0">
+          {/* Content — bottom aligned for mobile natural feel */}
+          <div className="relative z-10 w-full px-5 md:px-16 lg:px-24 pb-16 pt-32 md:pt-0 md:pb-24">
             <div className="max-w-2xl">
-              <div className="flex items-center gap-3 mb-6 md:mb-8 animate-fade-in">
-                <div className="w-8 h-px bg-gold/70" />
-                <span className="font-mono text-gold text-xs tracking-[0.25em] uppercase">
+              <div className="flex items-center gap-3 mb-4 md:mb-6 animate-fade-in">
+                <div className="w-6 h-px bg-gold/70" />
+                <span className="font-mono text-gold text-[10px] md:text-xs tracking-[0.25em] uppercase">
                   Gurugram · India
                 </span>
               </div>
 
-              <DepthText
-                as="h1"
-                className="font-display text-cream leading-[0.92] tracking-[-0.02em] mb-6 md:mb-8 animate-fade-up"
-                style={{ fontSize: "clamp(2.4rem, 8vw, 7rem)" } as React.CSSProperties}
-              >
+              <h1 className="font-display text-cream leading-[0.95] tracking-[-0.01em] mb-4 md:mb-6 animate-fade-up"
+                style={{ fontSize: "clamp(2.8rem, 10vw, 7rem)" } as React.CSSProperties}>
                 The<br />
                 <em className="not-italic text-gold">Mehmaan</em><br />
                 Experience
-              </DepthText>
+              </h1>
 
-              <p className="text-cream/70 text-base md:text-xl font-sans font-light leading-relaxed mb-8 md:mb-10 max-w-md animate-fade-up"
-                style={{ animationDelay: "200ms" }}>
-                {subtitle}
+              <p className="text-cream/80 text-sm md:text-xl font-sans font-light leading-relaxed mb-6 md:mb-10 max-w-md animate-fade-up"
+                style={{ animationDelay: "150ms" }}>
+                Two homes in Gurugram. Book directly — no middlemen, no hidden fees.
               </p>
 
-              <div className="flex flex-col gap-3 sm:flex-row sm:gap-4 animate-fade-up w-full sm:w-auto" style={{ animationDelay: "350ms" }}>
-                <Link href="/contact"
-                  className="inline-flex items-center justify-center gap-3 px-6 py-4 bg-gold text-ink font-medium text-sm md:text-base hover:bg-gold/90 transition-colors duration-300 group min-h-[52px]">
-                  Reserve Your Stay
-                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                </Link>
+              <div className="flex flex-col gap-2.5 sm:flex-row sm:gap-4 animate-fade-up" style={{ animationDelay: "250ms" }}>
+                <a href="https://wa.me/918828352311"
+                  target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gold text-ink font-medium text-sm hover:bg-gold/90 transition-colors duration-300 min-h-[48px]">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                  Book on WhatsApp
+                </a>
                 <Link href="/homes"
-                  className="inline-flex items-center justify-center px-6 py-4 border border-cream/30 text-cream font-medium text-sm md:text-base hover:border-cream/70 hover:bg-cream/5 transition-all duration-300 min-h-[52px]">
-                  Explore Our Homes
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 border border-cream/40 text-cream text-sm font-medium hover:bg-cream/10 transition-all duration-300 min-h-[48px]">
+                  View Our Homes
+                  <ArrowRight size={16} />
                 </Link>
+              </div>
+
+              {/* Quick trust signals below CTA */}
+              <div className="flex flex-wrap gap-3 mt-4 animate-fade-up" style={{ animationDelay: "350ms" }}>
+                <span className="text-cream/50 text-[10px] font-mono">✓ Direct booking</span>
+                <span className="text-cream/50 text-[10px] font-mono">✓ No booking fees</span>
+                <span className="text-cream/50 text-[10px] font-mono">✓ 24/7 host support</span>
               </div>
             </div>
           </div>
-
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10 animate-fade-in"
-            style={{ animationDelay: "800ms" }} aria-hidden="true">
-            <span className="font-mono text-cream/30 text-[10px] tracking-[0.3em] uppercase">Scroll</span>
-            <div className="w-px h-10 bg-gradient-to-b from-cream/30 to-transparent" />
-          </div>
         </section>
 
-        {/* === MANIFESTO ================================================= */}
-        <section className="bg-forest-deep py-12 md:py-28 px-4 md:px-6 relative overflow-hidden">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-16 border-2 border-gold/20 rounded-t-full" />
-          <div className="container mx-auto max-w-3xl text-center relative">
-            <p className="font-mono text-gold/70 text-xs tracking-[0.3em] uppercase mb-10 reveal">Our Philosophy</p>
-            <p className="font-display text-cream leading-[1.3] reveal"
-              style={{ fontSize: "clamp(1.6rem, 3.2vw, 2.4rem)" }}>
-              <em className="text-gold not-italic">Mehmaan</em> — the Hindi word for guest — carries a
-              cultural weight that no translation captures. It's not a transaction. It's a
-              relationship. Two beautifully curated homes. One unforgettable promise.
-              This isn't a hotel. This is your <em className="text-gold not-italic">Mehmaan</em> moment.
-            </p>
-            <div className="mt-12 flex items-center justify-center gap-6 reveal">
-              <div className="h-px w-16 bg-gold/30" />
-              <div className="w-4 h-4 border border-gold/40 rotate-45" />
-              <div className="h-px w-16 bg-gold/30" />
+        {/* === QUICK STATS — Mobile-friendly trust bar ================== */}
+        <section className="bg-forest-deep py-6 px-4 border-b border-gold/10">
+          <div className="container mx-auto max-w-4xl">
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <p className="font-display text-gold text-2xl md:text-3xl">2</p>
+                <p className="text-cream/50 text-[10px] md:text-xs font-mono uppercase tracking-wide">Homes</p>
+              </div>
+              <div>
+                <p className="font-display text-gold text-2xl md:text-3xl">4.9★</p>
+                <p className="text-cream/50 text-[10px] md:text-xs font-mono uppercase tracking-wide">Rating</p>
+              </div>
+              <div>
+                <p className="font-display text-gold text-2xl md:text-3xl">24/7</p>
+                <p className="text-cream/50 text-[10px] md:text-xs font-mono uppercase tracking-wide">Support</p>
+              </div>
             </div>
           </div>
         </section>
-
         {/* === THREE PILLARS ============================================= */}
         <section className="py-10 md:py-28 px-4 md:px-6 bg-cream">
           <div className="container mx-auto max-w-7xl">
