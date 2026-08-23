@@ -147,9 +147,34 @@
 }
 
 /* ── Cinematic animations ─────────────────────────────────────────── */
-@keyframes kenBurns {
+@keyframes kenBurnsIn {
   0%   { transform: scale(1)    translateX(0)    translateY(0); }
-  100% { transform: scale(1.08) translateX(-1%) translateY(-1%); }
+  100% { transform: scale(1.1)  translateX(-1%)  translateY(-1%); }
+}
+
+@keyframes kenBurnsOut {
+  0%   { transform: scale(1.1) translateX(0)    translateY(0); }
+  100% { transform: scale(1)   translateX(1%)   translateY(1%); }
+}
+
+@keyframes panLeft {
+  0%   { transform: scale(1.05) translateX(3%); }
+  100% { transform: scale(1.05) translateX(-3%); }
+}
+
+@keyframes panRight {
+  0%   { transform: scale(1.05) translateX(-3%); }
+  100% { transform: scale(1.05) translateX(3%); }
+}
+
+@keyframes panUp {
+  0%   { transform: scale(1.05) translateY(3%); }
+  100% { transform: scale(1.05) translateY(-3%); }
+}
+
+@keyframes fadeOut {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 @keyframes fadeSlideUp {
