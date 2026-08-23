@@ -7,7 +7,7 @@ export default async function HomePage() {
   // Only fetch photos needed for homepage sections to keep payload small
   const [properties, heroPhotos, instagramPhotos, propertyCardPhotos, content] = await Promise.all([
     prisma.property.findMany({ where: { isActive: true }, orderBy: { id: "asc" } }).catch(() => []),
-    prisma.photo.findMany({ where: { section: "hero" }, orderBy: { order: "asc" }, take: 1 }).catch(() => []),
+    prisma.photo.findMany({ where: { section: "hero" }, orderBy: { order: "asc" } }).catch(() => []),
     prisma.photo.findMany({ where: { section: "instagram" }, orderBy: { order: "asc" }, take: 6 }).catch(() => []),
     prisma.photo.findMany({ where: { section: "property-card" }, orderBy: { order: "asc" }, take: 6 }).catch(() => []),
     prisma.siteContent.findUnique({ where: { id: "singleton" } }).catch(() => null),
