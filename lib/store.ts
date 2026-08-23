@@ -39,6 +39,8 @@ export interface SiteProperty {
 export interface SiteContent {
   heroHeadline: string;
   heroSubtitle: string;
+  heroMediaUrl: string;
+  heroMediaType: string;
   philosophyText: string;
   taglinePrimary: string;
   taglineSecondary: string;
@@ -95,6 +97,8 @@ export const DEFAULT_PROPERTIES: SiteProperty[] = [
 export const DEFAULT_CONTENT: SiteContent = {
   heroHeadline: "The Mehmaan Experience",
   heroSubtitle: "Two homes in Gurugram. Endless ways to feel at home.",
+  heroMediaUrl: "",
+  heroMediaType: "photo",
   philosophyText: "Mehmaan — the Hindi word for guest — carries a cultural weight that no translation captures. It's not a transaction. It's a relationship. Two beautifully curated homes. One unforgettable promise. This isn't a hotel. This is your Mehmaan moment.",
   taglinePrimary: "Not just a stay — it's the Mehmaan experience.",
   taglineSecondary: "Two homes. One promise. Endless memories.",
