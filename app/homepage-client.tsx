@@ -72,24 +72,24 @@ function HeroSlideshow({ slides }: { slides: { url: string; alt: string }[] }) {
       {prev !== null && (
         <div
           key={`prev-${prev}`}
-          className="absolute inset-0 opacity-0 transition-opacity duration-1000"
-          style={{ animation: "fadeOut 1s forwards" }}
+          className="absolute inset-0"
+          style={{ animation: "fadeOut 1.2s ease-in-out forwards", zIndex: 1 }}
         >
           <img src={slides[prev].url} alt={slides[prev].alt} className="w-full h-full object-cover" />
         </div>
       )}
 
-      {/* Current slide — fades in with unique animation */}
+      {/* Current slide — fades in with unique Ken Burns animation */}
       <div
         key={`slide-${current}-${animKey}`}
         className="absolute inset-0"
-        style={{ animation: "fadeIn 1s forwards" }}
+        style={{ animation: "fadeIn 1.2s ease-in-out forwards", zIndex: 2 }}
       >
         <img
           src={slides[current].url}
           alt={slides[current].alt}
           className="w-full h-full object-cover"
-          style={{ animation: `${SLIDE_ANIMATIONS[current % SLIDE_ANIMATIONS.length]} 7s ease-in-out forwards` }}
+          style={{ animation: `${SLIDE_ANIMATIONS[current % SLIDE_ANIMATIONS.length]} 8s ease-in-out forwards` }}
         />
       </div>
 
