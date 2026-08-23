@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import type React from "react";
 import Link from "next/link";
 import { ArrowRight, Instagram, ChevronDown } from "lucide-react";
@@ -45,7 +45,6 @@ function useReveal() {
 export function HomePageClient({ siteData }: { siteData: SiteData }) {
   useReveal();
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [heroLoaded, setHeroLoaded] = useState(false);
 
   const { properties, heroPhotos, instagramPhotos, galleryPhotos, propertyCards, content } = siteData;
   const photos_fallback = galleryPhotos;
@@ -66,14 +65,13 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
         ═══════════════════════════════════════════════════════════════ */}
         <section className="relative w-full overflow-hidden" style={{ height: "100svh" }}>
 
-          {/* Media layer */}
-          <div className={`absolute inset-0 transition-opacity duration-1000 ${heroLoaded ? "opacity-100" : "opacity-0"}`}>
+          {/* Media layer — always visible */}
+          <div className="absolute inset-0">
             {isVideo && heroMediaUrl ? (
               <video
                 ref={videoRef}
                 src={heroMediaUrl}
                 autoPlay muted loop playsInline
-                onCanPlay={() => setHeroLoaded(true)}
                 className="absolute inset-0 w-full h-full object-cover"
                 style={{ animation: "kenBurns 20s ease-in-out infinite alternate" }}
               />
@@ -81,20 +79,13 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
               <img
                 src={heroMediaUrl}
                 alt="The Mehmaan Manor"
-                onLoad={() => setHeroLoaded(true)}
                 className="absolute inset-0 w-full h-full object-cover"
                 style={{ animation: "kenBurns 20s ease-in-out infinite alternate" }}
               />
             ) : (
-              // Dark fallback
               <div className="absolute inset-0 bg-gradient-to-br from-[#0a1a12] via-[#0d2018] to-[#060e09]" />
             )}
           </div>
-
-          {/* Loading state */}
-          {!heroLoaded && heroMediaUrl && (
-            <div className="absolute inset-0 bg-[#0a0f0d]" />
-          )}
 
           {/* Cinematic overlays */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/20" />
