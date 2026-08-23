@@ -146,19 +146,21 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
 
           {/* Content */}
           <div className="absolute inset-0 z-20 flex flex-col justify-end px-5 md:px-16 lg:px-24 pb-20 md:pb-28">
-            <div className="flex items-center gap-3 mb-5 opacity-0 animate-[fadeSlideUp_0.8s_0.2s_forwards]">
-              <div className="w-8 h-px bg-[#c9a84c]/60" />
-              <span className="font-mono text-[#c9a84c] text-[10px] md:text-xs tracking-[0.3em] uppercase">Gurugram · India</span>
-            </div>
 
             <h1
-              className="font-display text-white leading-[0.9] tracking-[-0.02em] mb-5 opacity-0 animate-[fadeSlideUp_0.8s_0.4s_forwards]"
+              className="font-display text-white leading-[0.9] tracking-[-0.02em] mb-4 opacity-0 animate-[fadeSlideUp_0.8s_0.3s_forwards]"
               style={{ fontSize: "clamp(3.2rem, 11vw, 8rem)" }}
             >
               The<br />
               <span className="text-[#c9a84c] italic">Mehmaan</span><br />
               Experience
             </h1>
+
+            {/* Location tag — below headline */}
+            <div className="flex items-center gap-3 mb-5 opacity-0 animate-[fadeSlideUp_0.8s_0.5s_forwards]">
+              <div className="w-6 h-px bg-[#c9a84c]/60" />
+              <span className="font-mono text-[#c9a84c] text-[10px] md:text-xs tracking-[0.3em] uppercase">Gurugram · India</span>
+            </div>
 
             <p className="text-white/70 text-sm md:text-lg font-light leading-relaxed mb-8 max-w-sm md:max-w-md opacity-0 animate-[fadeSlideUp_0.8s_0.6s_forwards]">
               Two homes in Gurugram. Book directly with your hosts — no middlemen, no hidden fees.

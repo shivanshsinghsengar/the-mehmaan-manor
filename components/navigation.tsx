@@ -68,7 +68,7 @@ export function Navigation() {
             >
               <Float amplitude={4} duration={5}>
                 <Logo
-                  size={52}
+                  size={40}
                   className="transition-transform duration-500 group-hover:scale-105 flex-shrink-0"
                 />
               </Float>
