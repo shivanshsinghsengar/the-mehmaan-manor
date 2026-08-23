@@ -34,10 +34,10 @@ const ROOM_TYPES: Record<string, {
 }[]> = {
   "jharsa-village": [
     { key: "1rk", shortLabel: "1RK Studio", label: "1RK Studio",
-      baseRate: 1999, weekendRate: 2299, maxGuests: 3,
+      baseRate: 1999, weekendRate: 2299, maxGuests: 2,
       description: "Compact studio — perfect for solo travelers & couples." },
     { key: "2bhk", shortLabel: "2BHK Apartment", label: "2BHK Apartment",
-      baseRate: 2999, weekendRate: 3299, maxGuests: 6,
+      baseRate: 2999, weekendRate: 3299, maxGuests: 5,
       description: "Spacious 2-bedroom — ideal for families & groups." },
   ],
 };
