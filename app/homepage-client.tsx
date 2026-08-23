@@ -248,9 +248,24 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
           </div>
         </section>
 
-        {/* ═══ AMENITIES ═══════════════════════════════════════════════ */}
-        <section className="bg-[#0a0f0d] py-10 md:py-16 border-t border-white/5">
-          <div className="container mx-auto max-w-7xl px-4 md:px-6">
+        {/* ═══ AMENITIES — Parallax background ════════════════════════ */}
+        <section className="relative py-10 md:py-16 border-t border-white/5 overflow-hidden">
+          {/* Parallax background image */}
+          {heroPhotos.length > 0 && (
+            <div
+              className="absolute inset-0 -z-10"
+              style={{
+                backgroundImage: `url(${heroPhotos[heroPhotos.length > 1 ? 1 : 0]?.url})`,
+                backgroundAttachment: "fixed",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            />
+          )}
+          {/* Dark overlay */}
+          <div className="absolute inset-0 -z-10 bg-[#0a0f0d]/88" />
+
+          <div className="container mx-auto max-w-7xl px-4 md:px-6 relative z-10">
             <p className="font-mono text-[#c9a84c]/50 text-[10px] tracking-[0.4em] uppercase mb-6 text-center reveal">What&apos;s Included</p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
               {[
@@ -259,7 +274,7 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
                 { icon: "✦", title: "Spotless", sub: "Hotel-grade cleaning" },
                 { icon: "📍", title: "Prime Location", sub: "Central Gurugram" },
               ].map(({ icon, title, sub }, i) => (
-                <div key={title} className="reveal border border-white/8 p-4 md:p-5 hover:border-[#c9a84c]/30 transition-colors duration-300 group"
+                <div key={title} className="reveal border border-white/10 p-4 md:p-5 hover:border-[#c9a84c]/40 bg-black/30 backdrop-blur-sm transition-colors duration-300 group"
                   style={{ animationDelay: `${i * 80}ms` }}>
                   <span className="text-2xl mb-3 block">{icon}</span>
                   <h3 className="font-display text-white text-base md:text-lg mb-1 group-hover:text-[#c9a84c] transition-colors">{title}</h3>
@@ -270,9 +285,23 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
           </div>
         </section>
 
-        {/* ═══ PULL QUOTE ══════════════════════════════════════════════ */}
-        <section className="bg-[#0d1a12] py-16 md:py-28 px-5 md:px-6 border-t border-white/5">
-          <div className="container mx-auto max-w-3xl text-center reveal">
+        {/* ═══ PULL QUOTE — Parallax ═══════════════════════════════════ */}
+        <section className="relative py-16 md:py-28 px-5 md:px-6 border-t border-white/5 overflow-hidden">
+          {/* Parallax background */}
+          {heroPhotos.length > 2 && (
+            <div
+              className="absolute inset-0 -z-10"
+              style={{
+                backgroundImage: `url(${heroPhotos[2]?.url})`,
+                backgroundAttachment: "fixed",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            />
+          )}
+          <div className="absolute inset-0 -z-10 bg-[#0d1a12]/92" />
+
+          <div className="container mx-auto max-w-3xl text-center reveal relative z-10">
             <div className="w-12 h-px bg-[#c9a84c]/40 mx-auto mb-8" />
             <h2 className="font-display text-white leading-[1.15] mb-6" style={{ fontSize: "clamp(1.8rem, 5vw, 4rem)" }}>
               &ldquo;Come as a guest,<br />
