@@ -250,19 +250,13 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
 
         {/* ═══ AMENITIES — Parallax background ════════════════════════ */}
         <section className="relative py-10 md:py-16 border-t border-white/5 overflow-hidden">
-          {(() => {
-            const allCards = Object.values(propertyCards).flat();
-            const url = allCards[0]?.url;
-            return url ? (
-              <div className="absolute inset-0 -z-10" style={{
-                backgroundImage: `url(${url})`,
-                backgroundAttachment: "fixed",
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }} />
-            ) : null;
-          })()}
-          <div className="absolute inset-0 -z-10 bg-[#0a0f0d]/88" />
+          <div className="absolute inset-0 -z-10" style={{
+            backgroundImage: "url(https://res.cloudinary.com/pdqt9y1o/image/upload/v1787146405/mehman-manor/cmssbzlmk000712sq7f5eenuc.jpg)",
+            backgroundAttachment: "fixed",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }} />
+          <div className="absolute inset-0 -z-10 bg-[#0a0f0d]/85" />
 
           <div className="container mx-auto max-w-7xl px-4 md:px-6 relative z-10">
             <p className="font-mono text-[#c9a84c]/50 text-[10px] tracking-[0.4em] uppercase mb-6 text-center reveal">What&apos;s Included</p>
@@ -286,18 +280,12 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
 
         {/* ═══ PULL QUOTE — Parallax ═══════════════════════════════════ */}
         <section className="relative py-16 md:py-28 px-5 md:px-6 border-t border-white/5 overflow-hidden">
-          {(() => {
-            const allCards = Object.values(propertyCards).flat();
-            const url = allCards[1]?.url || allCards[0]?.url;
-            return url ? (
-              <div className="absolute inset-0 -z-10" style={{
-                backgroundImage: `url(${url})`,
-                backgroundAttachment: "fixed",
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }} />
-            ) : null;
-          })()}
+          <div className="absolute inset-0 -z-10" style={{
+            backgroundImage: "url(https://res.cloudinary.com/pdqt9y1o/image/upload/v1787146466/mehman-manor/cmsvakswj000370ikofaym6c0.jpg)",
+            backgroundAttachment: "fixed",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }} />
           <div className="absolute inset-0 -z-10 bg-[#0d1a12]/92" />
 
           <div className="container mx-auto max-w-3xl text-center reveal relative z-10">
