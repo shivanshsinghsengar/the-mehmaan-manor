@@ -250,19 +250,18 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
 
         {/* ═══ AMENITIES — Parallax background ════════════════════════ */}
         <section className="relative py-10 md:py-16 border-t border-white/5 overflow-hidden">
-          {/* Parallax background image — use gallery fallback photos */}
-          {photos_fallback.length > 0 && (
+          {/* Parallax — use first property card photo */}
+          {Object.values(propertyCards).flat()[0]?.url && (
             <div
               className="absolute inset-0 -z-10"
               style={{
-                backgroundImage: `url(${photos_fallback[0]?.url})`,
+                backgroundImage: `url(${Object.values(propertyCards).flat()[0].url})`,
                 backgroundAttachment: "fixed",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
             />
           )}
-          {/* Dark overlay */}
           <div className="absolute inset-0 -z-10 bg-[#0a0f0d]/88" />
 
           <div className="container mx-auto max-w-7xl px-4 md:px-6 relative z-10">
@@ -287,12 +286,12 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
 
         {/* ═══ PULL QUOTE — Parallax ═══════════════════════════════════ */}
         <section className="relative py-16 md:py-28 px-5 md:px-6 border-t border-white/5 overflow-hidden">
-          {/* Parallax background */}
-          {photos_fallback.length > 1 && (
+          {/* Parallax background — second property card */}
+          {Object.values(propertyCards).flat()[1]?.url && (
             <div
               className="absolute inset-0 -z-10"
               style={{
-                backgroundImage: `url(${photos_fallback[1]?.url})`,
+                backgroundImage: `url(${Object.values(propertyCards).flat()[1].url})`,
                 backgroundAttachment: "fixed",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
