@@ -250,12 +250,12 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
 
         {/* ═══ AMENITIES — Parallax background ════════════════════════ */}
         <section className="relative py-10 md:py-16 border-t border-white/5 overflow-hidden">
-          {/* Parallax background image */}
-          {heroPhotos.length > 0 && (
+          {/* Parallax background image — use gallery fallback photos */}
+          {photos_fallback.length > 0 && (
             <div
               className="absolute inset-0 -z-10"
               style={{
-                backgroundImage: `url(${heroPhotos[heroPhotos.length > 1 ? 1 : 0]?.url})`,
+                backgroundImage: `url(${photos_fallback[0]?.url})`,
                 backgroundAttachment: "fixed",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
@@ -288,11 +288,11 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
         {/* ═══ PULL QUOTE — Parallax ═══════════════════════════════════ */}
         <section className="relative py-16 md:py-28 px-5 md:px-6 border-t border-white/5 overflow-hidden">
           {/* Parallax background */}
-          {heroPhotos.length > 2 && (
+          {photos_fallback.length > 1 && (
             <div
               className="absolute inset-0 -z-10"
               style={{
-                backgroundImage: `url(${heroPhotos[2]?.url})`,
+                backgroundImage: `url(${photos_fallback[1]?.url})`,
                 backgroundAttachment: "fixed",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
