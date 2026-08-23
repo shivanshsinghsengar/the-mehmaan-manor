@@ -288,16 +288,16 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 md:mb-8 gap-3 reveal">
               <div>
                 <p className="font-mono text-[#c9a84c]/50 text-[10px] tracking-[0.4em] uppercase mb-1">Follow the story</p>
-                <h2 className="font-display text-white text-xl md:text-2xl">@themehmaanmanor</h2>
+                <h2 className="font-display text-white text-xl md:text-2xl">@the_mehmaan_manor</h2>
               </div>
-              <a href="https://www.instagram.com/themehmaanmanor" target="_blank" rel="noopener noreferrer"
+              <a href="https://www.instagram.com/the_mehmaan_manor" target="_blank" rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-white/40 hover:text-[#c9a84c] font-mono text-xs tracking-wider transition-colors self-start">
                 <Instagram size={13} /> Open Instagram
               </a>
             </div>
             <div className="flex gap-3 md:grid md:grid-cols-6 overflow-x-auto pb-2 md:overflow-visible reveal">
               {(instagramPhotos.length > 0 ? instagramPhotos : photos_fallback).slice(0, 6).map((photo, i) => (
-                <a key={photo.url + i} href="https://www.instagram.com/themehmaanmanor" target="_blank" rel="noopener noreferrer"
+                <a key={photo.url + i} href="https://www.instagram.com/the_mehmaan_manor" target="_blank" rel="noopener noreferrer"
                   className="flex-shrink-0 flex flex-col items-center gap-2 group" style={{ minWidth: "80px" }}>
                   <div className="p-[2.5px] rounded-full bg-gradient-to-tr from-[#1a3328] via-[#c9a84c] to-[#1a3328]">
                     <div className="p-[2px] rounded-full bg-[#080e0b]">

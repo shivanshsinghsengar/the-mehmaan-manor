@@ -1,41 +1,41 @@
-/*
- * ═══════════════════════════════════════════════════════════════════════
- * THE MEHMAAN MANOR — Root Layout
- * ═══════════════════════════════════════════════════════════════════════
+﻿/*
+ * â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+ * THE MEHMAAN MANOR â€” Root Layout
+ * â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
  *
  * TYPOGRAPHY CHOICES:
- * Display: Cormorant Garamond — A high-contrast old-style serif with
+ * Display: Cormorant Garamond â€” A high-contrast old-style serif with
  * beautiful italics and ligatures. Its optical delicacy suggests
  * refinement without coldness. Paired with generous tracking at large
  * sizes it reads as architecturally elegant, never stuffy.
- * Body: Inter — The most humanist of the neutral grotesques. Tight
+ * Body: Inter â€” The most humanist of the neutral grotesques. Tight
  * tracking (-0.011em) and open apertures make it warm at text sizes.
- * Mono: JetBrains Mono — Used sparingly for coordinates, booking codes,
+ * Mono: JetBrains Mono â€” Used sparingly for coordinates, booking codes,
  * and structural labels. Creates editorial texture against Cormorant.
  *
  * COLOR DECISIONS:
- * OKLCH was chosen for perceptual uniformity — the forest green, gold,
+ * OKLCH was chosen for perceptual uniformity â€” the forest green, gold,
  * and cream maintain consistent perceived lightness across hues, so
  * the palette feels intentional and natural, never arbitrary.
- * The 70/20/8/2 ratio enforces cream dominance — the gold only appears
+ * The 70/20/8/2 ratio enforces cream dominance â€” the gold only appears
  * when it truly needs to earn attention.
  *
  * MOMENTS OF DELIGHT:
  * PUBLIC SITE:
- * — The hero headline uses a subtle word-by-word stagger reveal.
+ * â€” The hero headline uses a subtle word-by-word stagger reveal.
  *   Each word breathes in at 150ms intervals, creating cinematic pacing.
- * — The "Come as a guest, leave as family" section: when you hover the
- *   pull-quote, each word gently shifts hue toward gold — a warm,
+ * â€” The "Come as a guest, leave as family" section: when you hover the
+ *   pull-quote, each word gently shifts hue toward gold â€” a warm,
  *   almost-invisible effect that rewards lingering.
- * — Navigation links animate with an arch underline (matching the logo's
+ * â€” Navigation links animate with an arch underline (matching the logo's
  *   arch motif) rather than a standard underline.
  *
  * ADMIN PANEL:
- * — The bookings calendar uses a subtle paper-texture SVG pattern that
+ * â€” The bookings calendar uses a subtle paper-texture SVG pattern that
  *   makes it feel tangible, like a physical reservation book.
- * — KPI cards have a micro-animation: on hover, the number "breathes"
- *   to 103% scale over 600ms — just enough to feel alive.
- * — Empty states use hand-drawn SVG illustrations in forest green tones
+ * â€” KPI cards have a micro-animation: on hover, the number "breathes"
+ *   to 103% scale over 600ms â€” just enough to feel alive.
+ * â€” Empty states use hand-drawn SVG illustrations in forest green tones
  *   with a warm, slightly imperfect quality.
  */
 
@@ -67,11 +67,11 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "The Mehmaan Manor — Boutique Homestay in Gurugram",
+    default: "The Mehmaan Manor â€” Boutique Homestay in Gurugram",
     template: "%s | The Mehmaan Manor",
   },
   description:
-    "Two beautifully curated homes in Gurugram. Not a hotel. Not a rental. A Mehmaan experience — where guests arrive as guests and leave as family.",
+    "Two beautifully curated homes in Gurugram. Not a hotel. Not a rental. A Mehmaan experience â€” where guests arrive as guests and leave as family.",
   keywords: [
     "boutique homestay Gurugram",
     "short-stay rental Gurugram",
@@ -87,7 +87,7 @@ export const metadata: Metadata = {
     locale: "en_IN",
     url: "https://www.mehmaanmanor.com",
     siteName: "The Mehmaan Manor",
-    title: "The Mehmaan Manor — Boutique Homestay in Gurugram",
+    title: "The Mehmaan Manor â€” Boutique Homestay in Gurugram",
     description:
       "Two homes in Gurugram. One promise. Come as a guest, leave as family.",
     images: [
@@ -95,7 +95,7 @@ export const metadata: Metadata = {
         url: "https://www.mehmaanmanor.com/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "The Mehmaan Manor — Boutique Homestay in Gurugram",
+        alt: "The Mehmaan Manor â€” Boutique Homestay in Gurugram",
       },
     ],
   },
@@ -125,7 +125,7 @@ export default function RootLayout({
               {
                 "@context": "https://schema.org",
                 "@type": "LodgingBusiness",
-                name: "The Mehmaan Manor — Sushant Lok",
+                name: "The Mehmaan Manor â€” Sushant Lok",
                 description:
                   "Premium boutique homestay in Sushant Lok, Gurugram. Peaceful surroundings, great connectivity.",
                 url: "https://www.mehmaanmanor.com/homes/sushant-lok",
@@ -138,12 +138,12 @@ export default function RootLayout({
                   postalCode: "122011",
                   addressCountry: "IN",
                 },
-                sameAs: ["https://www.instagram.com/themehmaanmanor"],
+                sameAs: ["https://www.instagram.com/the_mehmaan_manor"],
               },
               {
                 "@context": "https://schema.org",
                 "@type": "LodgingBusiness",
-                name: "The Mehmaan Manor — Jharsa Village",
+                name: "The Mehmaan Manor â€” Jharsa Village",
                 description:
                   "Premium boutique homestay in Jharsa Village, Sector 39, Gurugram. Cozy neighborhood, close to everything.",
                 url: "https://www.mehmaanmanor.com/homes/jharsa-village",
@@ -157,7 +157,7 @@ export default function RootLayout({
                   postalCode: "122003",
                   addressCountry: "IN",
                 },
-                sameAs: ["https://www.instagram.com/themehmaanmanor"],
+                sameAs: ["https://www.instagram.com/the_mehmaan_manor"],
               },
             ]),
           }}

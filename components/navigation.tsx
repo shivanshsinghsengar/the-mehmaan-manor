@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -60,7 +60,7 @@ export function Navigation() {
       >
         <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
-            {/* Logo — always visible */}
+            {/* Logo â€” always visible */}
             <Link
               href="/"
               className="flex items-center group min-h-[44px]"
@@ -91,7 +91,7 @@ export function Navigation() {
               </Button>
             </div>
 
-            {/* Mobile Menu Button — 44×44px touch target */}
+            {/* Mobile Menu Button â€” 44Ã—44px touch target */}
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="lg:hidden min-w-[44px] min-h-[44px] flex items-center justify-center text-forest hover:text-gold transition-colors"
@@ -104,7 +104,7 @@ export function Navigation() {
         </div>
       </nav>
 
-      {/* Mobile Menu — full screen overlay */}
+      {/* Mobile Menu â€” full screen overlay */}
       <div
         className={cn(
           "fixed inset-0 z-50 bg-forest text-cream transition-transform duration-500 lg:hidden overflow-y-auto",
@@ -158,7 +158,7 @@ export function Navigation() {
 
             <div className="flex items-center justify-center space-x-6">
               <a
-                href="https://www.instagram.com/themehmaanmanor"
+                href="https://www.instagram.com/the_mehmaan_manor"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="min-w-[44px] min-h-[44px] flex items-center justify-center text-cream hover:text-gold transition-colors"
@@ -176,7 +176,7 @@ export function Navigation() {
             </div>
 
             <p className="text-center font-mono text-sm text-cream/60">
-              @themehmaanmanor
+              @the_mehmaan_manor
             </p>
           </div>
         </div>

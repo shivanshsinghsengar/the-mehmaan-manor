@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { Instagram, Phone } from "lucide-react";
 import { Logo } from "@/components/logo";
 
@@ -6,7 +6,7 @@ export function Footer() {
   return (
     <footer className="bg-forest-deep text-cream py-12 md:py-16">
       <div className="container mx-auto px-4 md:px-6">
-        {/* 1-col on mobile → 2-col on tablet → 4-col on desktop */}
+        {/* 1-col on mobile â†’ 2-col on tablet â†’ 4-col on desktop */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 mb-10 md:mb-12">
           {/* Logo & Tagline */}
           <div className="space-y-4 sm:col-span-2 lg:col-span-1">
@@ -86,12 +86,12 @@ export function Footer() {
                 <div className="text-sm">
                   <p className="text-cream font-medium">Instagram</p>
                   <a
-                    href="https://www.instagram.com/themehmaanmanor"
+                    href="https://www.instagram.com/the_mehmaan_manor"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-cream/80 hover:text-gold transition-colors font-mono min-h-[44px] flex items-center"
                   >
-                    @themehmaanmanor
+                    @the_mehmaan_manor
                   </a>
                 </div>
               </div>
@@ -103,19 +103,19 @@ export function Footer() {
         <div className="pt-6 md:pt-8 border-t border-cream/10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-3 md:gap-0">
             <p className="text-cream/60 text-sm text-center md:text-left">
-              © {new Date().getFullYear()} The Mehmaan Manor. All rights
+              Â© {new Date().getFullYear()} The Mehmaan Manor. All rights
               reserved.
             </p>
             <p className="font-display text-cream/80 text-sm italic">
               Come as a guest, leave as family.
             </p>
-            {/* Staff-only admin link — subtle, no label visible to guests */}
+            {/* Staff-only admin link â€” subtle, no label visible to guests */}
             <Link
               href="/admin/login"
               className="text-cream/20 hover:text-cream/50 transition-colors text-xs font-mono min-h-[44px] flex items-center"
               title="Staff Login"
             >
-              ·
+              Â·
             </Link>
           </div>
         </div>

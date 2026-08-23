@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { Phone, Mail, MessageCircle, Instagram, MapPin } from "lucide-react";
@@ -317,7 +317,7 @@ export default function ContactPage() {
                     required
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    placeholder="Tell us about your stay — how many guests, any special requests, or questions you have..."
+                    placeholder="Tell us about your stay â€” how many guests, any special requests, or questions you have..."
                     rows={5}
                   />
                 </div>
@@ -375,7 +375,7 @@ export default function ContactPage() {
                             Sector 57, Phase 2<br />
                             Sushant Lok, Gurugram<br />
                             Haryana - 122011<br />
-                            <span className="text-xs">28.4212° N, 77.0761° E</span>
+                            <span className="text-xs">28.4212Â° N, 77.0761Â° E</span>
                           </p>
                         </div>
                       </div>
@@ -387,7 +387,7 @@ export default function ContactPage() {
                             593, Durga Colony<br />
                             Jharsa Village, Sector 39<br />
                             Gurugram, Haryana - 122003<br />
-                            <span className="text-xs">28.4594° N, 77.0266° E</span>
+                            <span className="text-xs">28.4594Â° N, 77.0266Â° E</span>
                           </p>
                         </div>
                       </div>
@@ -406,7 +406,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <p className="font-mono text-gold text-sm">Instagram</p>
-                      <p className="font-display text-2xl">@themehmaanmanor</p>
+                      <p className="font-display text-2xl">@the_mehmaan_manor</p>
                     </div>
                   </div>
                   <p className="text-cream/80 leading-relaxed">
@@ -415,7 +415,7 @@ export default function ContactPage() {
                   </p>
                   <Button asChild variant="gold" size="lg" className="w-full">
                     <a
-                      href="https://www.instagram.com/themehmaanmanor"
+                      href="https://www.instagram.com/the_mehmaan_manor"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
