@@ -116,14 +116,16 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
   const { properties, heroPhotos, instagramPhotos, galleryPhotos, propertyCards, content } = siteData;
   const photos_fallback = galleryPhotos;
 
-  // Build slideshow: use all hero section photos
+  // Build slideshow from all hero photos — use all available
   const heroSlides = heroPhotos.length > 0 ? heroPhotos : [];
 
-  // If admin set a specific URL, use that as the only slide
+  // adminUrl sirf tab use karo jab koi hero photo DB mein nahi hai
   const adminUrl = content.heroMediaUrl;
-  const finalSlides = adminUrl
-    ? [{ url: adminUrl, alt: "The Mehmaan Manor" }]
-    : heroSlides;
+  const finalSlides = heroSlides.length > 0
+    ? heroSlides
+    : adminUrl
+      ? [{ url: adminUrl, alt: "The Mehmaan Manor" }]
+      : [];
 
   return (
     <div className="min-h-screen bg-[#0a0f0d]">
