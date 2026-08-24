@@ -97,37 +97,9 @@ function ParallaxBg({ url, speed = 0.35 }: { url: string; speed?: number }) {
 // ── Area Section with true reverse parallax ──────────────────────────
 function AreaSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const imgRef = useRef<HTMLImageElement>(null);
-
-  useEffect(() => {
-    const onScroll = () => {
-      if (!sectionRef.current || !imgRef.current) return;
-      const rect = sectionRef.current.getBoundingClientRect();
-      // Center of section relative to viewport center
-      const centerOffset = rect.top + rect.height / 2 - window.innerHeight / 2;
-      // Negative multiplier = opposite direction (reverse parallax)
-      const translate = centerOffset * -0.25;
-      imgRef.current.style.transform = `translateY(${translate}px) scale(1.3)`;
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll(); // run once on mount
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   return (
-    <section ref={sectionRef} className="relative py-10 md:py-16 border-t border-white/5 overflow-hidden">
-      {/* Parallax image layer */}
-      <img
-        ref={imgRef}
-        src="https://res.cloudinary.com/pdqt9y1o/image/upload/v1787146466/mehman-manor/cmsvakswj000370ikofaym6c0.jpg"
-        alt=""
-        aria-hidden="true"
-        className="absolute inset-0 w-full h-full object-cover will-change-transform"
-        style={{ transform: "translateY(0px) scale(1.3)" }}
-      />
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-[#0a0f0d]/85" />
-
+    <section ref={sectionRef} className="relative py-10 md:py-16 border-t border-white/5 bg-[#080e0b]">
       {/* Content */}
       <div className="container mx-auto max-w-7xl px-4 md:px-6 relative z-10">
         <p className="font-mono text-[#c9a84c]/50 text-[10px] tracking-[0.4em] uppercase mb-2 text-center reveal">The Area</p>
@@ -149,6 +121,57 @@ function AreaSection() {
             </div>
           ))}
         </div>
+      </div>
+    </section>
+  );
+}
+
+// ── Pull Quote with Logo Parallax ────────────────────────────────────
+function PullQuoteSection() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (!sectionRef.current || !imgRef.current) return;
+      const rect = sectionRef.current.getBoundingClientRect();
+      const centerOffset = rect.top + rect.height / 2 - window.innerHeight / 2;
+      // Gentle reverse parallax — logo moves opposite to scroll
+      const translate = centerOffset * -0.2;
+      imgRef.current.style.transform = `translate(-50%, calc(-50% + ${translate}px))`;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <section ref={sectionRef} className="relative py-16 md:py-28 px-5 md:px-6 border-t border-white/5 overflow-hidden bg-[#0d1a12]">
+      {/* Logo as parallax bg — centered, very faded */}
+      <img
+        ref={imgRef}
+        src="/logo.png"
+        alt=""
+        aria-hidden="true"
+        className="absolute will-change-transform pointer-events-none select-none"
+        style={{
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "clamp(280px, 45vw, 520px)",
+          opacity: 0.06,
+          filter: "grayscale(100%) brightness(2)",
+        }}
+      />
+
+      {/* Content */}
+      <div className="container mx-auto max-w-3xl text-center reveal relative z-10">
+        <div className="w-12 h-px bg-[#c9a84c]/40 mx-auto mb-8" />
+        <h2 className="font-display text-white leading-[1.15] mb-6" style={{ fontSize: "clamp(1.8rem, 5vw, 4rem)" }}>
+          &ldquo;Come as a guest,<br />
+          <span className="text-[#c9a84c] italic">leave as family.&rdquo;</span>
+        </h2>
+        <p className="font-mono text-white/25 text-xs tracking-[0.2em]">— The Mehmaan Manor Promise</p>
       </div>
     </section>
   );
@@ -384,20 +407,8 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
         {/* ═══ AREA / NEIGHBORHOOD ═════════════════════════════════════ */}
         <AreaSection />
 
-        {/* ═══ PULL QUOTE — Parallax ═══════════════════════════════════ */}
-        <section className="relative py-16 md:py-28 px-5 md:px-6 border-t border-white/5 overflow-hidden">
-          <ParallaxBg url="https://res.cloudinary.com/pdqt9y1o/image/upload/v1787146466/mehman-manor/cmsvakswj000370ikofaym6c0.jpg" speed={0.25} />
-          <div className="absolute inset-0 -z-10 bg-[#0d1a12]/88" />
-
-          <div className="container mx-auto max-w-3xl text-center reveal relative z-10">
-            <div className="w-12 h-px bg-[#c9a84c]/40 mx-auto mb-8" />
-            <h2 className="font-display text-white leading-[1.15] mb-6" style={{ fontSize: "clamp(1.8rem, 5vw, 4rem)" }}>
-              &ldquo;Come as a guest,<br />
-              <span className="text-[#c9a84c] italic">leave as family.&rdquo;</span>
-            </h2>
-            <p className="font-mono text-white/25 text-xs tracking-[0.2em]">— The Mehmaan Manor Promise</p>
-          </div>
-        </section>
+        {/* ═══ PULL QUOTE — Logo Parallax ══════════════════════════════ */}
+        <PullQuoteSection />
 
         {/* ═══ INSTAGRAM ═══════════════════════════════════════════════ */}
         <section className="bg-[#080e0b] py-10 md:py-16 px-4 md:px-6 border-t border-white/5">
