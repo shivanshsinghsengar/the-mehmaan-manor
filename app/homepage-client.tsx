@@ -378,30 +378,6 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
           </div>
         </section>
 
-        {/* ═══ AMENITIES — Parallax background ════════════════════════ */}
-        <section className="relative py-10 md:py-16 border-t border-white/5 overflow-hidden">
-          <ParallaxBg url="https://res.cloudinary.com/pdqt9y1o/image/upload/v1787146405/mehman-manor/cmssbzlmk000712sq7f5eenuc.jpg" />
-          <div className="absolute inset-0 -z-10 bg-[#0a0f0d]/85" />
-
-          <div className="container mx-auto max-w-7xl px-4 md:px-6 relative z-10">
-            <p className="font-mono text-[#c9a84c]/50 text-[10px] tracking-[0.4em] uppercase mb-6 text-center reveal">What&apos;s Included</p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-              {[
-                { icon: "⚡", title: "Fast Wi-Fi", sub: "Fibre broadband, always on" },
-                { icon: "📺", title: "Smart TV", sub: "Netflix, Prime ready" },
-                { icon: "✦", title: "Spotless", sub: "Hotel-grade cleaning" },
-                { icon: "📍", title: "Prime Location", sub: "Central Gurugram" },
-              ].map(({ icon, title, sub }, i) => (
-                <div key={title} className="reveal border border-white/10 p-4 md:p-5 hover:border-[#c9a84c]/40 bg-black/30 backdrop-blur-sm transition-colors duration-300 group"
-                  style={{ animationDelay: `${i * 80}ms` }}>
-                  <span className="text-2xl mb-3 block">{icon}</span>
-                  <h3 className="font-display text-white text-base md:text-lg mb-1 group-hover:text-[#c9a84c] transition-colors">{title}</h3>
-                  <p className="text-white/40 text-xs leading-relaxed">{sub}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* ═══ AREA / NEIGHBORHOOD ═════════════════════════════════════ */}
         <AreaSection />
