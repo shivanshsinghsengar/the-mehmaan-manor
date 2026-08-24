@@ -46,6 +46,54 @@ function useReveal() {
   }, []);
 }
 
+// JS Parallax — works on ALL browsers including mobile
+function useParallax(ref: React.RefObject<HTMLDivElement>, speed = 0.4) {
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const onScroll = () => {
+      const rect = el.getBoundingClientRect();
+      const offset = (rect.top + rect.height / 2 - window.innerHeight / 2) * speed;
+      const bg = el.querySelector(".parallax-bg") as HTMLElement | null;
+      if (bg) bg.style.transform = `translateY(${offset}px)`;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [ref, speed]);
+}
+
+function ParallaxBg({ url, speed = 0.35 }: { url: string; speed?: number }) {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const bgRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (!sectionRef.current || !bgRef.current) return;
+      const rect = sectionRef.current.getBoundingClientRect();
+      const offset = (rect.top + rect.height / 2 - window.innerHeight / 2) * speed;
+      bgRef.current.style.transform = `translateY(${offset}px)`;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [speed]);
+
+  return (
+    <div ref={sectionRef} className="absolute inset-0 overflow-hidden -z-10">
+      <div
+        ref={bgRef}
+        className="absolute inset-[-30%] will-change-transform"
+        style={{
+          backgroundImage: `url(${url})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      />
+    </div>
+  );
+}
+
 // ── Cinematic Slideshow ───────────────────────────────────────────────
 function HeroSlideshow({ slides }: { slides: { url: string; alt: string }[] }) {
   const [current, setCurrent] = useState(0);
@@ -250,12 +298,7 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
 
         {/* ═══ AMENITIES — Parallax background ════════════════════════ */}
         <section className="relative py-10 md:py-16 border-t border-white/5 overflow-hidden">
-          <div className="absolute inset-0 -z-10" style={{
-            backgroundImage: "url(https://res.cloudinary.com/pdqt9y1o/image/upload/v1787146405/mehman-manor/cmssbzlmk000712sq7f5eenuc.jpg)",
-            backgroundAttachment: "fixed",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }} />
+          <ParallaxBg url="https://res.cloudinary.com/pdqt9y1o/image/upload/v1787146405/mehman-manor/cmssbzlmk000712sq7f5eenuc.jpg" />
           <div className="absolute inset-0 -z-10 bg-[#0a0f0d]/85" />
 
           <div className="container mx-auto max-w-7xl px-4 md:px-6 relative z-10">
@@ -280,13 +323,8 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
 
         {/* ═══ PULL QUOTE — Parallax ═══════════════════════════════════ */}
         <section className="relative py-16 md:py-28 px-5 md:px-6 border-t border-white/5 overflow-hidden">
-          <div className="absolute inset-0 -z-10" style={{
-            backgroundImage: "url(https://res.cloudinary.com/pdqt9y1o/image/upload/v1787146466/mehman-manor/cmsvakswj000370ikofaym6c0.jpg)",
-            backgroundAttachment: "fixed",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }} />
-          <div className="absolute inset-0 -z-10 bg-[#0d1a12]/92" />
+          <ParallaxBg url="https://res.cloudinary.com/pdqt9y1o/image/upload/v1787146466/mehman-manor/cmsvakswj000370ikofaym6c0.jpg" speed={0.25} />
+          <div className="absolute inset-0 -z-10 bg-[#0d1a12]/88" />
 
           <div className="container mx-auto max-w-3xl text-center reveal relative z-10">
             <div className="w-12 h-px bg-[#c9a84c]/40 mx-auto mb-8" />
