@@ -94,6 +94,66 @@ function ParallaxBg({ url, speed = 0.35 }: { url: string; speed?: number }) {
   );
 }
 
+// ── Area Section with true reverse parallax ──────────────────────────
+function AreaSection() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (!sectionRef.current || !imgRef.current) return;
+      const rect = sectionRef.current.getBoundingClientRect();
+      // Center of section relative to viewport center
+      const centerOffset = rect.top + rect.height / 2 - window.innerHeight / 2;
+      // Negative multiplier = opposite direction (reverse parallax)
+      const translate = centerOffset * -0.25;
+      imgRef.current.style.transform = `translateY(${translate}px) scale(1.3)`;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll(); // run once on mount
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <section ref={sectionRef} className="relative py-10 md:py-16 border-t border-white/5 overflow-hidden">
+      {/* Parallax image layer */}
+      <img
+        ref={imgRef}
+        src="https://res.cloudinary.com/pdqt9y1o/image/upload/v1787146466/mehman-manor/cmsvakswj000370ikofaym6c0.jpg"
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 w-full h-full object-cover will-change-transform"
+        style={{ transform: "translateY(0px) scale(1.3)" }}
+      />
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-[#0a0f0d]/85" />
+
+      {/* Content */}
+      <div className="container mx-auto max-w-7xl px-4 md:px-6 relative z-10">
+        <p className="font-mono text-[#c9a84c]/50 text-[10px] tracking-[0.4em] uppercase mb-2 text-center reveal">The Area</p>
+        <h2 className="font-display text-white text-center mb-6 md:mb-10 reveal" style={{ fontSize: "clamp(1.6rem, 3.5vw, 2.4rem)" }}>
+          Central Gurugram, At Your Doorstep
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+          {[
+            { icon: "🚇", title: "Metro Access", sub: "IFFCO Chowk — 10 min" },
+            { icon: "🛍️", title: "Markets", sub: "Galleria & Town Square nearby" },
+            { icon: "🏥", title: "Healthcare", sub: "Medanta Hospital — 15 min" },
+            { icon: "🛣️", title: "Highways", sub: "NH-48 & Golf Course Rd close" },
+          ].map(({ icon, title, sub }, i) => (
+            <div key={title} className="reveal border border-white/10 p-4 md:p-5 hover:border-[#c9a84c]/40 bg-black/30 backdrop-blur-sm transition-colors duration-300 group"
+              style={{ animationDelay: `${i * 80}ms` }}>
+              <span className="text-2xl mb-3 block">{icon}</span>
+              <h3 className="font-display text-white text-base md:text-lg mb-1 group-hover:text-[#c9a84c] transition-colors">{title}</h3>
+              <p className="text-white/40 text-xs leading-relaxed">{sub}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ── Cinematic Slideshow ───────────────────────────────────────────────
 function HeroSlideshow({ slides }: { slides: { url: string; alt: string }[] }) {
   const [current, setCurrent] = useState(0);
@@ -322,32 +382,7 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
         </section>
 
         {/* ═══ AREA / NEIGHBORHOOD ═════════════════════════════════════ */}
-        <section className="relative py-10 md:py-16 border-t border-white/5 overflow-hidden">
-          <ParallaxBg url="https://res.cloudinary.com/pdqt9y1o/image/upload/v1787146466/mehman-manor/cmsvakswj000370ikofaym6c0.jpg" speed={-0.35} />
-          <div className="absolute inset-0 -z-10 bg-[#0a0f0d]/88" />
-
-          <div className="container mx-auto max-w-7xl px-4 md:px-6 relative z-10">
-            <p className="font-mono text-[#c9a84c]/50 text-[10px] tracking-[0.4em] uppercase mb-2 text-center reveal">The Area</p>
-            <h2 className="font-display text-white text-center mb-6 md:mb-10 reveal" style={{ fontSize: "clamp(1.6rem, 3.5vw, 2.4rem)" }}>
-              Central Gurugram, At Your Doorstep
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-              {[
-                { icon: "🚇", title: "Metro Access", sub: "IFFCO Chowk — 10 min" },
-                { icon: "🛍️", title: "Markets", sub: "Galleria & Town Square nearby" },
-                { icon: "🏥", title: "Healthcare", sub: "Medanta Hospital — 15 min" },
-                { icon: "🛣️", title: "Highways", sub: "NH-48 & Golf Course Rd close" },
-              ].map(({ icon, title, sub }, i) => (
-                <div key={title} className="reveal border border-white/10 p-4 md:p-5 hover:border-[#c9a84c]/40 bg-black/30 backdrop-blur-sm transition-colors duration-300 group"
-                  style={{ animationDelay: `${i * 80}ms` }}>
-                  <span className="text-2xl mb-3 block">{icon}</span>
-                  <h3 className="font-display text-white text-base md:text-lg mb-1 group-hover:text-[#c9a84c] transition-colors">{title}</h3>
-                  <p className="text-white/40 text-xs leading-relaxed">{sub}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        <AreaSection />
 
         {/* ═══ PULL QUOTE — Parallax ═══════════════════════════════════ */}
         <section className="relative py-16 md:py-28 px-5 md:px-6 border-t border-white/5 overflow-hidden">
