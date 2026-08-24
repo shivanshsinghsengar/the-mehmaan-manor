@@ -201,8 +201,8 @@ export default function PropertyPage() {
     return tagged.length > 0 ? tagged : photoList;
   };
 
-  const allHeroPhotos = photos.filter((p) => p.section === "property-hero");
-  const allGalleryPhotos = photos.filter((p) => p.section === "gallery");
+  const allHeroPhotos = photos.filter((p) => p.section === "property-hero" || p.section === "hero");
+  const allGalleryPhotos = photos.filter((p) => p.section === "gallery" || p.section === "property-hero");
 
   // Always show a hero — tagged first, then any property-hero, then null
   const heroPhoto = (selectedRoom
