@@ -136,8 +136,8 @@ function PullQuoteSection() {
       if (!sectionRef.current || !imgRef.current) return;
       const rect = sectionRef.current.getBoundingClientRect();
       const centerOffset = rect.top + rect.height / 2 - window.innerHeight / 2;
-      // Gentle reverse parallax — logo moves opposite to scroll
-      const translate = centerOffset * -0.2;
+      // 1:1 reverse — logo moves exactly opposite to scroll, feels fixed in bg
+      const translate = centerOffset * -1;
       imgRef.current.style.transform = `translate(-50%, calc(-50% + ${translate}px))`;
     };
     window.addEventListener("scroll", onScroll, { passive: true });
