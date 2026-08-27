@@ -58,7 +58,7 @@ export default function HomesPage() {
   }, [properties]);
 
   const getHeroPhoto = (propertyId: string) =>
-    photos.find((p) => p.propertyId === propertyId && (p.section === "property-hero" || p.section === "property-card"));
+    photos.find((p) => p.propertyId === propertyId && (p.section === "property-hero" || p.section === "property-card" || p.section === "hero"));
 
   const getMapsUrl = (property: Property) => {
     const match = property.coordinates?.match(/([\d.]+)°\s*N.*?([\d.]+)°\s*E/);

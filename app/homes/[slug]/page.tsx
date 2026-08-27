@@ -129,8 +129,8 @@ export default function PropertyPage() {
         const found = data.find((p) => p.slug === slug);
         setProperty(found || null);
         if (found) {
-          // Fetch all photos for this property in one call
-          fetch(`/api/photos?propertyId=${found.id}`)
+          // Fetch photos then stop loading — don't stop loading before photos arrive
+          return fetch(`/api/photos?propertyId=${found.id}`)
             .then((r) => r.json())
             .then((photoData) => setPhotos(Array.isArray(photoData) ? photoData : []))
             .catch(() => {});
@@ -201,8 +201,12 @@ export default function PropertyPage() {
     return tagged.length > 0 ? tagged : photoList;
   };
 
-  const allHeroPhotos = photos.filter((p) => p.section === "property-hero" || p.section === "hero");
-  const allGalleryPhotos = photos.filter((p) => p.section === "gallery" || p.section === "property-hero");
+  const allHeroPhotos = photos.filter((p) =>
+    p.section === "property-hero" || p.section === "hero"
+  );
+  const allGalleryPhotos = photos.filter((p) =>
+    p.section === "gallery" || p.section === "property-hero" || p.section === "hero"
+  );
 
   // Always show a hero — tagged first, then any property-hero, then null
   const heroPhoto = (selectedRoom
