@@ -139,7 +139,6 @@ export default function PropertyPage() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [slug]);
-
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add("active")),
@@ -201,12 +200,12 @@ export default function PropertyPage() {
     return tagged.length > 0 ? tagged : photoList;
   };
 
-  const allHeroPhotos = photos.filter((p) =>
-    p.section === "property-hero" || p.section === "hero"
-  );
-  const allGalleryPhotos = photos.filter((p) =>
-    p.section === "gallery" || p.section === "property-hero" || p.section === "hero"
-  );
+  // Hero: property-hero takes priority over generic hero section
+  const heroPhotos = photos.filter((p) => p.section === "property-hero");
+  const fallbackHeroPhotos = photos.filter((p) => p.section === "hero");
+  const allHeroPhotos = heroPhotos.length > 0 ? heroPhotos : fallbackHeroPhotos;
+  // Gallery should NOT include hero/property-hero — they belong in the hero slot only
+  const allGalleryPhotos = photos.filter((p) => p.section === "gallery");
 
   // Always show a hero — tagged first, then any property-hero, then null
   const heroPhoto = (selectedRoom

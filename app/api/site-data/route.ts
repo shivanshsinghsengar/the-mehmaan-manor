@@ -24,6 +24,7 @@ export async function GET() {
     content,
     heroPhotos: photos.filter((p) => p.section === "hero"),
     instagramPhotos: photos.filter((p) => p.section === "instagram"),
+    galleryPhotos: photos.filter((p) => p.section === "gallery"),
     propertyCards,
   });
 }

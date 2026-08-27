@@ -58,7 +58,11 @@ export default function HomesPage() {
   }, [properties]);
 
   const getHeroPhoto = (propertyId: string) =>
-    photos.find((p) => p.propertyId === propertyId && (p.section === "property-hero" || p.section === "property-card" || p.section === "hero"));
+    // Priority: property-hero > property-card > hero (all scoped to this property)
+    photos.find((p) => p.propertyId === propertyId && p.section === "property-hero") ??
+    photos.find((p) => p.propertyId === propertyId && p.section === "property-card") ??
+    photos.find((p) => p.propertyId === propertyId && p.section === "hero") ??
+    null;
 
   const getMapsUrl = (property: Property) => {
     const match = property.coordinates?.match(/([\d.]+)°\s*N.*?([\d.]+)°\s*E/);
