@@ -411,7 +411,7 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
                     </div>
                   </div>
                   <p className="font-mono text-[8px] md:text-[9px] text-white/25 group-hover:text-[#c9a84c] transition-colors text-center truncate w-full px-1">
-                    {["Bedroom", "Living", "Balcony", "Exterior", "Kitchen", "Bathroom"][i] ?? "View"}
+                    {photo.alt || "View"}
                   </p>
                 </a>
               ))}

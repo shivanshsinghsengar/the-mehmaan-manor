@@ -35,15 +35,26 @@ function PhotoCard({
   onDelete,
   onToggleFeatured,
   onAssign,
+  onUpdateAlt,
 }: {
   photo: Photo;
   onDelete: (id: string) => void;
   onToggleFeatured: (photo: Photo) => void;
   onAssign: (photo: Photo, section: string, propertyId: string | null) => void;
+  onUpdateAlt: (photo: Photo, alt: string) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [altValue, setAltValue] = useState(photo.alt);
+  const [altSaving, setAltSaving] = useState(false);
   const currentSection = SECTIONS.find((s) => s.key === photo.section);
   const currentProp    = PROPERTIES.find((p) => p.id === photo.propertyId);
+
+  const saveAlt = async () => {
+    if (altValue === photo.alt) return;
+    setAltSaving(true);
+    await onUpdateAlt(photo, altValue);
+    setAltSaving(false);
+  };
 
   return (
     <div className="bg-white border border-neutral-200 overflow-hidden">
@@ -61,6 +72,29 @@ function PhotoCard({
           <button onClick={() => onDelete(photo.id)}
             className="p-1.5 bg-white/90 hover:bg-red-500 hover:text-white transition-colors" title="Delete">
             <Trash2 size={12} />
+          </button>
+        </div>
+      </div>
+
+      {/* Label / Alt text edit */}
+      <div className="px-3 pt-3 pb-0">
+        <p className="text-[10px] font-mono text-ink/40 uppercase mb-1">Label (shown below photo)</p>
+        <div className="flex gap-1.5">
+          <input
+            type="text"
+            value={altValue}
+            onChange={(e) => setAltValue(e.target.value)}
+            onBlur={saveAlt}
+            onKeyDown={(e) => e.key === "Enter" && saveAlt()}
+            placeholder="e.g. Bedroom, Living Room…"
+            className="flex-1 text-xs border border-neutral-200 px-2 py-1.5 focus:outline-none focus:border-forest text-ink/80 placeholder:text-ink/25"
+          />
+          <button
+            onClick={saveAlt}
+            disabled={altSaving || altValue === photo.alt}
+            className="px-2 py-1.5 bg-forest text-cream text-[10px] font-mono disabled:opacity-30 hover:bg-forest/80 transition-colors"
+          >
+            {altSaving ? "…" : "Save"}
           </button>
         </div>
       </div>
@@ -214,6 +248,14 @@ export default function PhotosPage() {
     setPhotos((prev) => prev.map((p) => p.id === photo.id ? updated : p));
   };
 
+  const handleUpdateAlt = async (photo: Photo, alt: string) => {
+    await fetch(`/api/photos/${photo.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ alt }),
+    });
+    setPhotos((prev) => prev.map((p) => p.id === photo.id ? { ...p, alt } : p));
+  };
   // Filter
   const visible = photos.filter((p) => {
     if (filterSection !== "all" && p.section !== filterSection) return false;
@@ -381,6 +423,7 @@ export default function PhotosPage() {
               onDelete={handleDelete}
               onToggleFeatured={handleToggleFeatured}
               onAssign={handleAssign}
+              onUpdateAlt={handleUpdateAlt}
             />
           ))}
         </div>
