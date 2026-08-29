@@ -6,7 +6,7 @@ import Link from "next/link";
 import {
   MapPin, Wifi, Tv, UtensilsCrossed, AirVent, Monitor, Car,
   TreePine, Shield, Droplets, Home as HomeIcon, ArrowLeft,
-  Phone, MessageCircle, Star, Users,
+  Phone, MessageCircle, Star,
 } from "lucide-react";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
@@ -329,25 +329,16 @@ export default function PropertyPage() {
 
                 {/* Location + description */}
                 <div className="reveal">
-                  <div className="flex items-start justify-between flex-wrap gap-4 mb-6">
-                    <div>
-                      <div className="flex items-start space-x-2 mb-2">
-                        <MapPin size={16} className="text-gold flex-shrink-0 mt-0.5" />
-                        <span className="font-mono text-sm text-ink/60 leading-relaxed">{property.address}</span>
-                      </div>
-                      {property.coordinates && (
-                        <p className="font-mono text-xs text-ink/40 mb-1 ml-6">{property.coordinates}</p>
-                      )}
-                      <a href={mapsUrl} target="_blank" rel="noopener noreferrer"
-                        className="text-xs font-mono text-gold hover:underline ml-6">Get Directions →</a>
+                  <div className="mb-6">
+                    <div className="flex items-start space-x-2 mb-2">
+                      <MapPin size={16} className="text-gold flex-shrink-0 mt-0.5" />
+                      <span className="font-mono text-sm text-ink/60 leading-relaxed">{property.address}</span>
                     </div>
-                    <div className="flex items-center gap-2 bg-forest/5 px-4 py-2 border border-forest/10">
-                      <Users size={16} className="text-gold" />
-                      <div className="text-center">
-                        <p className="text-xl font-display text-forest">{displayMaxGuests}</p>
-                        <p className="font-mono text-[10px] text-ink/50">MAX GUESTS</p>
-                      </div>
-                    </div>
+                    {property.coordinates && (
+                      <p className="font-mono text-xs text-ink/40 mb-1 ml-6">{property.coordinates}</p>
+                    )}
+                    <a href={mapsUrl} target="_blank" rel="noopener noreferrer"
+                      className="text-xs font-mono text-gold hover:underline ml-6">Get Directions →</a>
                   </div>
 
                   <h2 className="text-xl md:text-2xl font-display text-forest mb-3">{displayDescription}</h2>

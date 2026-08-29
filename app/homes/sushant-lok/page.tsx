@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   MapPin, Wifi, Tv, UtensilsCrossed, AirVent, Monitor, Car,
-  TreePine, Shield, Droplets, Home, ArrowLeft, Phone, MessageCircle,
+  Shield, Droplets, Home as HomeIcon, ArrowLeft, Phone, MessageCircle, Star,
 } from "lucide-react";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
@@ -12,35 +12,66 @@ import { PlaceholderImage } from "@/components/placeholder-image";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const amenities = [
-  { icon: Wifi, label: "High-Speed Wi-Fi" },
-  { icon: Tv, label: "Smart TV with Netflix" },
-  { icon: UtensilsCrossed, label: "Fully Equipped Kitchen" },
-  { icon: AirVent, label: "Air Conditioning" },
-  { icon: Monitor, label: "Dedicated Workspace" },
-  { icon: Droplets, label: "24/7 Hot Water" },
-  { icon: Car, label: "Free Parking" },
-  { icon: TreePine, label: "Garden Access" },
-  { icon: Shield, label: "Security System" },
-  { icon: Home, label: "Spacious Living Area" },
-];
+const ICON_MAP: Record<string, React.ElementType> = {
+  "High-Speed Wi-Fi": Wifi,
+  "Smart TV with Netflix": Tv,
+  "Fully Equipped Kitchen": UtensilsCrossed,
+  "Air Conditioning": AirVent,
+  "Dedicated Workspace": Monitor,
+  "24/7 Hot Water": Droplets,
+  "Free Parking": Car,
+  "Street Parking": Car,
+  "Security System": Shield,
+  "CCTV Security": Shield,
+  "Spacious Living Area": HomeIcon,
+  "Balcony": HomeIcon,
+  "24-Hour Power Backup": Droplets,
+};
 
-const DEFAULTS = { baseRate: 4500, weekendRate: 5500, cleaningFee: 500, maxGuests: 6, checkInTime: "14:00", checkOutTime: "11:00" };
+interface Photo {
+  id: string;
+  url: string;
+  alt: string;
+  section: string;
+  tags: string[];
+}
+
+const DEFAULTS = {
+  baseRate: 2499, weekendRate: 2799, cleaningFee: 0,
+  maxGuests: 2, checkInTime: "14:00", checkOutTime: "11:00",
+  amenities: ["High-Speed Wi-Fi", "Smart TV with Netflix", "Air Conditioning", "24/7 Hot Water", "Balcony", "CCTV Security", "24-Hour Power Backup", "Street Parking"],
+  policies: "Smoking outdoors only. No pets. No parties or events. Quiet hours after 10:00 PM.",
+};
 
 export default function SushantLokPage() {
   const [stickyVisible, setStickyVisible] = useState(false);
   const [pricing, setPricing] = useState(DEFAULTS);
+  const [photos, setPhotos] = useState<Photo[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/properties")
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data)) {
-          const p = data.find((x: any) => x.slug === "sushant-lok");
-          if (p) setPricing({ baseRate: p.baseRate, weekendRate: p.weekendRate, cleaningFee: p.cleaningFee, maxGuests: p.maxGuests, checkInTime: p.checkInTime || "14:00", checkOutTime: p.checkOutTime || "11:00" });
+          const p = data.find((x: { slug: string }) => x.slug === "sushant-lok");
+          if (p) {
+            setPricing({
+              baseRate: p.baseRate, weekendRate: p.weekendRate,
+              cleaningFee: p.cleaningFee, maxGuests: p.maxGuests,
+              checkInTime: p.checkInTime || "14:00", checkOutTime: p.checkOutTime || "11:00",
+              amenities: p.amenities || DEFAULTS.amenities,
+              policies: p.policies || DEFAULTS.policies,
+            });
+            return fetch(`/api/photos?propertyId=${p.id}`)
+              .then((r) => r.json())
+              .then((photoData) => setPhotos(Array.isArray(photoData) ? photoData : []))
+              .catch(() => {});
+          }
         }
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -52,56 +83,93 @@ export default function SushantLokPage() {
     const handleScroll = () => setStickyVisible(window.scrollY > 600);
     window.addEventListener("scroll", handleScroll);
     return () => { observer.disconnect(); window.removeEventListener("scroll", handleScroll); };
-  }, []);
+  }, [photos]);
+
+  // Photo selection — same logic as [slug]/page.tsx
+  const heroPhotos = photos.filter((p) => p.section === "property-hero");
+  const fallbackHeroPhotos = photos.filter((p) => p.section === "hero");
+  const allHeroPhotos = heroPhotos.length > 0 ? heroPhotos : fallbackHeroPhotos;
+  const heroPhoto = allHeroPhotos[0] ?? null;
+  const galleryPhotos = photos.filter((p) => p.section === "gallery");
+
+  const waMessage = encodeURIComponent("Hi! I'd like to reserve Sushant Lok. Can you help me with availability?");
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-cream flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-forest border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="font-mono text-sm text-ink/50">Loading…</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-cream">
       <Navigation />
       <main id="main-content">
+
         {/* Hero */}
-        <section className="pt-24 relative">
-          <PlaceholderImage caption="PROPERTY HERO — Sushant Lok, dusk exterior" className="w-full" aspectRatio="video" />
-          <div className="absolute inset-0 bg-gradient-to-t from-ink/60 to-transparent flex items-end">
-            <div className="container mx-auto px-6 pb-12">
-              <Link href="/homes" className="inline-flex items-center text-cream/80 hover:text-cream mb-6 transition-colors">
+        <section className="pt-20 md:pt-24 relative">
+          {heroPhoto ? (
+            <div className="w-full aspect-[4/3] sm:aspect-video relative overflow-hidden">
+              <img src={heroPhoto.url} alt={heroPhoto.alt || "Sushant Lok"}
+                className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-ink/70 to-transparent" />
+            </div>
+          ) : (
+            <div className="relative">
+              <PlaceholderImage caption="PROPERTY HERO — Sushant Lok exterior" className="w-full" aspectRatio="video" />
+            </div>
+          )}
+          <div className="absolute inset-x-0 bottom-0 top-20 md:top-24 flex items-end">
+            <div className="container mx-auto px-4 md:px-6 pb-6 md:pb-12">
+              <Link href="/homes" className="inline-flex items-center text-cream/80 hover:text-cream mb-4 md:mb-6 transition-colors">
                 <ArrowLeft size={16} className="mr-2" />
                 <span className="font-mono text-sm">All Homes</span>
               </Link>
-              <p className="font-mono text-gold text-sm tracking-widest mb-2">HOME 01</p>
-              <h1 className="text-4xl md:text-6xl font-display text-cream">Sushant Lok</h1>
+              <p className="font-mono text-gold text-xs md:text-sm tracking-widest mb-1 md:mb-2">HOME 01</p>
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-display text-cream leading-tight mb-4 md:mb-6">
+                Sushant Lok
+              </h1>
+              <div className="flex flex-wrap gap-3">
+                <a href={`https://wa.me/918828352311?text=${waMessage}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-3 bg-gold text-ink text-sm font-medium hover:bg-gold/90 transition-colors">
+                  <MessageCircle size={16} />Reserve via WhatsApp
+                </a>
+                <a href="tel:+918828352311"
+                  className="inline-flex items-center gap-2 px-5 py-3 bg-cream/10 backdrop-blur-sm border border-cream/40 text-cream text-sm font-medium hover:bg-cream/20 transition-colors">
+                  <Phone size={16} />Call Simran
+                </a>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Property Details */}
-        <section className="py-16 px-6">
+        {/* Details */}
+        <section className="py-8 md:py-16 px-4 md:px-6">
           <div className="container mx-auto max-w-7xl">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-              {/* Main Content */}
-              <div className="lg:col-span-2 space-y-12">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
+
+              {/* Main content */}
+              <div className="lg:col-span-2 space-y-10 md:space-y-12">
+
+                {/* Location + description */}
                 <div className="reveal">
-                  <div className="flex items-start justify-between flex-wrap gap-4 mb-6">
-                    <div>
-                      <div className="flex items-center space-x-2 mb-2">
-                        <MapPin size={16} className="text-gold" />
-                        <span className="font-mono text-sm text-ink/60">Sector 57, Phase 2, Sushant Lok, Gurugram</span>
-                      </div>
-                      <p className="font-mono text-xs text-ink/40 mb-1">28.4212° N, 77.0761° E</p>
-                      <a href="https://maps.google.com/?q=28.4212,77.0761" target="_blank" rel="noopener noreferrer"
-                        className="text-xs font-mono text-gold hover:underline">Get Directions →</a>
+                  <div className="mb-6">
+                    <div className="flex items-start space-x-2 mb-2">
+                      <MapPin size={16} className="text-gold flex-shrink-0 mt-0.5" />
+                      <span className="font-mono text-sm text-ink/60 leading-relaxed">
+                        Building No. G-219, G-Block, Sushant Lok-2, Sector 57, Gurugram — 122011
+                      </span>
                     </div>
-                    <div className="flex gap-4">
-                      <div className="text-center">
-                        <p className="text-2xl font-display text-forest">{pricing.maxGuests}</p>
-                        <p className="font-mono text-xs text-ink/50">GUESTS</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-2xl font-display text-forest">3</p>
-                        <p className="font-mono text-xs text-ink/50">BEDS</p>
-                      </div>
-                    </div>
+                    <p className="font-mono text-xs text-ink/40 mb-1 ml-6">28.4212° N, 77.0761° E</p>
+                    <a href="https://maps.google.com/?q=28.4233,77.0890" target="_blank" rel="noopener noreferrer"
+                      className="text-xs font-mono text-gold hover:underline ml-6">Get Directions →</a>
                   </div>
-                  <h2 className="text-2xl font-display text-forest mb-4">Peaceful Surroundings, Great Connectivity</h2>
+                  <h2 className="text-xl md:text-2xl font-display text-forest mb-3">Peaceful Surroundings, Great Connectivity</h2>
                   <p className="text-ink/80 leading-relaxed mb-4">
                     Tucked into the quiet lanes of Sushant Lok, this home offers something increasingly rare in Gurugram: genuine peace. Floor-to-ceiling windows flood the living area with morning light.
                   </p>
@@ -110,29 +178,51 @@ export default function SushantLokPage() {
                   </p>
                 </div>
 
+                {/* Gallery */}
                 <div className="reveal">
-                  <h2 className="text-2xl font-display text-forest mb-6">The Space</h2>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {["PROPERTY HERO — Sushant Lok dusk exterior","INTERIOR — Living room with natural light","DETAIL — Brass fixture, ceramic vessel","BEDROOM — Crisp linens, warm lighting","KITCHEN — Modern, fully equipped","LIFESTYLE — Guest reading by window","WORKSPACE — Dedicated desk setup","EXTERIOR — Garden area"].map((caption, i) => (
-                      <PlaceholderImage key={i} caption={caption} aspectRatio={i === 0 ? "landscape" : "square"} className={cn("image-hover", i === 0 ? "col-span-2" : "")} />
-                    ))}
-                  </div>
+                  <h2 className="text-xl md:text-2xl font-display text-forest mb-4 md:mb-6">The Space</h2>
+                  {galleryPhotos.length > 0 ? (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4">
+                      {galleryPhotos.map((photo, i) => (
+                        <div key={photo.id} className={cn("image-hover overflow-hidden", i === 0 ? "col-span-2" : "")}>
+                          <img src={photo.url} alt={photo.alt}
+                            className={cn("w-full object-cover", i === 0 ? "aspect-video" : "aspect-square")} />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+                      {["EXTERIOR — Property view", "INTERIOR — Living area", "DETAIL — Thoughtful touches",
+                        "BEDROOM — Comfortable retreat", "KITCHEN — Well equipped", "LIFESTYLE — At home"].map((caption, i) => (
+                        <PlaceholderImage key={i} caption={caption}
+                          aspectRatio={i === 0 ? "landscape" : "square"}
+                          className={cn("image-hover", i === 0 ? "col-span-2" : "")} />
+                      ))}
+                    </div>
+                  )}
                 </div>
 
-                <div className="reveal">
-                  <h2 className="text-2xl font-display text-forest mb-6">Amenities</h2>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {amenities.map((amenity, i) => (
-                      <div key={i} className="flex items-center space-x-3 p-4 border border-forest/10">
-                        <amenity.icon size={18} className="text-gold flex-shrink-0" />
-                        <span className="text-sm text-ink/80">{amenity.label}</span>
-                      </div>
-                    ))}
+                {/* Amenities */}
+                {pricing.amenities.length > 0 && (
+                  <div className="reveal">
+                    <h2 className="text-xl md:text-2xl font-display text-forest mb-4 md:mb-6">Amenities</h2>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4">
+                      {pricing.amenities.map((amenity, i) => {
+                        const Icon = ICON_MAP[amenity] || Star;
+                        return (
+                          <div key={i} className="flex items-center space-x-3 p-3 md:p-4 border border-forest/10">
+                            <Icon size={16} className="text-gold flex-shrink-0" />
+                            <span className="text-xs md:text-sm text-ink/80">{amenity}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
+                )}
 
+                {/* Neighborhood */}
                 <div className="reveal">
-                  <h2 className="text-2xl font-display text-forest mb-6">The Neighborhood</h2>
+                  <h2 className="text-xl md:text-2xl font-display text-forest mb-4 md:mb-6">The Neighborhood</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <h3 className="font-medium text-forest mb-3">Getting Around</h3>
@@ -155,28 +245,51 @@ export default function SushantLokPage() {
                   </div>
                 </div>
 
-                <div className="reveal bg-forest/5 p-6">
-                  <h2 className="text-xl font-display text-forest mb-4">House Policies</h2>
+                {/* Policies */}
+                <div className="reveal bg-forest/5 p-4 md:p-6">
+                  <h2 className="text-lg md:text-xl font-display text-forest mb-4">House Policies</h2>
                   <div className="grid grid-cols-2 gap-4 font-mono text-sm text-ink/70 mb-4">
                     <div><p className="text-ink/50 text-xs mb-1">CHECK-IN</p><p>{pricing.checkInTime} onwards</p></div>
                     <div><p className="text-ink/50 text-xs mb-1">CHECK-OUT</p><p>{pricing.checkOutTime} by</p></div>
                   </div>
-                  <p className="text-sm text-ink/70">No smoking indoors. Pets negotiable. Quiet hours 10 PM – 8 AM. Events require prior approval.</p>
+                  <p className="text-sm text-ink/70">{pricing.policies}</p>
                 </div>
               </div>
 
               {/* Sidebar */}
               <div className="lg:col-span-1">
                 <div className="sticky top-24 space-y-4 reveal">
-                  <div className="border-2 border-forest/10 p-6 bg-cream">
-                    <div className="mb-6">
+                  <div className="border-2 border-forest/10 p-5 md:p-6 bg-cream">
+                    <div className="flex flex-wrap gap-2 mb-4 pb-4 border-b border-forest/10">
+                      <span className="flex items-center gap-1 text-[10px] font-mono text-green-700 bg-green-50 border border-green-200 px-2 py-1">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        Verified Property
+                      </span>
+                      <span className="flex items-center gap-1 text-[10px] font-mono text-gold bg-gold/10 border border-gold/30 px-2 py-1">★ 4.9 Rating</span>
+                    </div>
+                    <div className="mb-5 md:mb-6">
                       <p className="font-mono text-xs text-ink/50 mb-1">BASE RATE</p>
-                      <p className="text-3xl font-display text-forest">₹{pricing.baseRate.toLocaleString("en-IN")}<span className="text-sm text-ink/50 ml-1">/ night</span></p>
-                      <p className="text-sm text-ink/60">Weekends from ₹{pricing.weekendRate.toLocaleString("en-IN")}/night</p>
+                      <p className="text-3xl font-display text-forest">
+                        ₹{pricing.baseRate.toLocaleString("en-IN")}
+                        <span className="text-sm text-ink/50 ml-1">/ night</span>
+                      </p>
+                      {pricing.weekendRate > pricing.baseRate && (
+                        <p className="text-sm text-ink/60 mt-1">
+                          Weekends from ₹{pricing.weekendRate.toLocaleString("en-IN")}/night
+                        </p>
+                      )}
+                      <div className="mt-3 pt-3 border-t border-forest/10 space-y-1.5 text-xs font-mono text-ink/50">
+                        <div className="flex justify-between"><span>Base rate / night</span><span>₹{pricing.baseRate.toLocaleString("en-IN")}</span></div>
+                        <div className="flex justify-between"><span>Cleaning fee</span><span>{pricing.cleaningFee > 0 ? `₹${pricing.cleaningFee.toLocaleString("en-IN")}` : "Free"}</span></div>
+                        <div className="flex justify-between text-ink/70 font-medium pt-1 border-t border-forest/10">
+                          <span>Example: 2 nights</span>
+                          <span>₹{(pricing.baseRate * 2 + Math.round(pricing.baseRate * 2 * 0.18)).toLocaleString("en-IN")}</span>
+                        </div>
+                      </div>
                     </div>
                     <div className="space-y-3">
                       <Button asChild variant="gold" size="lg" className="w-full">
-                        <a href={`https://wa.me/918828352311?text=${encodeURIComponent("Hi! I'd like to reserve Sushant Lok. Can you help me with availability?")}`} target="_blank" rel="noopener noreferrer">
+                        <a href={`https://wa.me/918828352311?text=${waMessage}`} target="_blank" rel="noopener noreferrer">
                           <MessageCircle size={18} className="mr-2" />Reserve via WhatsApp
                         </a>
                       </Button>
@@ -190,7 +303,7 @@ export default function SushantLokPage() {
                   </div>
                   <div className="font-mono text-xs text-ink/50 text-center p-4">
                     <p>Minimum stay: 1 night</p>
-                    <p>Cleaning fee: ₹{pricing.cleaningFee.toLocaleString("en-IN")}</p>
+                    <p>Cleaning fee: {pricing.cleaningFee > 0 ? `₹${pricing.cleaningFee.toLocaleString("en-IN")}` : "Free"}</p>
                   </div>
                 </div>
               </div>
@@ -199,17 +312,24 @@ export default function SushantLokPage() {
         </section>
       </main>
 
-      <div className={cn("lg:hidden fixed bottom-0 left-0 right-0 bg-cream border-t border-forest/10 p-4 transition-transform duration-300 z-30", stickyVisible ? "translate-y-0" : "translate-y-full")}>
-        <div className="flex items-center justify-between">
+      {/* Mobile sticky bar */}
+      <div className={cn(
+        "lg:hidden fixed bottom-0 left-0 right-0 bg-cream border-t border-forest/10 p-3 transition-transform duration-300 z-30",
+        stickyVisible ? "translate-y-0" : "translate-y-full"
+      )}>
+        <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-xl font-display text-forest">₹{pricing.baseRate.toLocaleString("en-IN")}</p>
             <p className="font-mono text-xs text-ink/50">per night</p>
           </div>
-          <Button asChild variant="gold" size="lg">
-            <a href={`https://wa.me/918828352311?text=${encodeURIComponent("Hi! I'd like to reserve Sushant Lok.")}`} target="_blank" rel="noopener noreferrer">Reserve Now</a>
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild variant="gold" size="lg" className="flex-shrink-0">
+              <a href={`https://wa.me/918828352311?text=${waMessage}`} target="_blank" rel="noopener noreferrer">Reserve Now</a>
+            </Button>
+          </div>
         </div>
       </div>
+
       <Footer />
     </div>
   );
