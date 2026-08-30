@@ -22,6 +22,9 @@ interface SiteData {
     philosophyText: string; taglineCloser: string;
     heroMediaUrl?: string; heroMediaType?: string;
   };
+  discountPercent: number;
+  activeFestival: string;
+  discountActive: boolean;
 }
 
 // Different cinematic animations for each slide
@@ -32,6 +35,214 @@ const SLIDE_ANIMATIONS = [
   "panRight",        // pan right to left
   "panUp",           // pan bottom to top
 ];
+
+// ── Festival Ambience Overlay ─────────────────────────────────────────
+function FestivalAmbience({ festival, active }: { festival: string; active: boolean }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!active || !festival || !containerRef.current) return;
+    const container = containerRef.current;
+
+    // Clear existing particles
+    container.innerHTML = "";
+
+    const count = 28;
+
+    const configs: Record<string, () => HTMLElement> = {
+      "republic-day": () => {
+        const el = document.createElement("div");
+        const colors = ["#FF9933", "#ffffff", "#138808"];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const size = Math.random() * 10 + 5;
+        el.style.cssText = `
+          position:absolute;
+          width:${size}px;height:${size}px;
+          border-radius:50%;
+          background:${color};
+          left:${Math.random() * 100}%;
+          top:-${Math.random() * 20 + 10}px;
+          opacity:${Math.random() * 0.5 + 0.2};
+          animation: festivalFall ${Math.random() * 6 + 5}s linear ${Math.random() * 4}s infinite;
+        `;
+        return el;
+      },
+      "independence-day": () => {
+        const el = document.createElement("div");
+        const colors = ["#FF9933", "#ffffff", "#138808"];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const size = Math.random() * 10 + 5;
+        el.style.cssText = `
+          position:absolute;
+          width:${size}px;height:${size}px;
+          border-radius:50%;
+          background:${color};
+          left:${Math.random() * 100}%;
+          top:-${Math.random() * 20 + 10}px;
+          opacity:${Math.random() * 0.5 + 0.2};
+          animation: festivalFall ${Math.random() * 6 + 5}s linear ${Math.random() * 4}s infinite;
+        `;
+        return el;
+      },
+      "holi": () => {
+        const el = document.createElement("div");
+        const colors = ["#FF69B4", "#9B59B6", "#FFD700", "#2ECC71", "#FF6347", "#00BFFF"];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const size = Math.random() * 18 + 8;
+        const borderRadius = `${Math.random() * 50}% ${Math.random() * 50}% ${Math.random() * 50}% ${Math.random() * 50}%`;
+        el.style.cssText = `
+          position:absolute;
+          width:${size}px;height:${size * 0.7}px;
+          border-radius:${borderRadius};
+          background:${color};
+          left:${Math.random() * 100}%;
+          top:${Math.random() * 100}%;
+          opacity:${Math.random() * 0.35 + 0.1};
+          animation: holiFloat ${Math.random() * 8 + 5}s ease-in-out ${Math.random() * 4}s infinite alternate;
+          filter: blur(${Math.random() * 2}px);
+        `;
+        return el;
+      },
+      "diwali": () => {
+        const el = document.createElement("span");
+        const icons = ["✨", "🪔", "✨", "⭐", "✨"];
+        el.textContent = icons[Math.floor(Math.random() * icons.length)];
+        el.style.cssText = `
+          position:absolute;
+          font-size:${Math.random() * 16 + 10}px;
+          left:${Math.random() * 100}%;
+          top:-30px;
+          opacity:${Math.random() * 0.6 + 0.2};
+          animation: festivalFall ${Math.random() * 7 + 5}s linear ${Math.random() * 5}s infinite;
+        `;
+        return el;
+      },
+    };
+
+    const buildParticle = configs[festival];
+    if (!buildParticle) return;
+
+    for (let i = 0; i < count; i++) {
+      container.appendChild(buildParticle());
+    }
+
+    return () => { container.innerHTML = ""; };
+  }, [festival, active]);
+
+  if (!active || !festival) return null;
+
+  // Festival top border color
+  const borderColor: Record<string, string> = {
+    "republic-day": "linear-gradient(90deg, #FF9933 33%, #ffffff 33% 66%, #138808 66%)",
+    "independence-day": "linear-gradient(90deg, #FF9933 33%, #ffffff 33% 66%, #138808 66%)",
+    "holi": "linear-gradient(90deg, #FF69B4, #FFD700, #2ECC71, #9B59B6, #FF6347)",
+    "diwali": "linear-gradient(90deg, #FFD700, #FF8C00, #FFD700)",
+  };
+
+  return (
+    <>
+      {/* Colored top border */}
+      <div
+        className="fixed top-0 left-0 right-0 z-50 pointer-events-none"
+        style={{ height: "4px", background: borderColor[festival] || "#c9a84c" }}
+      />
+      {/* Particle container */}
+      <div
+        ref={containerRef}
+        className="fixed inset-0 pointer-events-none overflow-hidden"
+        style={{ zIndex: 0 }}
+        aria-hidden="true"
+      />
+      <style>{`
+        @keyframes festivalFall {
+          0% { transform: translateY(-20px) rotate(0deg); opacity: 0.7; }
+          100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
+        @keyframes holiFloat {
+          0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+          50% { transform: translate(${Math.random() > 0.5 ? "" : "-"}30px, -40px) scale(1.1) rotate(180deg); }
+          100% { transform: translate(0, 20px) scale(0.95) rotate(360deg); }
+        }
+      `}</style>
+    </>
+  );
+}
+
+// ── Festival Discount Banner ──────────────────────────────────────────
+function DiscountBanner({ discountPercent, activeFestival, discountActive }: {
+  discountPercent: number;
+  activeFestival: string;
+  discountActive: boolean;
+}) {
+  if (!discountActive || discountPercent <= 0) return null;
+
+  const festivalLabels: Record<string, string> = {
+    "republic-day": "Republic Day",
+    "independence-day": "Independence Day",
+    "holi": "Holi",
+    "diwali": "Diwali",
+  };
+
+  const festivalStyles: Record<string, React.CSSProperties> = {
+    "republic-day": {
+      background: "#ffffff",
+      borderTop: "3px solid #FF9933",
+      borderBottom: "3px solid #138808",
+      color: "#1a1a1a",
+    },
+    "independence-day": {
+      background: "#ffffff",
+      borderTop: "3px solid #FF9933",
+      borderBottom: "3px solid #138808",
+      color: "#1a1a1a",
+    },
+    "holi": {
+      background: "linear-gradient(90deg, #FF69B4, #FFD700, #2ECC71, #9B59B6)",
+      color: "#fff",
+      borderTop: "none",
+      borderBottom: "none",
+    },
+    "diwali": {
+      background: "linear-gradient(90deg, #FF8C00, #FFD700, #FF8C00)",
+      color: "#1a1a1a",
+      borderTop: "none",
+      borderBottom: "none",
+    },
+  };
+
+  const style = festivalStyles[activeFestival] || { background: "#c9a84c", color: "#000" };
+  const label = festivalLabels[activeFestival] || "Festival";
+
+  const waMessage = encodeURIComponent(
+    `Hi! I'd like to book a stay and avail the ${label} offer of ${discountPercent}% off. Can you help me?`
+  );
+
+  return (
+    <div
+      className="relative z-30 w-full px-4 py-2.5 text-center text-sm font-medium"
+      style={style}
+      role="banner"
+    >
+      <span className="inline-flex flex-wrap items-center justify-center gap-2">
+        <span>🎉 {label} Offer: <strong>{discountPercent}% off</strong> on all stays!</span>
+        <a
+          href={`https://wa.me/918828352311?text=${waMessage}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold"
+          style={{
+            background: "rgba(0,0,0,0.15)",
+            color: "inherit",
+            textDecoration: "none",
+            border: "1px solid rgba(0,0,0,0.2)",
+          }}
+        >
+          Book Now →
+        </a>
+      </span>
+    </div>
+  );
+}
 
 function useReveal() {
   useEffect(() => {
@@ -243,7 +454,7 @@ function HeroSlideshow({ slides }: { slides: { url: string; alt: string }[] }) {
 export function HomePageClient({ siteData }: { siteData: SiteData }) {
   useReveal();
 
-  const { properties, heroPhotos, instagramPhotos, galleryPhotos, propertyCards, content } = siteData;
+  const { properties, heroPhotos, instagramPhotos, galleryPhotos, propertyCards, content, discountPercent, activeFestival, discountActive } = siteData;
   const photos_fallback = galleryPhotos;
 
   // Build slideshow from all hero photos — use all available
@@ -259,8 +470,14 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
 
   return (
     <div className="min-h-screen bg-[#0a0f0d]">
+      <FestivalAmbience festival={activeFestival} active={discountActive} />
       <ScrollProgressBar />
       <Navigation />
+      <DiscountBanner
+        discountPercent={discountPercent}
+        activeFestival={activeFestival}
+        discountActive={discountActive}
+      />
       <main id="main-content">
 
         {/* ═══ HERO — Cinematic Slideshow ═══════════════════════════════ */}
@@ -365,7 +582,23 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
                             style={{ fontSize: "clamp(1.6rem, 3.5vw, 2.6rem)" }}>{p.name}</h3>
                           <p className="text-white/60 text-xs md:text-sm mb-4 line-clamp-2 max-w-sm">{p.vibe}</p>
                           <div className="flex items-center justify-between">
-                            <span className="font-mono text-[#c9a84c] text-sm font-medium">from ₹{p.baseRate.toLocaleString("en-IN")}/night</span>
+                            <div>
+                              {discountActive && discountPercent > 0 ? (
+                                <div className="flex flex-col gap-0.5">
+                                  <span className="font-mono text-white/40 text-xs line-through">
+                                    ₹{p.baseRate.toLocaleString("en-IN")}/night
+                                  </span>
+                                  <span className="font-mono text-[#c9a84c] text-sm font-medium">
+                                    from ₹{Math.round(p.baseRate * (1 - discountPercent / 100)).toLocaleString("en-IN")}/night
+                                  </span>
+                                  <span className="font-mono text-[#c9a84c]/70 text-[10px]">
+                                    🎉 {discountPercent}% off applied
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="font-mono text-[#c9a84c] text-sm font-medium">from ₹{p.baseRate.toLocaleString("en-IN")}/night</span>
+                              )}
+                            </div>
                             <span className="flex items-center gap-1.5 text-white/60 text-xs group-hover:text-[#c9a84c] group-hover:gap-2.5 transition-all duration-300">Explore <ArrowRight size={13} /></span>
                           </div>
                         </div>

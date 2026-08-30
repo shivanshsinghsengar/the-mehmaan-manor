@@ -26,5 +26,8 @@ export async function GET() {
     instagramPhotos: photos.filter((p) => p.section === "instagram"),
     galleryPhotos: photos.filter((p) => p.section === "gallery"),
     propertyCards,
+    discountPercent: content?.discountPercent ?? 0,
+    activeFestival: content?.activeFestival ?? "",
+    discountActive: content?.discountActive ?? false,
   });
 }

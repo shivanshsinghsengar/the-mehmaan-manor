@@ -110,6 +110,7 @@ export default function PropertyPage() {
   const [loading, setLoading] = useState(true);
   const [stickyVisible, setStickyVisible] = useState(false);
   const [selectedRoomKey, setSelectedRoomKey] = useState<string | null>(null);
+  const [festivalDiscount, setFestivalDiscount] = useState({ discountPercent: 0, activeFestival: "", discountActive: false });
 
   const roomTypes = ROOM_TYPES[slug] ?? null;
 
@@ -138,6 +139,15 @@ export default function PropertyPage() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
+
+    fetch("/api/settings/festival")
+      .then((r) => r.json())
+      .then((d) => setFestivalDiscount({
+        discountPercent: d.discountPercent ?? 0,
+        activeFestival: d.activeFestival ?? "",
+        discountActive: d.discountActive ?? false,
+      }))
+      .catch(() => {});
   }, [slug]);
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -467,10 +477,25 @@ export default function PropertyPage() {
                       <p className="font-mono text-xs text-ink/50 mb-1">
                         {selectedRoom ? selectedRoom.label.toUpperCase() + " RATE" : "BASE RATE"}
                       </p>
-                      <p className="text-3xl font-display text-forest">
-                        ₹{displayRate.toLocaleString("en-IN")}
-                        <span className="text-sm text-ink/50 ml-1">/ night</span>
-                      </p>
+                      {festivalDiscount.discountActive && festivalDiscount.discountPercent > 0 ? (
+                        <>
+                          <p className="text-sm font-mono text-ink/40 line-through">
+                            ₹{displayRate.toLocaleString("en-IN")}/night
+                          </p>
+                          <p className="text-3xl font-display text-gold">
+                            ₹{Math.round(displayRate * (1 - festivalDiscount.discountPercent / 100)).toLocaleString("en-IN")}
+                            <span className="text-sm text-ink/50 ml-1">/ night</span>
+                          </p>
+                          <p className="text-xs font-mono text-green-600 mt-1">
+                            🎉 {festivalDiscount.discountPercent}% festival discount applied
+                          </p>
+                        </>
+                      ) : (
+                        <p className="text-3xl font-display text-forest">
+                          ₹{displayRate.toLocaleString("en-IN")}
+                          <span className="text-sm text-ink/50 ml-1">/ night</span>
+                        </p>
+                      )}
                       {displayWeekendRate > displayRate && (
                         <p className="text-sm text-ink/60 mt-1">
                           Weekends from ₹{displayWeekendRate.toLocaleString("en-IN")}/night
@@ -541,7 +566,14 @@ export default function PropertyPage() {
             {selectedRoom && (
               <p className="font-mono text-[10px] text-gold uppercase">{selectedRoom.shortLabel}</p>
             )}
-            <p className="text-xl font-display text-forest">₹{displayRate.toLocaleString("en-IN")}</p>
+            {festivalDiscount.discountActive && festivalDiscount.discountPercent > 0 ? (
+              <>
+                <p className="text-sm font-mono text-ink/40 line-through">₹{displayRate.toLocaleString("en-IN")}</p>
+                <p className="text-xl font-display text-gold">₹{Math.round(displayRate * (1 - festivalDiscount.discountPercent / 100)).toLocaleString("en-IN")}</p>
+              </>
+            ) : (
+              <p className="text-xl font-display text-forest">₹{displayRate.toLocaleString("en-IN")}</p>
+            )}
             <p className="font-mono text-xs text-ink/50">per night</p>
           </div>
           <div className="flex gap-2">

@@ -99,6 +99,9 @@ model SiteContent {
   teamSimranPhone    String @default("8828352311")
   teamVipinPhone     String @default("8796568003")
   teamJyotiPhone     String @default("8796568002")
+  discountPercent    Float   @default(0)
+  activeFestival     String  @default("")
+  discountActive     Boolean @default(false)
 }
 
 // ── Inquiries ─────────────────────────────────────────────────────────────────

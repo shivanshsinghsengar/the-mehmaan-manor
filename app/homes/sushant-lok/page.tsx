@@ -48,6 +48,7 @@ export default function SushantLokPage() {
   const [pricing, setPricing] = useState(DEFAULTS);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [festivalDiscount, setFestivalDiscount] = useState({ discountPercent: 0, activeFestival: "", discountActive: false });
 
   useEffect(() => {
     fetch("/api/properties")
@@ -72,6 +73,15 @@ export default function SushantLokPage() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
+
+    fetch("/api/settings/festival")
+      .then((r) => r.json())
+      .then((d) => setFestivalDiscount({
+        discountPercent: d.discountPercent ?? 0,
+        activeFestival: d.activeFestival ?? "",
+        discountActive: d.discountActive ?? false,
+      }))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -269,10 +279,25 @@ export default function SushantLokPage() {
                     </div>
                     <div className="mb-5 md:mb-6">
                       <p className="font-mono text-xs text-ink/50 mb-1">BASE RATE</p>
-                      <p className="text-3xl font-display text-forest">
-                        ₹{pricing.baseRate.toLocaleString("en-IN")}
-                        <span className="text-sm text-ink/50 ml-1">/ night</span>
-                      </p>
+                      {festivalDiscount.discountActive && festivalDiscount.discountPercent > 0 ? (
+                        <>
+                          <p className="text-sm font-mono text-ink/40 line-through">
+                            ₹{pricing.baseRate.toLocaleString("en-IN")}/night
+                          </p>
+                          <p className="text-3xl font-display text-gold">
+                            ₹{Math.round(pricing.baseRate * (1 - festivalDiscount.discountPercent / 100)).toLocaleString("en-IN")}
+                            <span className="text-sm text-ink/50 ml-1">/ night</span>
+                          </p>
+                          <p className="text-xs font-mono text-green-600 mt-1">
+                            🎉 {festivalDiscount.discountPercent}% festival discount applied
+                          </p>
+                        </>
+                      ) : (
+                        <p className="text-3xl font-display text-forest">
+                          ₹{pricing.baseRate.toLocaleString("en-IN")}
+                          <span className="text-sm text-ink/50 ml-1">/ night</span>
+                        </p>
+                      )}
                       {pricing.weekendRate > pricing.baseRate && (
                         <p className="text-sm text-ink/60 mt-1">
                           Weekends from ₹{pricing.weekendRate.toLocaleString("en-IN")}/night
@@ -319,7 +344,14 @@ export default function SushantLokPage() {
       )}>
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-xl font-display text-forest">₹{pricing.baseRate.toLocaleString("en-IN")}</p>
+            {festivalDiscount.discountActive && festivalDiscount.discountPercent > 0 ? (
+              <>
+                <p className="text-sm font-mono text-ink/40 line-through">₹{pricing.baseRate.toLocaleString("en-IN")}</p>
+                <p className="text-xl font-display text-gold">₹{Math.round(pricing.baseRate * (1 - festivalDiscount.discountPercent / 100)).toLocaleString("en-IN")}</p>
+              </>
+            ) : (
+              <p className="text-xl font-display text-forest">₹{pricing.baseRate.toLocaleString("en-IN")}</p>
+            )}
             <p className="font-mono text-xs text-ink/50">per night</p>
           </div>
           <div className="flex gap-2">

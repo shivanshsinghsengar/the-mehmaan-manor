@@ -50,6 +50,9 @@ export default async function HomePage() {
       heroMediaUrl: content?.heroMediaUrl || "",
       heroMediaType: content?.heroMediaType || "photo",
     },
+    discountPercent: content?.discountPercent ?? 0,
+    activeFestival: content?.activeFestival ?? "",
+    discountActive: content?.discountActive ?? false,
   };
 
   return <HomePageClient siteData={siteData} />;

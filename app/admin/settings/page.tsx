@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 const TABS = [
   { key: "whatsapp", label: "WhatsApp" },
   { key: "brand", label: "Brand" },
+  { key: "festival", label: "Festival" },
   { key: "team", label: "Team" },
   { key: "notifications", label: "Notifications" },
   { key: "integrations", label: "Integrations" },
@@ -53,6 +54,11 @@ export default function SettingsPage() {
   const [teamSaving, setTeamSaving] = useState(false);
   const [teamSaved, setTeamSaved] = useState(false);
 
+  // Festival state
+  const [festival, setFestival] = useState({ discountPercent: 0, activeFestival: "", discountActive: false });
+  const [festivalSaving, setFestivalSaving] = useState(false);
+  const [festivalSaved, setFestivalSaved] = useState(false);
+
   // Notifications state
   const [notifPrefs, setNotifPrefs] = useState<NotifPrefs>(buildDefaultNotifPrefs());
   const [notifSaved, setNotifSaved] = useState(false);
@@ -89,6 +95,17 @@ export default function SettingsPage() {
       const stored = localStorage.getItem("mm_notification_prefs");
       if (stored) setNotifPrefs(JSON.parse(stored));
     } catch {}
+
+    fetch("/api/settings/festival")
+      .then((r) => r.json())
+      .then((d) => {
+        setFestival({
+          discountPercent: d.discountPercent ?? 0,
+          activeFestival: d.activeFestival ?? "",
+          discountActive: d.discountActive ?? false,
+        });
+      })
+      .catch(() => {});
   }, []);
 
   const saveWhatsApp = async () => {
@@ -113,6 +130,18 @@ export default function SettingsPage() {
       await fetch("/api/content", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ teamSimranPhone: teamPhones.simran, teamVipinPhone: teamPhones.vipin, teamJyotiPhone: teamPhones.jyoti }) });
       setTeamSaved(true); setTimeout(() => setTeamSaved(false), 3000);
     } catch {} finally { setTeamSaving(false); }
+  };
+
+  const saveFestival = async () => {
+    setFestivalSaving(true);
+    try {
+      await fetch("/api/settings/festival", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(festival),
+      });
+      setFestivalSaved(true); setTimeout(() => setFestivalSaved(false), 3000);
+    } catch {} finally { setFestivalSaving(false); }
   };
 
   const saveNotifs = () => {
@@ -253,6 +282,96 @@ export default function SettingsPage() {
               </div>
               <Button variant="gold" onClick={saveBrand} disabled={brandSaving} className={cn(brandSaved && "bg-green-500")}>
                 {brandSaved ? <><Check size={14} className="mr-2" />Saved!</> : brandSaving ? "Saving…" : <><Save size={14} className="mr-2" />Save Brand</>}
+              </Button>
+            </div>
+          )}
+
+          {/* FESTIVAL TAB */}
+          {activeTab === "festival" && (
+            <div className="space-y-6 max-w-lg">
+              <h2 className="text-lg font-display text-forest">Festival &amp; Discount</h2>
+
+              {/* Toggle */}
+              <div className="flex items-center justify-between p-4 bg-forest/5 border border-forest/15">
+                <div>
+                  <p className="font-medium text-forest text-sm">Enable Festival Mode</p>
+                  <p className="text-xs text-ink/50 mt-0.5">
+                    Currently: <span className={cn("font-mono", festival.discountActive ? "text-green-600" : "text-ink/40")}>
+                      {festival.discountActive ? "Active" : "Inactive"}
+                    </span>
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={festival.discountActive}
+                  onClick={() => setFestival((f) => ({ ...f, discountActive: !f.discountActive }))}
+                  className={cn(
+                    "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200",
+                    festival.discountActive ? "bg-forest" : "bg-neutral-200"
+                  )}
+                >
+                  <span className={cn(
+                    "pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform duration-200",
+                    festival.discountActive ? "translate-x-5" : "translate-x-0"
+                  )} />
+                </button>
+              </div>
+
+              {/* Festival selector */}
+              <div>
+                <label className="block text-sm font-medium text-forest mb-3">Festival</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { key: "republic-day", emoji: "🇮🇳", label: "Republic Day", sub: "26 Jan" },
+                    { key: "independence-day", emoji: "🇮🇳", label: "Independence Day", sub: "15 Aug" },
+                    { key: "holi", emoji: "🎨", label: "Holi", sub: "" },
+                    { key: "diwali", emoji: "🪔", label: "Diwali", sub: "" },
+                  ].map((f) => (
+                    <button
+                      key={f.key}
+                      type="button"
+                      onClick={() => setFestival((prev) => ({ ...prev, activeFestival: f.key }))}
+                      className={cn(
+                        "flex items-center gap-2 px-4 py-3 border text-sm text-left transition-all",
+                        festival.activeFestival === f.key
+                          ? "border-forest bg-forest text-cream font-medium"
+                          : "border-neutral-200 text-ink/70 hover:border-forest/40"
+                      )}
+                    >
+                      <span className="text-xl">{f.emoji}</span>
+                      <div>
+                        <p className="font-medium text-xs">{f.label}</p>
+                        {f.sub && <p className="text-[10px] opacity-60">{f.sub}</p>}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Discount percentage */}
+              <div>
+                <label className="block text-sm font-medium text-forest mb-2">Discount Percentage</label>
+                <div className="flex items-center gap-3">
+                  <Input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={festival.discountPercent}
+                    onChange={(e) => setFestival((f) => ({ ...f, discountPercent: Math.min(100, Math.max(0, Number(e.target.value))) }))}
+                    className="font-mono w-24"
+                  />
+                  <span className="text-ink/50 text-sm">%</span>
+                  {festival.discountPercent > 0 && (
+                    <span className="text-xs font-mono text-gold">
+                      e.g. ₹3000 → ₹{Math.round(3000 * (1 - festival.discountPercent / 100)).toLocaleString("en-IN")}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <Button variant="gold" onClick={saveFestival} disabled={festivalSaving} className={cn(festivalSaved && "bg-green-500")}>
+                {festivalSaved ? <><Check size={14} className="mr-2" />Saved!</> : festivalSaving ? "Saving…" : <><Save size={14} className="mr-2" />Save Festival Settings</>}
               </Button>
             </div>
           )}
