@@ -28,6 +28,11 @@ export default async function HomePage() {
       .map((ph) => ({ url: ph.url, alt: ph.alt }));
   }
 
+  // First hero image URL — used for <link rel="preload"> to improve LCP
+  const firstHeroUrl =
+    heroPhotos[0]?.url ||
+    (content?.heroMediaUrl ? content.heroMediaUrl : null);
+
   const siteData = {
     properties: properties.map((p) => ({
       id: p.id,
@@ -55,5 +60,22 @@ export default async function HomePage() {
     discountActive: content?.discountActive ?? false,
   };
 
-  return <HomePageClient siteData={siteData} />;
+  return (
+    <>
+      {/*
+        Preload the first hero image as early as possible in the HTML stream.
+        This tells the browser to fetch it at highest priority immediately,
+        before any JS executes — the single biggest LCP win.
+      */}
+      {firstHeroUrl && (
+        <link
+          rel="preload"
+          as="image"
+          href={firstHeroUrl}
+          fetchPriority="high"
+        />
+      )}
+      <HomePageClient siteData={siteData} />
+    </>
+  );
 }

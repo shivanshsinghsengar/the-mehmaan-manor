@@ -416,7 +416,12 @@ function HeroSlideshow({ slides }: { slides: { url: string; alt: string }[] }) {
           className="absolute inset-0"
           style={{ animation: "fadeOut 1.2s ease-in-out forwards", zIndex: 1 }}
         >
-          <img src={slides[prev].url} alt={slides[prev].alt} className="w-full h-full object-cover" />
+          <img
+            src={slides[prev].url}
+            alt={slides[prev].alt}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
         </div>
       )}
 
@@ -431,6 +436,10 @@ function HeroSlideshow({ slides }: { slides: { url: string; alt: string }[] }) {
           alt={slides[current].alt}
           className="w-full h-full object-cover"
           style={{ animation: `${SLIDE_ANIMATIONS[current % SLIDE_ANIMATIONS.length]} 8s ease-in-out forwards` }}
+          // First slide (index 0) is the LCP element — load it with highest priority
+          loading={current === 0 ? "eager" : "lazy"}
+          fetchPriority={current === 0 ? "high" : "low"}
+          decoding={current === 0 ? "sync" : "async"}
         />
       </div>
 
