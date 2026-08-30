@@ -101,6 +101,194 @@ interface Photo {
   tags: string[];
 }
 
+// ── Booking Sidebar with availability check ──────────────────────────
+function BookingSidebar({
+  property, selectedRoom, roomTypes, selectedRoomKey, setSelectedRoomKey,
+  displayRate, displayWeekendRate, festivalDiscount, waMessage,
+}: {
+  property: Property;
+  selectedRoom: { key: string; label: string; shortLabel: string; baseRate: number; weekendRate: number; maxGuests: number } | null;
+  roomTypes: { key: string; label: string; shortLabel: string; baseRate: number; weekendRate: number; maxGuests: number }[] | null;
+  selectedRoomKey: string | null;
+  setSelectedRoomKey: (k: string) => void;
+  displayRate: number;
+  displayWeekendRate: number;
+  festivalDiscount: { discountPercent: number; discountActive: boolean; activeFestival: string };
+  waMessage: string;
+}) {
+  const today = new Date().toISOString().split("T")[0];
+  const [checkIn, setCheckIn] = useState("");
+  const [checkOut, setCheckOut] = useState("");
+  const [availability, setAvailability] = useState<"idle" | "checking" | "available" | "soldout">("idle");
+
+  const nights = checkIn && checkOut
+    ? Math.max(0, Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / 86400000))
+    : 0;
+
+  const discounted = festivalDiscount.discountActive && festivalDiscount.discountPercent > 0;
+  const effectiveRate = discounted
+    ? Math.round(displayRate * (1 - festivalDiscount.discountPercent / 100))
+    : displayRate;
+
+  // Auto-check availability when both dates set
+  useEffect(() => {
+    if (!checkIn || !checkOut || nights <= 0) { setAvailability("idle"); return; }
+    setAvailability("checking");
+    const t = setTimeout(() => {
+      fetch(`/api/availability?propertyId=${property.id}&checkIn=${checkIn}&checkOut=${checkOut}`)
+        .then((r) => r.json())
+        .then((d) => setAvailability(d.available ? "available" : "soldout"))
+        .catch(() => setAvailability("available")); // fail open
+    }, 600);
+    return () => clearTimeout(t);
+  }, [checkIn, checkOut, property.id, nights]);
+
+  const bookUrl = availability === "available" && checkIn && checkOut
+    ? `/book?property=${property.id}&checkIn=${checkIn}&checkOut=${checkOut}`
+    : `/book?property=${property.id}`;
+
+  return (
+    <div className="sticky top-24 space-y-4">
+      {/* Room selector */}
+      {roomTypes && (
+        <div className="border border-forest/10 p-4 bg-cream">
+          <p className="font-mono text-xs text-ink/50 uppercase mb-3">Room Type</p>
+          <div className="grid grid-cols-2 gap-2">
+            {roomTypes.map((room) => (
+              <button key={room.key} onClick={() => setSelectedRoomKey(room.key)}
+                className={cn(
+                  "py-3 px-2 text-center transition-all duration-200 border",
+                  selectedRoomKey === room.key
+                    ? "border-forest bg-forest text-cream"
+                    : "border-forest/20 text-ink/60 hover:border-forest"
+                )}>
+                <p className="font-display text-base">{room.shortLabel}</p>
+                <p className="font-mono text-[10px] mt-0.5 opacity-70">{room.maxGuests} guests</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="border-2 border-forest/10 p-5 bg-cream">
+        {/* Trust badges */}
+        <div className="flex flex-wrap gap-2 mb-4 pb-4 border-b border-forest/10">
+          <span className="flex items-center gap-1 text-[10px] font-mono text-green-700 bg-green-50 border border-green-200 px-2 py-1">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Verified Property
+          </span>
+          <span className="flex items-center gap-1 text-[10px] font-mono text-gold bg-gold/10 border border-gold/30 px-2 py-1">★ 4.9 Rating</span>
+        </div>
+
+        {/* Rate */}
+        <div className="mb-4">
+          <p className="font-mono text-xs text-ink/50 mb-1">
+            {selectedRoom ? selectedRoom.label.toUpperCase() + " RATE" : "BASE RATE"}
+          </p>
+          {discounted ? (
+            <>
+              <p className="text-sm font-mono text-ink/40 line-through">₹{displayRate.toLocaleString("en-IN")}/night</p>
+              <p className="text-3xl font-display text-gold">₹{effectiveRate.toLocaleString("en-IN")}<span className="text-sm text-ink/50 ml-1">/ night</span></p>
+              <p className="text-xs font-mono text-green-600 mt-0.5">🎉 {festivalDiscount.discountPercent}% festival discount</p>
+            </>
+          ) : (
+            <p className="text-3xl font-display text-forest">₹{displayRate.toLocaleString("en-IN")}<span className="text-sm text-ink/50 ml-1">/ night</span></p>
+          )}
+          {displayWeekendRate > displayRate && (
+            <p className="text-sm text-ink/60 mt-1">Weekends from ₹{displayWeekendRate.toLocaleString("en-IN")}/night</p>
+          )}
+        </div>
+
+        {/* Date pickers */}
+        <div className="space-y-2 mb-4">
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-[10px] font-mono text-ink/50 uppercase mb-1">Check-in</label>
+              <input type="date" min={today} value={checkIn}
+                onChange={(e) => { setCheckIn(e.target.value); if (checkOut && e.target.value >= checkOut) setCheckOut(""); }}
+                className="w-full border border-forest/20 px-2 py-2 text-xs font-mono text-ink focus:outline-none focus:border-forest bg-white" />
+            </div>
+            <div>
+              <label className="block text-[10px] font-mono text-ink/50 uppercase mb-1">Check-out</label>
+              <input type="date" min={checkIn || today} value={checkOut}
+                disabled={!checkIn}
+                onChange={(e) => setCheckOut(e.target.value)}
+                className="w-full border border-forest/20 px-2 py-2 text-xs font-mono text-ink focus:outline-none focus:border-forest bg-white disabled:opacity-40" />
+            </div>
+          </div>
+
+          {/* Nights summary + price */}
+          {nights > 0 && (
+            <div className="bg-forest/5 border border-forest/10 px-3 py-2 text-xs font-mono">
+              <div className="flex justify-between text-ink/60">
+                <span>₹{effectiveRate.toLocaleString("en-IN")} × {nights} night{nights > 1 ? "s" : ""}</span>
+                <span>₹{(effectiveRate * nights).toLocaleString("en-IN")}</span>
+              </div>
+              <div className="flex justify-between text-ink/60">
+                <span>GST (18%)</span>
+                <span>₹{Math.round(effectiveRate * nights * 0.18).toLocaleString("en-IN")}</span>
+              </div>
+              <div className="flex justify-between font-medium text-forest pt-1 border-t border-forest/10 mt-1">
+                <span>Total</span>
+                <span>₹{(effectiveRate * nights + Math.round(effectiveRate * nights * 0.18)).toLocaleString("en-IN")}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Availability status */}
+          {availability === "checking" && (
+            <p className="text-xs font-mono text-ink/50 flex items-center gap-1.5">
+              <span className="w-3 h-3 border border-forest border-t-transparent rounded-full animate-spin inline-block" />
+              Checking availability…
+            </p>
+          )}
+          {availability === "available" && (
+            <p className="text-xs font-mono text-green-600 flex items-center gap-1.5">✓ Available for these dates</p>
+          )}
+          {availability === "soldout" && (
+            <p className="text-xs font-mono text-red-600 flex items-center gap-1.5">✗ Not available for these dates</p>
+          )}
+        </div>
+
+        {/* CTA buttons */}
+        {availability === "soldout" ? (
+          <div className="space-y-3">
+            <div className="w-full py-3.5 bg-red-100 border border-red-300 text-red-700 font-mono text-sm text-center font-medium">
+              🚫 Sold Out for Selected Dates
+            </div>
+            <a href={`https://wa.me/918828352311?text=${waMessage}`} target="_blank" rel="noopener noreferrer"
+              className="w-full py-3.5 border-2 border-forest text-forest font-medium text-sm flex items-center justify-center gap-2 hover:bg-forest hover:text-cream transition-all">
+              <MessageCircle size={16} /> Ask for Alternative Dates
+            </a>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <Link href={bookUrl}
+              className="w-full py-3.5 bg-gold text-ink font-semibold text-sm flex items-center justify-center gap-2 hover:bg-gold/90 transition-all">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              {checkIn && checkOut ? "Book Now" : "Check Availability"}
+            </Link>
+            <a href={`https://wa.me/918828352311?text=${waMessage}`} target="_blank" rel="noopener noreferrer"
+              className="w-full py-3.5 border border-forest/30 text-forest/70 font-medium text-sm flex items-center justify-center gap-2 hover:border-forest hover:text-forest transition-all">
+              <MessageCircle size={16} /> Reserve via WhatsApp
+            </a>
+            <a href="tel:+918828352311"
+              className="w-full py-3 text-center font-mono text-xs text-ink/50 hover:text-forest transition-colors flex items-center justify-center gap-1.5">
+              <Phone size={12} /> Call Simran — +91 88283 52311
+            </a>
+          </div>
+        )}
+      </div>
+
+      <div className="font-mono text-xs text-ink/50 text-center p-3">
+        <p>Minimum stay: 1 night · Cleaning fee: {property.cleaningFee > 0 ? `₹${property.cleaningFee.toLocaleString("en-IN")}` : "Free"}</p>
+      </div>
+    </div>
+  );
+}
+
 export default function PropertyPage() {
   const params = useParams();
   const slug = params.slug as string;
@@ -222,7 +410,6 @@ export default function PropertyPage() {
   // Displayed rate — from room type if selected, else from DB
   const displayRate = selectedRoom?.baseRate ?? property.baseRate;
   const displayWeekendRate = selectedRoom?.weekendRate ?? property.weekendRate;
-  const displayMaxGuests = selectedRoom?.maxGuests ?? property.maxGuests;
   const displayDescription = selectedRoom?.description ?? property.description;
 
   const coordParts = property.coordinates?.match(/([\d.]+)°\s*N.*?([\d.]+)°\s*E/);
@@ -425,126 +612,17 @@ export default function PropertyPage() {
 
               {/* ── Sidebar ─────────────────────────────────────────── */}
               <div className="lg:col-span-1">
-                <div className="sticky top-24 space-y-4">
-
-                  {/* Room type mini-selector in sidebar (mobile-friendly) */}
-                  {roomTypes && (
-                    <div className="border border-forest/10 p-4 bg-cream">
-                      <p className="font-mono text-xs text-ink/50 uppercase mb-3">Room Type</p>
-                      <div className="grid grid-cols-2 gap-2">
-                        {roomTypes.map((room) => (
-                          <button
-                            key={room.key}
-                            onClick={() => setSelectedRoomKey(room.key)}
-                            className={cn(
-                              "py-3 px-2 text-center transition-all duration-200 border",
-                              selectedRoomKey === room.key
-                                ? "border-forest bg-forest text-cream"
-                                : "border-forest/20 text-ink/60 hover:border-forest"
-                            )}
-                          >
-                            <p className="font-display text-base">{room.shortLabel}</p>
-                            <p className="font-mono text-[10px] mt-0.5 opacity-70">
-                              {room.maxGuests} guests
-                            </p>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="border-2 border-forest/10 p-5 md:p-6 bg-cream">
-                    {/* Trust badges */}
-                    <div className="flex flex-wrap gap-2 mb-4 pb-4 border-b border-forest/10">
-                      <span className="flex items-center gap-1 text-[10px] font-mono text-green-700 bg-green-50 border border-green-200 px-2 py-1">
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                        Verified Property
-                      </span>
-                      <span className="flex items-center gap-1 text-[10px] font-mono text-gold bg-gold/10 border border-gold/30 px-2 py-1">
-                        ★ 4.9 Rating
-                      </span>
-                      <span className="flex items-center gap-1 text-[10px] font-mono text-forest/70 bg-forest/5 border border-forest/20 px-2 py-1">
-                        🔒 Secure Booking
-                      </span>
-                    </div>
-
-                    <div className="mb-5 md:mb-6">
-                      <p className="font-mono text-xs text-ink/50 mb-1">
-                        {selectedRoom ? selectedRoom.label.toUpperCase() + " RATE" : "BASE RATE"}
-                      </p>
-                      {festivalDiscount.discountActive && festivalDiscount.discountPercent > 0 ? (
-                        <>
-                          <p className="text-sm font-mono text-ink/40 line-through">
-                            ₹{displayRate.toLocaleString("en-IN")}/night
-                          </p>
-                          <p className="text-3xl font-display text-gold">
-                            ₹{Math.round(displayRate * (1 - festivalDiscount.discountPercent / 100)).toLocaleString("en-IN")}
-                            <span className="text-sm text-ink/50 ml-1">/ night</span>
-                          </p>
-                          <p className="text-xs font-mono text-green-600 mt-1">
-                            🎉 {festivalDiscount.discountPercent}% festival discount applied
-                          </p>
-                        </>
-                      ) : (
-                        <p className="text-3xl font-display text-forest">
-                          ₹{displayRate.toLocaleString("en-IN")}
-                          <span className="text-sm text-ink/50 ml-1">/ night</span>
-                        </p>
-                      )}
-                      {displayWeekendRate > displayRate && (
-                        <p className="text-sm text-ink/60 mt-1">
-                          Weekends from ₹{displayWeekendRate.toLocaleString("en-IN")}/night
-                        </p>
-                      )}
-                      {/* Pricing transparency */}
-                      <div className="mt-3 pt-3 border-t border-forest/10 space-y-1.5 text-xs font-mono text-ink/50">
-                        <div className="flex justify-between">
-                          <span>Base rate / night</span>
-                          <span>₹{displayRate.toLocaleString("en-IN")}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Cleaning fee</span>
-                          <span>{property.cleaningFee > 0 ? `₹${property.cleaningFee.toLocaleString("en-IN")}` : "Free"}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>GST (18%)</span>
-                          <span>Added at checkout</span>
-                        </div>
-                        <div className="flex justify-between text-ink/70 font-medium pt-1 border-t border-forest/10">
-                          <span>Example: 2 nights</span>
-                          <span>₹{(displayRate * 2 + Math.round(displayRate * 2 * 0.18)).toLocaleString("en-IN")}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      {/* Primary CTA — direct website booking */}
-                      <Button asChild variant="gold" size="lg" className="w-full">
-                        <Link href={`/book?property=${property.id}`}>
-                          <svg className="mr-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                          Book Now
-                        </Link>
-                      </Button>
-                      <Button asChild variant="outline" size="lg" className="w-full">
-                        <a href={`https://wa.me/918828352311?text=${waMessage}`}
-                          target="_blank" rel="noopener noreferrer">
-                          <MessageCircle size={18} className="mr-2" />Reserve via WhatsApp
-                        </a>
-                      </Button>
-                      <Button asChild variant="outline" size="lg" className="w-full">
-                        <a href="tel:+918828352311">
-                          <Phone size={18} className="mr-2" />Call Simran
-                        </a>
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="font-mono text-xs text-ink/50 text-center p-4">
-                    <p>Minimum stay: 1 night</p>
-                    <p>Cleaning fee: ₹{property.cleaningFee.toLocaleString("en-IN")}</p>
-                  </div>
-                </div>
+                <BookingSidebar
+                  property={property}
+                  selectedRoom={selectedRoom}
+                  roomTypes={roomTypes}
+                  selectedRoomKey={selectedRoomKey}
+                  setSelectedRoomKey={setSelectedRoomKey}
+                  displayRate={displayRate}
+                  displayWeekendRate={displayWeekendRate}
+                  festivalDiscount={festivalDiscount}
+                  waMessage={waMessage}
+                />
               </div>
             </div>
           </div>
