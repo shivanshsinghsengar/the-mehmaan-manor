@@ -151,14 +151,26 @@ export default function PropertyPage() {
   }, [slug]);
   useEffect(() => {
     const observer = new IntersectionObserver(
-      (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add("active")),
-      { threshold: 0.1 }
+      (entries) => entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add("active");
+          observer.unobserve(e.target);
+        }
+      }),
+      { threshold: 0, rootMargin: "0px 0px -30px 0px" }
     );
-    document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
+    // Small delay to ensure DOM is painted after state updates
+    const timer = setTimeout(() => {
+      document.querySelectorAll(".reveal:not(.active)").forEach((el) => observer.observe(el));
+    }, 50);
     const handleScroll = () => setStickyVisible(window.scrollY > 600);
     window.addEventListener("scroll", handleScroll);
-    return () => { observer.disconnect(); window.removeEventListener("scroll", handleScroll); };
-  }, [property]);
+    return () => {
+      clearTimeout(timer);
+      observer.disconnect();
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [property, selectedRoomKey]);
 
   // Dynamic SEO
   useEffect(() => {

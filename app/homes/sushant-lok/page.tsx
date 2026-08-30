@@ -86,13 +86,24 @@ export default function SushantLokPage() {
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add("active")),
-      { threshold: 0.1 }
+      (entries) => entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add("active");
+          observer.unobserve(e.target);
+        }
+      }),
+      { threshold: 0, rootMargin: "0px 0px -30px 0px" }
     );
-    document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
+    const timer = setTimeout(() => {
+      document.querySelectorAll(".reveal:not(.active)").forEach((el) => observer.observe(el));
+    }, 50);
     const handleScroll = () => setStickyVisible(window.scrollY > 600);
     window.addEventListener("scroll", handleScroll);
-    return () => { observer.disconnect(); window.removeEventListener("scroll", handleScroll); };
+    return () => {
+      clearTimeout(timer);
+      observer.disconnect();
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, [photos]);
 
   // Photo selection — same logic as [slug]/page.tsx
