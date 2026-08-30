@@ -85,26 +85,10 @@ export default function SushantLokPage() {
   }, []);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => entries.forEach((e) => {
-        if (e.isIntersecting) {
-          e.target.classList.add("active");
-          observer.unobserve(e.target);
-        }
-      }),
-      { threshold: 0, rootMargin: "0px 0px -30px 0px" }
-    );
-    const timer = setTimeout(() => {
-      document.querySelectorAll(".reveal:not(.active)").forEach((el) => observer.observe(el));
-    }, 50);
     const handleScroll = () => setStickyVisible(window.scrollY > 600);
     window.addEventListener("scroll", handleScroll);
-    return () => {
-      clearTimeout(timer);
-      observer.disconnect();
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [photos]);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Photo selection — same logic as [slug]/page.tsx
   const heroPhotos = photos.filter((p) => p.section === "property-hero");
@@ -178,7 +162,7 @@ export default function SushantLokPage() {
               <div className="lg:col-span-2 space-y-10 md:space-y-12">
 
                 {/* Location + description */}
-                <div className="reveal">
+                <div>
                   <div className="mb-6">
                     <div className="flex items-start space-x-2 mb-2">
                       <MapPin size={16} className="text-gold flex-shrink-0 mt-0.5" />
@@ -200,7 +184,7 @@ export default function SushantLokPage() {
                 </div>
 
                 {/* Gallery */}
-                <div className="reveal">
+                <div>
                   <h2 className="text-xl md:text-2xl font-display text-forest mb-4 md:mb-6">The Space</h2>
                   {galleryPhotos.length > 0 ? (
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4">
@@ -225,7 +209,7 @@ export default function SushantLokPage() {
 
                 {/* Amenities */}
                 {pricing.amenities.length > 0 && (
-                  <div className="reveal">
+                  <div>
                     <h2 className="text-xl md:text-2xl font-display text-forest mb-4 md:mb-6">Amenities</h2>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4">
                       {pricing.amenities.map((amenity, i) => {
@@ -242,7 +226,7 @@ export default function SushantLokPage() {
                 )}
 
                 {/* Neighborhood */}
-                <div className="reveal">
+                <div>
                   <h2 className="text-xl md:text-2xl font-display text-forest mb-4 md:mb-6">The Neighborhood</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -267,7 +251,7 @@ export default function SushantLokPage() {
                 </div>
 
                 {/* Policies */}
-                <div className="reveal bg-forest/5 p-4 md:p-6">
+                <div className="bg-forest/5 p-4 md:p-6">
                   <h2 className="text-lg md:text-xl font-display text-forest mb-4">House Policies</h2>
                   <div className="grid grid-cols-2 gap-4 font-mono text-sm text-ink/70 mb-4">
                     <div><p className="text-ink/50 text-xs mb-1">CHECK-IN</p><p>{pricing.checkInTime} onwards</p></div>
@@ -279,7 +263,7 @@ export default function SushantLokPage() {
 
               {/* Sidebar */}
               <div className="lg:col-span-1">
-                <div className="sticky top-24 space-y-4 reveal">
+                <div className="sticky top-24 space-y-4">
                   <div className="border-2 border-forest/10 p-5 md:p-6 bg-cream">
                     <div className="flex flex-wrap gap-2 mb-4 pb-4 border-b border-forest/10">
                       <span className="flex items-center gap-1 text-[10px] font-mono text-green-700 bg-green-50 border border-green-200 px-2 py-1">

@@ -150,27 +150,10 @@ export default function PropertyPage() {
       .catch(() => {});
   }, [slug]);
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => entries.forEach((e) => {
-        if (e.isIntersecting) {
-          e.target.classList.add("active");
-          observer.unobserve(e.target);
-        }
-      }),
-      { threshold: 0, rootMargin: "0px 0px -30px 0px" }
-    );
-    // Small delay to ensure DOM is painted after state updates
-    const timer = setTimeout(() => {
-      document.querySelectorAll(".reveal:not(.active)").forEach((el) => observer.observe(el));
-    }, 50);
     const handleScroll = () => setStickyVisible(window.scrollY > 600);
     window.addEventListener("scroll", handleScroll);
-    return () => {
-      clearTimeout(timer);
-      observer.disconnect();
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [property, selectedRoomKey]);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Dynamic SEO
   useEffect(() => {
@@ -350,7 +333,7 @@ export default function PropertyPage() {
               <div className="lg:col-span-2 space-y-10 md:space-y-12">
 
                 {/* Location + description */}
-                <div className="reveal">
+                <div>
                   <div className="mb-6">
                     <div className="flex items-start space-x-2 mb-2">
                       <MapPin size={16} className="text-gold flex-shrink-0 mt-0.5" />
@@ -369,7 +352,7 @@ export default function PropertyPage() {
 
                 {/* Gallery — switches with room type */}
                 {galleryPhotos.length > 0 ? (
-                  <div className="reveal">
+                  <div>
                     <div className="flex items-center justify-between mb-4 md:mb-6">
                       <h2 className="text-xl md:text-2xl font-display text-forest">The Space</h2>
                       {selectedRoom && (
@@ -389,7 +372,7 @@ export default function PropertyPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="reveal">
+                  <div>
                     <h2 className="text-xl md:text-2xl font-display text-forest mb-4 md:mb-6">The Space</h2>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
                       {["EXTERIOR — Property view", "INTERIOR — Living area", "DETAIL — Thoughtful touches",
@@ -404,7 +387,7 @@ export default function PropertyPage() {
 
                 {/* Amenities */}
                 {property.amenities?.length > 0 && (
-                  <div className="reveal">
+                  <div>
                     <h2 className="text-xl md:text-2xl font-display text-forest mb-4 md:mb-6">Amenities</h2>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4">
                       {property.amenities.map((amenity, i) => {
@@ -421,7 +404,7 @@ export default function PropertyPage() {
                 )}
 
                 {/* Policies */}
-                <div className="reveal bg-forest/5 p-4 md:p-6">
+                <div className="bg-forest/5 p-4 md:p-6">
                   <h2 className="text-lg md:text-xl font-display text-forest mb-4">House Policies</h2>
                   <div className="grid grid-cols-2 gap-4 font-mono text-sm text-ink/70 mb-4">
                     <div>
@@ -442,7 +425,7 @@ export default function PropertyPage() {
 
               {/* ── Sidebar ─────────────────────────────────────────── */}
               <div className="lg:col-span-1">
-                <div className="sticky top-24 space-y-4 reveal">
+                <div className="sticky top-24 space-y-4">
 
                   {/* Room type mini-selector in sidebar (mobile-friendly) */}
                   {roomTypes && (
