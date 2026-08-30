@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  const auth = requireAdmin();
+  if (!auth.ok) return auth.response;
+
   const bookings = await prisma.booking.findMany({
     orderBy: { createdAt: "desc" },
   });
@@ -11,6 +15,9 @@ export async function GET() {
 }
 
 export async function PATCH(request: Request) {
+  const auth = requireAdmin();
+  if (!auth.ok) return auth.response;
+
   const { id, status, note } = await request.json();
 
   const existing = await prisma.booking.findUnique({ where: { id } });

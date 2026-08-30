@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
+// Public — used by the public site to display discount banners
 export async function GET() {
-  const content = await prisma.siteContent.findUnique({ where: { id: "singleton" } });
+  const content = await prisma.siteContent.findUnique({
+    where: { id: "singleton" },
+  });
   return NextResponse.json({
     discountPercent: content?.discountPercent ?? 0,
     activeFestival: content?.activeFestival ?? "",
@@ -12,11 +16,19 @@ export async function GET() {
   });
 }
 
+// Admin only — managing festival discounts
 export async function PUT(request: Request) {
+  const auth = requireAdmin();
+  if (!auth.ok) return auth.response;
+
   const body = await request.json();
   const { discountPercent, activeFestival, discountActive } = body;
 
-  if (typeof discountPercent !== "number" || typeof activeFestival !== "string" || typeof discountActive !== "boolean") {
+  if (
+    typeof discountPercent !== "number" ||
+    typeof activeFestival !== "string" ||
+    typeof discountActive !== "boolean"
+  ) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }
 

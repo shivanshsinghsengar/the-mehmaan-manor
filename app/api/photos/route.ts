@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
+// Public — used by the public site to display photos
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const propertyId = searchParams.get("propertyId");
@@ -19,7 +21,11 @@ export async function GET(request: Request) {
   return NextResponse.json(photos);
 }
 
+// Admin only — creating a photo record directly
 export async function POST(request: Request) {
+  const auth = requireAdmin();
+  if (!auth.ok) return auth.response;
+
   const body = await request.json();
   if (!body.url) {
     return NextResponse.json({ error: "url required" }, { status: 400 });

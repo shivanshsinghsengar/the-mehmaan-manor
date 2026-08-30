@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -9,7 +10,8 @@ const DEFAULT_CONTENT = {
   heroSubtitle: "Two homes in Gurugram. Endless ways to feel at home.",
   heroMediaUrl: "",
   heroMediaType: "photo",
-  philosophyText: "Mehmaan — the Hindi word for guest — carries a cultural weight that no translation captures.",
+  philosophyText:
+    "Mehmaan — the Hindi word for guest — carries a cultural weight that no translation captures.",
   taglinePrimary: "Not just a stay — it's the Mehmaan experience.",
   taglineSecondary: "Two homes. One promise. Endless memories.",
   taglineCloser: "Come as a guest, leave as family.",
@@ -19,12 +21,19 @@ const DEFAULT_CONTENT = {
   teamJyotiPhone: "8796568002",
 };
 
+// Public — used by the public site
 export async function GET() {
-  const content = await prisma.siteContent.findUnique({ where: { id: "singleton" } });
+  const content = await prisma.siteContent.findUnique({
+    where: { id: "singleton" },
+  });
   return NextResponse.json(content ?? DEFAULT_CONTENT);
 }
 
+// Admin only — updating site content
 export async function PUT(request: Request) {
+  const auth = requireAdmin();
+  if (!auth.ok) return auth.response;
+
   const body = await request.json();
   const { id: _id, ...data } = body;
 

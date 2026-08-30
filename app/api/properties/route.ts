@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
+// Public — anyone can read active properties (used by the public site)
 export async function GET() {
   const properties = await prisma.property.findMany({
     where: { isActive: true },
@@ -11,9 +13,17 @@ export async function GET() {
   return NextResponse.json(properties);
 }
 
+// Admin only — creating properties
 export async function POST(request: Request) {
+  const auth = requireAdmin();
+  if (!auth.ok) return auth.response;
+
   const body = await request.json();
-  const { name, slug, address, coordinates, description, vibe, baseRate, weekendRate, cleaningFee, maxGuests, checkInTime, checkOutTime, amenities, policies } = body;
+  const {
+    name, slug, address, coordinates, description, vibe,
+    baseRate, weekendRate, cleaningFee, maxGuests,
+    checkInTime, checkOutTime, amenities, policies,
+  } = body;
 
   if (!name || !slug) {
     return NextResponse.json({ error: "name and slug are required" }, { status: 400 });

@@ -1,10 +1,26 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
+import {
+  checkLoginRateLimit,
+  recordFailedLogin,
+  clearLoginAttempts,
+} from "@/lib/auth";
 
 const ADMIN_SESSION_COOKIE = "mm_admin_session";
 const SEVEN_DAYS = 60 * 60 * 24 * 7;
 
 export async function POST(request: Request) {
+  // Determine caller IP for rate limiting
+  const headerList = headers();
+  const ip =
+    headerList.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    headerList.get("x-real-ip") ??
+    "unknown";
+
+  // Rate-limit check — reject if locked out
+  const rateLimitError = checkLoginRateLimit(ip);
+  if (rateLimitError) return rateLimitError;
+
   const { username, password } = await request.json();
 
   const validUsername = process.env.ADMIN_USERNAME;
@@ -19,20 +35,19 @@ export async function POST(request: Request) {
     );
   }
 
-  // Constant-time comparison to prevent timing attacks
   const usernameMatch = username === validUsername;
   const passwordMatch = password === validPassword;
 
   if (!usernameMatch || !passwordMatch) {
-    // Deliberate delay to slow brute-force attempts
+    // Record failure and apply deliberate delay
+    recordFailedLogin(ip);
     await new Promise((r) => setTimeout(r, 500));
-    return NextResponse.json(
-      { error: "Invalid credentials" },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
   }
 
-  // Set secure session cookie
+  // Success — clear any recorded attempts and set session cookie
+  clearLoginAttempts(ip);
+
   cookies().set(ADMIN_SESSION_COOKIE, sessionToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

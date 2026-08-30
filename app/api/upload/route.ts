@@ -1,14 +1,28 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { v2 as cloudinary } from "cloudinary";
+import { requireAdmin } from "@/lib/auth";
 
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "pdqt9y1o",
-  api_key: process.env.CLOUDINARY_API_KEY || "659975391527599",
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// Allowed MIME types for upload
+const ALLOWED_MIME_TYPES = new Set([
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "image/avif",
+]);
+
 export async function POST(request: Request) {
+  const auth = requireAdmin();
+  if (!auth.ok) return auth.response;
+
   try {
     const formData = await request.formData();
     const files = formData.getAll("files") as File[];
@@ -25,14 +39,23 @@ export async function POST(request: Request) {
     for (const file of files) {
       if (!file.size) continue;
 
+      // Validate file type
+      if (!ALLOWED_MIME_TYPES.has(file.type)) {
+        return NextResponse.json(
+          { error: `File type "${file.type}" is not allowed. Only images are accepted.` },
+          { status: 400 }
+        );
+      }
+
       // Convert to base64 for Cloudinary upload
       const bytes = await file.arrayBuffer();
       const base64 = Buffer.from(bytes).toString("base64");
-      const mimeType = file.type || "image/jpeg";
+      const mimeType = file.type;
       const dataUrl = `data:${mimeType};base64,${base64}`;
 
       const ext = file.name.split(".").pop() || "jpg";
-      const alt = altPrefix || file.name.replace(`.${ext}`, "").replace(/-/g, " ");
+      const alt =
+        altPrefix || file.name.replace(`.${ext}`, "").replace(/-/g, " ");
 
       let url = dataUrl; // fallback
 
@@ -48,8 +71,10 @@ export async function POST(request: Request) {
         });
         url = result.secure_url;
       } catch (cloudErr) {
-        console.error("Cloudinary upload failed, using base64 fallback:", cloudErr);
-        // Keep base64 as fallback
+        console.error(
+          "Cloudinary upload failed, using base64 fallback:",
+          cloudErr
+        );
       }
 
       // Get current max order
