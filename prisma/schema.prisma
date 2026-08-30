@@ -104,6 +104,18 @@ model SiteContent {
   discountActive     Boolean @default(false)
 }
 
+// ── Page Views ────────────────────────────────────────────────────────────────
+
+model PageView {
+  id        String @id @default(cuid())
+  page      String // e.g. "/", "/homes/sushant-lok"
+  date      String // "YYYY-MM-DD"
+  createdAt String // ISO datetime
+
+  @@index([date])
+  @@index([page])
+}
+
 // ── Inquiries ─────────────────────────────────────────────────────────────────
 
 model Inquiry {
