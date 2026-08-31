@@ -1,6 +1,7 @@
 // Server Component — fetches data before rendering, no loading flash
 import { prisma } from "@/lib/prisma";
 import { HomePageClient } from "./homepage-client";
+import { heroImageUrl } from "@/lib/cloudinary";
 
 export default async function HomePage() {
   // Fetch all data server-side — arrives pre-loaded, zero blank flash
@@ -71,7 +72,7 @@ export default async function HomePage() {
         <link
           rel="preload"
           as="image"
-          href={firstHeroUrl}
+          href={heroImageUrl(firstHeroUrl)}
           fetchPriority="high"
         />
       )}

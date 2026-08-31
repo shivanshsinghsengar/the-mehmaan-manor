@@ -59,15 +59,14 @@ export async function POST(request: Request) {
 
       let url = dataUrl; // fallback
 
-      // Upload to Cloudinary
+      // Upload to Cloudinary — store the original, untransformed image.
+      // Quality/format transformations are applied at display time via URL
+      // manipulation so we always have the full-quality source available.
       try {
         const result = await cloudinary.uploader.upload(dataUrl, {
           folder: "mehman-manor",
           resource_type: "image",
-          transformation: [
-            { quality: "auto:good" },
-            { fetch_format: "auto" },
-          ],
+          // No transformation here — keep the original quality intact
         });
         url = result.secure_url;
       } catch (cloudErr) {

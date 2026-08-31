@@ -7,6 +7,7 @@ import { ArrowRight, Instagram, ChevronDown } from "lucide-react";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { ScrollProgressBar } from "@/components/3d-effects";
+import { heroImageUrl, cardImageUrl, thumbnailUrl } from "@/lib/cloudinary";
 
 interface SiteData {
   properties: {
@@ -417,7 +418,7 @@ function HeroSlideshow({ slides }: { slides: { url: string; alt: string }[] }) {
           style={{ animation: "fadeOut 1.2s ease-in-out forwards", zIndex: 1 }}
         >
           <img
-            src={slides[prev].url}
+            src={heroImageUrl(slides[prev].url)}
             alt={slides[prev].alt}
             className="w-full h-full object-cover"
             loading="lazy"
@@ -432,7 +433,7 @@ function HeroSlideshow({ slides }: { slides: { url: string; alt: string }[] }) {
         style={{ animation: "fadeIn 1.2s ease-in-out forwards", zIndex: 2 }}
       >
         <img
-          src={slides[current].url}
+          src={heroImageUrl(slides[current].url)}
           alt={slides[current].alt}
           className="w-full h-full object-cover"
           style={{ animation: `${SLIDE_ANIMATIONS[current % SLIDE_ANIMATIONS.length]} 8s ease-in-out forwards` }}
@@ -576,7 +577,7 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
                     style={{ animationDelay: `${i * 100}ms` }}>
                     <div className="relative h-[420px] sm:h-[500px] lg:h-[580px]">
                       {cardPhoto ? (
-                        <img src={cardPhoto.url} alt={p.name}
+                        <img src={cardImageUrl(cardPhoto.url)} alt={p.name}
                           className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                       ) : (
                         <div className="absolute inset-0 bg-gradient-to-br from-[#1a3328] to-[#0a1a12]" />
@@ -647,7 +648,7 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
                   <div className="p-[2.5px] rounded-full bg-gradient-to-tr from-[#1a3328] via-[#c9a84c] to-[#1a3328]">
                     <div className="p-[2px] rounded-full bg-[#080e0b]">
                       <div className="w-14 h-14 md:w-full md:h-auto md:aspect-square rounded-full overflow-hidden">
-                        <img src={photo.url} alt={photo.alt || "The Mehmaan Manor"}
+                        <img src={thumbnailUrl(photo.url, 300)} alt={photo.alt || "The Mehmaan Manor"}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                       </div>
                     </div>
