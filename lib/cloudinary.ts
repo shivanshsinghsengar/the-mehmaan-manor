@@ -18,7 +18,7 @@
 export function cloudinaryUrl(
   url: string,
   opts: {
-    quality?: number | "auto";
+    quality?: number | "auto" | "auto:best" | "auto:good" | "auto:eco" | "auto:low";
     format?: "auto" | "webp" | "avif" | "jpg" | "png";
     width?: number;
     height?: number;
