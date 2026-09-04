@@ -571,10 +571,9 @@ function StatsRow({ discountPercent, discountActive }: { discountPercent: number
     { value: "2", label: "Curated Homes" },
     { value: "4.9★", label: "Average Rating" },
     { value: "24/7", label: "Host Availability" },
-    {
-      value: discountActive && discountPercent > 0 ? `${discountPercent}%` : "₹0",
-      label: discountActive && discountPercent > 0 ? "Current Offer" : "Booking Fees",
-    },
+    ...(discountActive && discountPercent > 0
+      ? [{ value: `${discountPercent}%`, label: "Current Offer" }]
+      : [{ value: "Free", label: "No Platform Fees" }]),
   ];
   return (
     <section className="theme-transition" style={{ background: "var(--bg-surface)", borderBottom: "1px solid var(--border-gold)" }}>
