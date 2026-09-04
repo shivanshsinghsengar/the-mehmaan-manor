@@ -1,66 +1,124 @@
 "use client";
 
 /**
- * MOVA-style animation primitives
+ * MOVA-style animation primitives — production-safe
  *
- * SplitText      — wraps each word in a clip-mask slot, triggers on scroll
- * SplitChars     — per-character staggered entrance (for big display words)
- * ImgWipe        — bottom-up curtain lift on images
- * ParallaxImg    — scroll-driven vertical parallax on images
- * LineReveal     — single line fade + rise
- * GridReveal     — staggered grid children reveal
- * LineDraw       — gold horizontal line that draws itself in
- * useScrollReveal— generic IntersectionObserver hook for custom elements
+ * ImgReveal  — fade + scale entrance for images (NO clip-path, always visible)
+ * SplitText  — word-by-word slide-up reveal
+ * SplitChars — per-character staggered entrance
+ * ParallaxImg— scroll-driven vertical parallax
+ * LineReveal — fade + rise on scroll
+ * GridReveal — staggered grid children reveal
+ * LineDraw   — gold line draws itself in
  */
 
 import { useEffect, useRef, type ReactNode, type CSSProperties } from "react";
 
-/* ─── shared intersection helper ─────────────────────────────── */
+/* ─── Bulletproof intersection observer ──────────────────────── */
 function observe(
   el: Element,
   onEnter: () => void,
   options?: IntersectionObserverInit
-) {
-  // Check if already in viewport on mount — fire immediately
+): () => void {
+  let fired = false;
+
+  const fire = () => {
+    if (fired) return;
+    fired = true;
+    onEnter();
+  };
+
+  // Guaranteed fallback — always show content after 1.2s even if IO never fires
+  const fallback = setTimeout(fire, 1200);
+
+  // If already in viewport, fire immediately next frame
   const rect = el.getBoundingClientRect();
-  if (rect.top < window.innerHeight && rect.bottom > 0) {
-    // Already visible — trigger after a tiny frame to allow CSS to attach
-    const raf = requestAnimationFrame(() => onEnter());
-    // Still set up observer as no-op so callers get a valid return value
-    const io = new IntersectionObserver(() => {}, {});
-    // Return a fake disconnect that cancels the raf too
-    const origDisconnect = io.disconnect.bind(io);
-    io.disconnect = () => { cancelAnimationFrame(raf); origDisconnect(); };
-    return io;
+  if (rect.top < window.innerHeight + 200 && rect.bottom > -200) {
+    requestAnimationFrame(fire);
+    return () => clearTimeout(fallback);
   }
 
   const io = new IntersectionObserver(
     ([entry]) => {
       if (entry.isIntersecting) {
-        onEnter();
+        fire();
         io.unobserve(el);
       }
     },
-    { threshold: 0.05, rootMargin: "0px 0px 100px 0px", ...options }
+    {
+      threshold: 0,
+      rootMargin: "0px 0px 200px 0px",
+      ...options,
+    }
   );
   io.observe(el);
-  return io;
+
+  return () => {
+    clearTimeout(fallback);
+    io.disconnect();
+  };
 }
 
 /* ════════════════════════════════════════════════════════════════
+   ImgReveal
+   Safe image reveal: starts visible but slightly scaled/faded.
+   Never hides images via clip-path. Graceful fallback always works.
+   ════════════════════════════════════════════════════════════════ */
+interface ImgRevealProps {
+  children: ReactNode;
+  className?: string;
+  style?: CSSProperties;
+  delay?: number;
+}
+
+export function ImgReveal({
+  children,
+  className = "",
+  style,
+  delay = 0,
+}: ImgRevealProps) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    // Start state: slightly scaled up, opacity low
+    el.style.opacity = "0";
+    el.style.transform = "scale(1.04)";
+    el.style.transition = `opacity 0.9s ease ${delay}ms, transform 1.1s cubic-bezier(0.16,1,0.3,1) ${delay}ms`;
+
+    const cleanup = observe(el, () => {
+      el.style.opacity = "1";
+      el.style.transform = "scale(1)";
+    });
+
+    return cleanup;
+  }, [delay]);
+
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{ position: "relative", overflow: "hidden", ...style }}
+    >
+      {children}
+    </div>
+  );
+}
+
+// Keep ImgWipe as alias to ImgReveal for backwards compat
+export const ImgWipe = ImgReveal;
+
+/* ════════════════════════════════════════════════════════════════
    SplitText
-   Splits text into words, each word masked. Words slide up one
-   by one when the container enters the viewport.
+   Word-by-word slide up from clip mask on scroll entry.
    ════════════════════════════════════════════════════════════════ */
 interface SplitTextProps {
   text: string;
-  /** Tag to render, defaults to span */
   as?: keyof JSX.IntrinsicElements;
   className?: string;
   style?: CSSProperties;
-  /** ms between each word */
   stagger?: number;
-  /** ms delay before first word */
   delay?: number;
 }
 
@@ -77,18 +135,16 @@ export function SplitText({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-
     const inners = el.querySelectorAll<HTMLElement>(".split-word-inner");
 
-    const io = observe(el, () => {
+    const cleanup = observe(el, () => {
       inners.forEach((inner, i) => {
-        const t = delay + i * stagger;
-        inner.style.transitionDelay = `${t}ms`;
+        inner.style.transitionDelay = `${delay + i * stagger}ms`;
         inner.classList.add("visible");
       });
     });
 
-    return () => io.disconnect();
+    return cleanup;
   }, [delay, stagger]);
 
   const words = text.split(" ");
@@ -108,8 +164,7 @@ export function SplitText({
 
 /* ════════════════════════════════════════════════════════════════
    SplitChars
-   Per-character stagger with skew — for big single words /
-   display headings (MOVA brand name treatment)
+   Per-character skew entrance for big display headings.
    ════════════════════════════════════════════════════════════════ */
 interface SplitCharsProps {
   text: string;
@@ -133,16 +188,16 @@ export function SplitChars({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-
     const inners = el.querySelectorAll<HTMLElement>(".split-char-inner");
-    const io = observe(el, () => {
+
+    const cleanup = observe(el, () => {
       inners.forEach((inner, i) => {
         inner.style.transitionDelay = `${delay + i * stagger}ms`;
         inner.classList.add("visible");
       });
     });
 
-    return () => io.disconnect();
+    return cleanup;
   }, [delay, stagger]);
 
   return (
@@ -165,60 +220,14 @@ export function SplitChars({
 }
 
 /* ════════════════════════════════════════════════════════════════
-   ImgWipe
-   Wraps an image (or any child) in a bottom-up clip-path reveal.
-   Pass children — typically an <img> tag.
-   ════════════════════════════════════════════════════════════════ */
-interface ImgWipeProps {
-  children: ReactNode;
-  className?: string;
-  style?: CSSProperties;
-  direction?: "up" | "right";
-  delay?: number;
-}
-
-export function ImgWipe({
-  children,
-  className = "",
-  style,
-  direction = "up",
-  delay = 0,
-}: ImgWipeProps) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const io = observe(el, () => {
-      el.style.transitionDelay = `${delay}ms`;
-      el.classList.add("visible");
-    });
-
-    return () => io.disconnect();
-  }, [delay]);
-
-  return (
-    <div
-      ref={ref}
-      className={`${direction === "right" ? "img-wipe-x" : "img-wipe"} ${className}`}
-      style={{ position: "relative", ...style }}
-    >
-      {children}
-    </div>
-  );
-}
-
-/* ════════════════════════════════════════════════════════════════
    ParallaxImg
-   On scroll, shifts inner image by `speed` fraction of scroll delta.
-   Wrap an <img> or div — inner element gets translateY applied.
+   Scroll-driven vertical parallax. Inner image is oversized so
+   parallax shift doesn't reveal edges.
    ════════════════════════════════════════════════════════════════ */
 interface ParallaxImgProps {
   children: ReactNode;
   className?: string;
   style?: CSSProperties;
-  /** 0 = no effect, 0.15 = gentle, 0.3 = dramatic */
   speed?: number;
 }
 
@@ -226,7 +235,7 @@ export function ParallaxImg({
   children,
   className = "",
   style,
-  speed = 0.18,
+  speed = 0.12,
 }: ParallaxImgProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
@@ -243,13 +252,24 @@ export function ParallaxImg({
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll(); // init
+    onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, [speed]);
 
   return (
-    <div ref={wrapRef} className={`parallax-img-wrap ${className}`} style={style}>
-      <div ref={innerRef} className="parallax-img-inner">
+    <div
+      ref={wrapRef}
+      className={className}
+      style={{ position: "relative", overflow: "hidden", ...style }}
+    >
+      <div
+        ref={innerRef}
+        style={{
+          position: "absolute",
+          inset: "-10% 0",
+          willChange: "transform",
+        }}
+      >
         {children}
       </div>
     </div>
@@ -257,8 +277,7 @@ export function ParallaxImg({
 }
 
 /* ════════════════════════════════════════════════════════════════
-   LineReveal
-   Single block-level element that fades + rises on scroll.
+   LineReveal  — fade + translateY on scroll
    ════════════════════════════════════════════════════════════════ */
 interface LineRevealProps {
   children: ReactNode;
@@ -281,12 +300,12 @@ export function LineReveal({
     const el = ref.current;
     if (!el) return;
 
-    const io = observe(el, () => {
+    const cleanup = observe(el, () => {
       el.style.transitionDelay = `${delay}ms`;
       el.classList.add("visible");
     });
 
-    return () => io.disconnect();
+    return cleanup;
   }, [delay]);
 
   return (
@@ -298,9 +317,7 @@ export function LineReveal({
 }
 
 /* ════════════════════════════════════════════════════════════════
-   GridReveal
-   Wraps children and stagger-reveals them as grid items.
-   Each direct child gets .grid-reveal-child with increasing delay.
+   GridReveal  — stagger direct children on scroll
    ════════════════════════════════════════════════════════════════ */
 interface GridRevealProps {
   children: ReactNode;
@@ -322,22 +339,17 @@ export function GridReveal({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-
     const items = el.querySelectorAll<HTMLElement>(":scope > *");
     items.forEach((item) => item.classList.add("grid-reveal-child"));
 
-    const io = observe(
-      el,
-      () => {
-        items.forEach((item, i) => {
-          item.style.transitionDelay = `${delay + i * stagger}ms`;
-          item.classList.add("visible");
-        });
-      },
-      { threshold: 0.05 }
-    );
+    const cleanup = observe(el, () => {
+      items.forEach((item, i) => {
+        item.style.transitionDelay = `${delay + i * stagger}ms`;
+        item.classList.add("visible");
+      });
+    });
 
-    return () => io.disconnect();
+    return cleanup;
   }, [delay, stagger]);
 
   return (
@@ -348,8 +360,7 @@ export function GridReveal({
 }
 
 /* ════════════════════════════════════════════════════════════════
-   LineDraw
-   A gold horizontal line that draws itself from left to right.
+   LineDraw  — gold line draws itself in
    ════════════════════════════════════════════════════════════════ */
 interface LineDrawProps {
   className?: string;
@@ -364,20 +375,19 @@ export function LineDraw({ className = "", style, delay = 0 }: LineDrawProps) {
     const el = ref.current;
     if (!el) return;
 
-    const io = observe(el, () => {
+    const cleanup = observe(el, () => {
       el.style.transitionDelay = `${delay}ms`;
       el.classList.add("visible");
     });
 
-    return () => io.disconnect();
+    return cleanup;
   }, [delay]);
 
   return <div ref={ref} className={`line-draw ${className}`} style={style} />;
 }
 
 /* ════════════════════════════════════════════════════════════════
-   SectionProgressLine
-   Thin left-edge vertical gold line that grows to full height.
+   SectionProgressLine  — left edge vertical gold bar
    ════════════════════════════════════════════════════════════════ */
 export function SectionProgressLine() {
   const ref = useRef<HTMLDivElement>(null);
@@ -386,21 +396,19 @@ export function SectionProgressLine() {
     const el = ref.current;
     if (!el) return;
 
-    const io = observe(
+    const cleanup = observe(
       el.parentElement ?? el,
       () => el.classList.add("visible"),
-      { threshold: 0.02 }
+      { threshold: 0 }
     );
-    return () => io.disconnect();
+    return cleanup;
   }, []);
 
   return <div ref={ref} className="section-progress-line" />;
 }
 
 /* ════════════════════════════════════════════════════════════════
-   useScrollReveal
-   Generic hook — returns a ref; attach to any element to get a
-   one-time "visible" class added on intersection.
+   useScrollReveal  — generic hook, adds "visible" class on entry
    ════════════════════════════════════════════════════════════════ */
 export function useScrollReveal<T extends HTMLElement>(delay = 0) {
   const ref = useRef<T>(null);
@@ -409,12 +417,12 @@ export function useScrollReveal<T extends HTMLElement>(delay = 0) {
     const el = ref.current;
     if (!el) return;
 
-    const io = observe(el, () => {
+    const cleanup = observe(el, () => {
       el.style.transitionDelay = `${delay}ms`;
       el.classList.add("visible");
     });
 
-    return () => io.disconnect();
+    return cleanup;
   }, [delay]);
 
   return ref;

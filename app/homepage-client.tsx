@@ -11,7 +11,7 @@ import { heroImageUrl, cardImageUrl, thumbnailUrl } from "@/lib/cloudinary";
 import {
   SplitText,
   SplitChars,
-  ImgWipe,
+  ImgReveal,
   ParallaxImg,
   LineReveal,
   GridReveal,
@@ -424,16 +424,21 @@ function PropertyCards({ properties, propertyCards, discountPercent, discountAct
             const extraPhotos = photos.slice(1, 4);
             return (
               <Link key={p.id} href={`/homes/${p.slug}`} className="prop-card group relative block">
-                {/* Main image — wipe reveal + sweep hover */}
-                <ImgWipe delay={i * 160} style={{ height: "clamp(340px,52vw,620px)" }} className="img-sweep-wrap">
+                {/* Main image container — ImgReveal handles fade-in, no clip-path */}
+                <ImgReveal delay={i * 160} className="img-sweep-wrap" style={{ height: "clamp(340px,52vw,620px)" }}>
                   {mainPhoto ? (
-                    <img src={cardImageUrl(mainPhoto.url)} alt={p.name}
-                      className="absolute inset-0 w-full h-full object-cover" />
+                    <img
+                      src={cardImageUrl(mainPhoto.url)}
+                      alt={p.name}
+                      className="w-full h-full object-cover"
+                      style={{ display: "block", width: "100%", height: "100%" }}
+                    />
                   ) : (
-                    <div className="absolute inset-0" style={{ background: "linear-gradient(135deg,#1a3328,#0a1a12)" }} />
+                    <div className="w-full h-full" style={{ background: "linear-gradient(135deg,#1a3328,#0a1a12)" }} />
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/5" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent" />
+                  {/* Gradient overlays — absolutely positioned over the image */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/5 pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent pointer-events-none" />
 
                   <div className="absolute top-5 left-5 z-10">
                     <span className="label-badge bg-black/50 backdrop-blur-sm px-3 py-1.5 block" style={{ color: "var(--gold)" }}>
@@ -445,7 +450,6 @@ function PropertyCards({ properties, propertyCards, discountPercent, discountAct
                     <div className="prop-card-line mb-3" />
                     <h3 className="font-display text-white leading-tight mb-2 transition-colors duration-500 group-hover:text-[#c9a84c]"
                       style={{ fontSize: "clamp(1.8rem,3.5vw,2.8rem)" }}>{p.name}</h3>
-                    {/* Vibe text slides up on hover — scrim-text */}
                     <p className="text-white/55 text-sm mb-5 leading-relaxed line-clamp-2 max-w-sm scrim-text">{p.vibe}</p>
                     <div className="flex items-end justify-between">
                       <div>
@@ -464,15 +468,19 @@ function PropertyCards({ properties, propertyCards, discountPercent, discountAct
                       </span>
                     </div>
                   </div>
-                </ImgWipe>
+                </ImgReveal>
 
                 {extraPhotos.length > 0 && (
                   <div className="grid grid-cols-3 gap-1 mt-1">
                     {extraPhotos.map((ph, j) => (
-                      <ImgWipe key={j} delay={i * 160 + 320 + j * 80} style={{ height: "72px" }}>
-                        <img src={thumbnailUrl(ph.url, 300)} alt={ph.alt || p.name}
-                          className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
-                      </ImgWipe>
+                      <ImgReveal key={j} delay={i * 160 + 300 + j * 70} style={{ height: "72px" }}>
+                        <img
+                          src={thumbnailUrl(ph.url, 300)}
+                          alt={ph.alt || p.name}
+                          className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-500"
+                          style={{ display: "block", width: "100%", height: "100%" }}
+                        />
+                      </ImgReveal>
                     ))}
                   </div>
                 )}
@@ -680,25 +688,40 @@ function GalleryMosaic({ photos }: { photos: { url: string; alt: string }[] }) {
           </LineReveal>
         </div>
 
-        {/* Mosaic grid — each cell wipes in with stagger */}
+        {/* Mosaic grid — each cell fades + scales in staggered */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
           {main && (
-            <ImgWipe delay={0}
+            <ImgReveal
+              delay={0}
               className="col-span-2 row-span-2 md:row-span-2 gallery-cell img-sweep-wrap"
-              style={{ height: "clamp(240px,40vw,500px)" }}>
-              <img src={cardImageUrl(main.url)} alt={main.alt || "The Mehmaan Manor"}
-                className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+              style={{ height: "clamp(240px,40vw,500px)" }}
+            >
+              <img
+                src={cardImageUrl(main.url)}
+                alt={main.alt || "The Mehmaan Manor"}
+                className="w-full h-full object-cover"
+                style={{ display: "block", width: "100%", height: "100%" }}
+                loading="lazy"
+              />
               <div className="gallery-cell-overlay" />
-            </ImgWipe>
+            </ImgReveal>
           )}
           {rest.map((photo, i) => (
-            <ImgWipe key={i} delay={120 + i * 100}
+            <ImgReveal
+              key={i}
+              delay={120 + i * 90}
               className="gallery-cell img-sweep-wrap"
-              style={{ height: "clamp(100px,18vw,240px)" }}>
-              <img src={thumbnailUrl(photo.url, 600)} alt={photo.alt || "The Mehmaan Manor"}
-                className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+              style={{ height: "clamp(100px,18vw,240px)" }}
+            >
+              <img
+                src={thumbnailUrl(photo.url, 600)}
+                alt={photo.alt || "The Mehmaan Manor"}
+                className="w-full h-full object-cover"
+                style={{ display: "block", width: "100%", height: "100%" }}
+                loading="lazy"
+              />
               <div className="gallery-cell-overlay" />
-            </ImgWipe>
+            </ImgReveal>
           ))}
         </div>
 

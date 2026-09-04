@@ -410,13 +410,17 @@
 
 /* ── Gallery mosaic hover lift ──────────────────────────────────── */
 .gallery-cell {
-  overflow: hidden;
+  /* overflow hidden is handled by ImgReveal wrapper */
   position: relative;
 }
 .gallery-cell img {
   transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
               filter 0.8s ease;
   filter: brightness(0.88);
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .gallery-cell:hover img {
   transform: scale(1.06);
@@ -572,29 +576,11 @@
 }
 
 /* ── Image wipe reveal (bottom → top curtain lift) ───────────── */
-.img-wipe {
-  clip-path: inset(0 0 100% 0);
-  transition: clip-path 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: clip-path;
-  overflow: hidden;
-}
-.img-wipe.visible {
-  clip-path: inset(0 0 0% 0);
-}
-/* Fallback: if animation never fires (no JS / already scrolled past) show content */
-@media (prefers-reduced-motion: reduce) {
-  .img-wipe, .img-wipe-x { clip-path: none !important; }
-}
-
-/* ── Image wipe from left → right ───────────────────────────── */
+/* ── img-wipe: no longer hides images via clip-path ─────────── */
+/* ImgReveal uses JS opacity+scale. These classes kept for hover effects only */
+.img-wipe,
 .img-wipe-x {
-  clip-path: inset(0 100% 0 0);
-  transition: clip-path 1.1s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: clip-path;
   overflow: hidden;
-}
-.img-wipe-x.visible {
-  clip-path: inset(0 0% 0 0);
 }
 
 /* ── Bold line fade + rise (section headings) ────────────────── */
