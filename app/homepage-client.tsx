@@ -1113,20 +1113,20 @@ function InstagramStrip({ photos }: { photos: { url: string; alt: string }[] }) 
           </LineReveal>
         </div>
 
-        <GridReveal className="flex gap-4 md:grid md:grid-cols-6 overflow-x-auto pb-3 md:overflow-visible" stagger={70} delay={100}>
+        <GridReveal className="flex gap-6 md:grid md:grid-cols-6 overflow-x-auto pb-3 md:overflow-visible" stagger={70} delay={100}>
           {photos.slice(0, 6).map((photo, i) => (
             <a key={photo.url + i} href="https://www.instagram.com/the_mehmaan_manor" target="_blank" rel="noopener noreferrer"
-              className="flex-shrink-0 flex flex-col items-center gap-2 group" style={{ minWidth: "88px" }}>
-              <div className="p-[2.5px] rounded-full bg-gradient-to-tr from-[#c9a84c]/40 via-[#c9a84c] to-[#e8d08a]">
-                <div className="p-[2.5px] rounded-full" style={{ background: "var(--bg-surface)" }}>
-                  <div className="w-16 h-16 md:w-full md:aspect-square rounded-full overflow-hidden">
-                    <img src={thumbnailUrl(photo.url, 320)} alt={photo.alt || "The Mehmaan Manor"}
+              className="flex-shrink-0 flex flex-col items-center gap-3 group" style={{ minWidth: "110px" }}>
+              <div className="p-[3px] rounded-full bg-gradient-to-tr from-[#c9a84c]/40 via-[#c9a84c] to-[#e8d08a] transition-all duration-300 group-hover:shadow-[0_0_18px_rgba(201,168,76,0.45)]">
+                <div className="p-[3px] rounded-full" style={{ background: "var(--bg-surface)" }}>
+                  <div className="w-24 h-24 md:w-full md:aspect-square rounded-full overflow-hidden">
+                    <img src={thumbnailUrl(photo.url, 400)} alt={photo.alt || "The Mehmaan Manor"}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                   </div>
                 </div>
               </div>
-              <p className="label-badge text-[8px] transition-colors text-center truncate w-full px-1 group-hover:text-[#c9a84c]"
-                style={{ color: "var(--text-faint)" }}>
+              <p className="font-mono text-[10px] tracking-widest uppercase transition-colors duration-300 text-center truncate w-full px-1 group-hover:text-[#c9a84c]"
+                style={{ color: "var(--text-tertiary)" }}>
                 {photo.alt || "View"}
               </p>
             </a>
