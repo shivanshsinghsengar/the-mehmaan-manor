@@ -197,13 +197,18 @@ function HeroSlideshow({ slides }: { slides: { url: string; alt: string }[] }) {
     <div className="absolute inset-0">
       {prev !== null && (
         <div key={`prev-${prev}`} className="absolute inset-0" style={{ animation: "fadeOut 1.4s ease-in-out forwards", zIndex: 1 }}>
-          <img src={heroImageUrl(slides[prev].url)} alt={slides[prev].alt} className="w-full h-full object-cover" loading="lazy" />
+          <img src={heroImageUrl(slides[prev].url)} alt={slides[prev].alt}
+            className="w-full h-full object-cover" loading="lazy" sizes="100vw" />
         </div>
       )}
       <div key={`slide-${current}-${animKey}`} className="absolute inset-0" style={{ animation: "fadeIn 1.4s ease-in-out forwards", zIndex: 2 }}>
-        <img src={heroImageUrl(slides[current].url)} alt={slides[current].alt} className="w-full h-full object-cover"
+        <img src={heroImageUrl(slides[current].url)} alt={slides[current].alt}
+          className="w-full h-full object-cover"
           style={{ animation: `${SLIDE_ANIMATIONS[current % SLIDE_ANIMATIONS.length]} 9s ease-in-out forwards` }}
-          loading={current === 0 ? "eager" : "lazy"} fetchPriority={current === 0 ? "high" : "low"} decoding={current === 0 ? "sync" : "async"} />
+          sizes="100vw"
+          loading={current === 0 ? "eager" : "lazy"}
+          fetchPriority={current === 0 ? "high" : "low"}
+          decoding={current === 0 ? "sync" : "async"} />
       </div>
       {slides.length > 1 && (
         <div className="absolute bottom-20 right-6 z-30 flex gap-2">

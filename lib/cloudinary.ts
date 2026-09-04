@@ -43,24 +43,23 @@ export function cloudinaryUrl(
 }
 
 /**
- * Hero image: full-resolution, best quality, auto format.
- * Used for the main slideshow LCP image.
+ * Hero image: maximum quality, no downscaling.
+ * Serves original resolution — used for the main slideshow LCP image.
  */
-export function heroImageUrl(url: string, width = 1920): string {
+export function heroImageUrl(url: string): string {
   return cloudinaryUrl(url, {
     quality: "auto:best",
     format: "auto",
-    width,
-    crop: "limit", // never upscale, just limit max width
+    // No width/crop constraint — serve full original resolution
   });
 }
 
 /**
- * Property card: medium quality for listing cards.
+ * Property card: high quality for listing cards.
  */
-export function cardImageUrl(url: string, width = 900): string {
+export function cardImageUrl(url: string, width = 1200): string {
   return cloudinaryUrl(url, {
-    quality: 85,
+    quality: "auto:best",
     format: "auto",
     width,
     crop: "limit",
