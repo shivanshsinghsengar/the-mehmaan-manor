@@ -318,6 +318,230 @@ function HeroSection({ slides, content }: {
 }
 
 /* ─────────────────────────────────────────────────────────────────
+   Social Proof Ticker — rotating recent activity
+───────────────────────────────────────────────────────────────── */
+const SOCIAL_PROOF_ITEMS = [
+  { icon: "🏠", text: "Someone from Delhi just viewed Sushant Lok", time: "2 min ago" },
+  { icon: "📅", text: "Weekend dates filling fast — only a few open slots left", time: "" },
+  { icon: "⭐", text: "\"Felt like home the moment we walked in\" — Priya M.", time: "last week" },
+  { icon: "✅", text: "Booking confirmed for this weekend", time: "4 hours ago" },
+  { icon: "💬", text: "Host responded in under 3 minutes", time: "today" },
+  { icon: "🎉", text: "2 groups stayed last weekend — both rated 5 stars", time: "" },
+];
+
+function SocialProofTicker() {
+  const [idx, setIdx] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setIdx((i) => (i + 1) % SOCIAL_PROOF_ITEMS.length);
+        setVisible(true);
+      }, 350);
+    }, 4500);
+    return () => clearInterval(interval);
+  }, []);
+
+  const item = SOCIAL_PROOF_ITEMS[idx];
+
+  return (
+    <div
+      className="relative z-10 py-2.5 px-4"
+      style={{ background: "var(--bg-elevated)", borderBottom: "1px solid var(--border-gold)" }}
+    >
+      <div className="container mx-auto max-w-5xl">
+        <div
+          className="flex items-center justify-center gap-3 text-xs font-mono transition-all duration-300"
+          style={{
+            color: "var(--text-secondary)",
+            opacity: visible ? 1 : 0,
+            transform: visible ? "translateY(0)" : "translateY(-6px)",
+          }}
+        >
+          <span className="text-sm">{item.icon}</span>
+          <span style={{ color: "var(--text-secondary)" }}>{item.text}</span>
+          {item.time && (
+            <span
+              className="px-2 py-0.5 rounded-full font-mono text-[10px] tracking-wider"
+              style={{ background: "var(--gold-faint)", color: "var(--gold)" }}
+            >
+              {item.time}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Urgency Banner — above property cards
+───────────────────────────────────────────────────────────────── */
+function UrgencyBanner() {
+  const [dismissed, setDismissed] = useState(false);
+
+  if (dismissed) return null;
+
+  return (
+    <div
+      className="relative z-10"
+      style={{ background: "rgba(201,168,76,0.08)", borderBottom: "1px solid rgba(201,168,76,0.2)" }}
+    >
+      <div className="container mx-auto max-w-7xl px-4 md:px-8 py-3 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="text-base">🔥</span>
+          <p className="text-xs font-mono" style={{ color: "var(--text-secondary)" }}>
+            <span style={{ color: "var(--gold)", fontWeight: 600 }}>Only 2 properties available</span>
+            {" "}— weekend dates book 3–5 days in advance on average.
+          </p>
+          <a
+            href="https://wa.me/918828352311?text=Hi%21+I%27d+like+to+check+availability+for+a+stay."
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-mono tracking-wider uppercase transition-all duration-200"
+            style={{ background: "var(--gold)", color: "#000" }}
+          >
+            Check Dates →
+          </a>
+        </div>
+        <button
+          onClick={() => setDismissed(true)}
+          className="flex-shrink-0 text-xs font-mono opacity-40 hover:opacity-70 transition-opacity"
+          style={{ color: "var(--text-secondary)" }}
+          aria-label="Dismiss"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Scarcity Strip — before final CTA
+───────────────────────────────────────────────────────────────── */
+function ScarcityStrip() {
+  return (
+    <section
+      className="py-10 md:py-14 relative overflow-hidden"
+      style={{ background: "var(--bg-elevated)", borderTop: "1px solid var(--border-default)" }}
+    >
+      <div className="container mx-auto max-w-5xl px-4 md:px-8">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          {/* Left: trust signals */}
+          <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center md:justify-start">
+            {[
+              { icon: "⭐⭐⭐⭐⭐", label: "4.9 on Google", sub: "from real guests" },
+              { icon: "⚡", label: "Responds in 5 min", sub: "avg WhatsApp reply time" },
+              { icon: "🏠", label: "2 homes only", sub: "limited availability" },
+              { icon: "💸", label: "No OTA markup", sub: "save vs Airbnb" },
+            ].map(({ icon, label, sub }) => (
+              <div key={label} className="text-center px-4">
+                <p className="text-base leading-none mb-1">{icon}</p>
+                <p className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{label}</p>
+                <p className="text-[10px] font-mono mt-0.5" style={{ color: "var(--text-tertiary)" }}>{sub}</p>
+              </div>
+            ))}
+          </div>
+          {/* Right: CTA */}
+          <a
+            href="https://wa.me/918828352311?text=Hi%21+I%27d+like+to+book+a+stay+at+The+Mehmaan+Manor."
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2.5 px-7 py-3.5 font-semibold text-sm tracking-wide transition-all duration-300 flex-shrink-0 group"
+            style={{ background: "var(--gold)", color: "#000" }}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Message Us Now
+            <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Exit Intent Nudge — fires once when cursor leaves top of page
+───────────────────────────────────────────────────────────────── */
+function ExitIntentNudge() {
+  const [show, setShow] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  const firedRef = useRef(false);
+
+  useEffect(() => {
+    const onMouseLeave = (e: MouseEvent) => {
+      if (e.clientY <= 10 && !firedRef.current && !dismissed) {
+        firedRef.current = true;
+        setTimeout(() => setShow(true), 200);
+      }
+    };
+    document.addEventListener("mouseleave", onMouseLeave);
+    return () => document.removeEventListener("mouseleave", onMouseLeave);
+  }, [dismissed]);
+
+  const handleDismiss = () => { setShow(false); setDismissed(true); };
+
+  if (!show) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.65)", backdropFilter: "blur(4px)" }}
+      onClick={handleDismiss}
+    >
+      <div
+        className="relative max-w-md w-full p-8 text-center"
+        style={{ background: "var(--bg-raised)", border: "1px solid var(--border-gold)" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={handleDismiss}
+          className="absolute top-4 right-4 font-mono text-xs opacity-40 hover:opacity-70"
+          style={{ color: "var(--text-secondary)" }}
+        >✕</button>
+
+        <p className="text-3xl mb-4">🏠</p>
+        <h3
+          className="font-display text-2xl md:text-3xl italic mb-3 leading-tight"
+          style={{ color: "var(--text-primary)" }}
+        >
+          Before you go…
+        </h3>
+        <p className="text-sm leading-relaxed mb-6" style={{ color: "var(--text-secondary)" }}>
+          Weekend dates fill up fast. Drop us a message — no commitment, just a quick chat about availability.
+        </p>
+
+        <a
+          href="https://wa.me/918828352311?text=Hi%21+I+was+browsing+The+Mehmaan+Manor+and+wanted+to+check+availability."
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={handleDismiss}
+          className="w-full flex items-center justify-center gap-2.5 py-3.5 font-semibold text-sm mb-3"
+          style={{ background: "var(--gold)", color: "#000" }}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Check Availability on WhatsApp
+        </a>
+        <button
+          onClick={handleDismiss}
+          className="w-full text-xs font-mono py-2 transition-opacity opacity-40 hover:opacity-60"
+          style={{ color: "var(--text-secondary)" }}
+        >
+          No thanks, I&rsquo;ll decide later
+        </button>
+
+        <p className="text-[10px] font-mono mt-4 tracking-wider" style={{ color: "var(--text-faint)" }}>
+          SIMRAN · +91 88283 52311 · RESPONDS IN &lt;5 MIN
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────
    Marquee Ribbon
 ───────────────────────────────────────────────────────────────── */
 function MarqueeRibbon() {
@@ -1007,8 +1231,12 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
 
       <main id="main-content">
         <HeroSection slides={finalSlides} content={content} />
+        {/* Social proof activity ticker — right after hero, before ribbon */}
+        <SocialProofTicker />
         <MarqueeRibbon />
         <StatsRow discountPercent={discountPercent} discountActive={discountActive} />
+        {/* Urgency banner — scarcity nudge above property cards */}
+        <UrgencyBanner />
         <PropertyCards properties={properties} propertyCards={propertyCards} discountPercent={discountPercent} discountActive={discountActive} />
         <HowItWorks />
         <PhilosophySection text={content.philosophyText} />
@@ -1016,8 +1244,13 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
         <NeighbourhoodSection />
         <ReviewNudge />
         <InstagramStrip photos={instagramPhotos} />
+        {/* Scarcity trust strip — between instagram and final CTA */}
+        <ScarcityStrip />
         <FinalCTA />
       </main>
+
+      {/* Exit intent — fires once when user tries to leave */}
+      <ExitIntentNudge />
 
       <Footer />
     </div>
