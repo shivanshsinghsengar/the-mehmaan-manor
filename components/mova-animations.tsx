@@ -21,6 +21,19 @@ function observe(
   onEnter: () => void,
   options?: IntersectionObserverInit
 ) {
+  // Check if already in viewport on mount — fire immediately
+  const rect = el.getBoundingClientRect();
+  if (rect.top < window.innerHeight && rect.bottom > 0) {
+    // Already visible — trigger after a tiny frame to allow CSS to attach
+    const raf = requestAnimationFrame(() => onEnter());
+    // Still set up observer as no-op so callers get a valid return value
+    const io = new IntersectionObserver(() => {}, {});
+    // Return a fake disconnect that cancels the raf too
+    const origDisconnect = io.disconnect.bind(io);
+    io.disconnect = () => { cancelAnimationFrame(raf); origDisconnect(); };
+    return io;
+  }
+
   const io = new IntersectionObserver(
     ([entry]) => {
       if (entry.isIntersecting) {
@@ -28,7 +41,7 @@ function observe(
         io.unobserve(el);
       }
     },
-    { threshold: 0.1, rootMargin: "0px 0px -60px 0px", ...options }
+    { threshold: 0.05, rootMargin: "0px 0px 100px 0px", ...options }
   );
   io.observe(el);
   return io;
@@ -189,7 +202,7 @@ export function ImgWipe({
     <div
       ref={ref}
       className={`${direction === "right" ? "img-wipe-x" : "img-wipe"} ${className}`}
-      style={style}
+      style={{ position: "relative", ...style }}
     >
       {children}
     </div>

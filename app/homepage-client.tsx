@@ -425,7 +425,7 @@ function PropertyCards({ properties, propertyCards, discountPercent, discountAct
             return (
               <Link key={p.id} href={`/homes/${p.slug}`} className="prop-card group relative block">
                 {/* Main image — wipe reveal + sweep hover */}
-                <ImgWipe delay={i * 160} style={{ height: "clamp(340px,52vw,620px)", position: "relative" }} className="img-sweep-wrap">
+                <ImgWipe delay={i * 160} style={{ height: "clamp(340px,52vw,620px)" }} className="img-sweep-wrap">
                   {mainPhoto ? (
                     <img src={cardImageUrl(mainPhoto.url)} alt={p.name}
                       className="absolute inset-0 w-full h-full object-cover" />
@@ -469,7 +469,7 @@ function PropertyCards({ properties, propertyCards, discountPercent, discountAct
                 {extraPhotos.length > 0 && (
                   <div className="grid grid-cols-3 gap-1 mt-1">
                     {extraPhotos.map((ph, j) => (
-                      <ImgWipe key={j} delay={i * 160 + 320 + j * 80} style={{ height: "72px", position: "relative" }}>
+                      <ImgWipe key={j} delay={i * 160 + 320 + j * 80} style={{ height: "72px" }}>
                         <img src={thumbnailUrl(ph.url, 300)} alt={ph.alt || p.name}
                           className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
                       </ImgWipe>
@@ -685,7 +685,7 @@ function GalleryMosaic({ photos }: { photos: { url: string; alt: string }[] }) {
           {main && (
             <ImgWipe delay={0}
               className="col-span-2 row-span-2 md:row-span-2 gallery-cell img-sweep-wrap"
-              style={{ height: "clamp(240px,40vw,500px)", position: "relative" }}>
+              style={{ height: "clamp(240px,40vw,500px)" }}>
               <img src={cardImageUrl(main.url)} alt={main.alt || "The Mehmaan Manor"}
                 className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
               <div className="gallery-cell-overlay" />
@@ -694,7 +694,7 @@ function GalleryMosaic({ photos }: { photos: { url: string; alt: string }[] }) {
           {rest.map((photo, i) => (
             <ImgWipe key={i} delay={120 + i * 100}
               className="gallery-cell img-sweep-wrap"
-              style={{ height: "clamp(100px,18vw,240px)", position: "relative" }}>
+              style={{ height: "clamp(100px,18vw,240px)" }}>
               <img src={thumbnailUrl(photo.url, 600)} alt={photo.alt || "The Mehmaan Manor"}
                 className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
               <div className="gallery-cell-overlay" />

@@ -372,7 +372,7 @@
 /* ── Serif number accent ────────────────────────────────────────── */
 .step-number {
   font-family: var(--font-cormorant), serif;
-  font-size: clamp(5rem, 12vw, 9rem);
+  font-size: clamp(3rem, 7vw, 5.5rem);
   line-height: 1;
   font-weight: 300;
   font-style: italic;
@@ -382,6 +382,8 @@
   background-clip: text;
   transition: background 0.4s ease;
   user-select: none;
+  position: relative;
+  z-index: 2;
 }
 .step-card:hover .step-number {
   background: linear-gradient(180deg, var(--step-number-hover-start) 0%, var(--step-number-hover-end) 100%);
@@ -572,18 +574,24 @@
 /* ── Image wipe reveal (bottom → top curtain lift) ───────────── */
 .img-wipe {
   clip-path: inset(0 0 100% 0);
-  transition: clip-path 1.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: clip-path 1.2s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: clip-path;
+  overflow: hidden;
 }
 .img-wipe.visible {
   clip-path: inset(0 0 0% 0);
+}
+/* Fallback: if animation never fires (no JS / already scrolled past) show content */
+@media (prefers-reduced-motion: reduce) {
+  .img-wipe, .img-wipe-x { clip-path: none !important; }
 }
 
 /* ── Image wipe from left → right ───────────────────────────── */
 .img-wipe-x {
   clip-path: inset(0 100% 0 0);
-  transition: clip-path 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: clip-path 1.1s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: clip-path;
+  overflow: hidden;
 }
 .img-wipe-x.visible {
   clip-path: inset(0 0% 0 0);
