@@ -18,11 +18,11 @@
   /* ── DARK THEME (default) ─────────────────────────────────────── */
   html[data-theme="dark"],
   html:not([data-theme]) {
-    --bg-page:        #0a0f0d;
-    --bg-surface:     #080e0b;
-    --bg-raised:      #0d1a12;
-    --bg-elevated:    #0f1f16;
-    --bg-inset:       #060c09;
+    --bg-page:        #0c0c0c;
+    --bg-surface:     #0a0a0a;
+    --bg-raised:      #111111;
+    --bg-elevated:    #141414;
+    --bg-inset:       #080808;
 
     --text-primary:   #f5f0e8;
     --text-secondary: rgba(245, 240, 232, 0.60);
@@ -33,27 +33,27 @@
     --border-gold:    rgba(201, 168, 76, 0.20);
     --border-strong:  rgba(255, 255, 255, 0.15);
 
-    --nav-bg:         rgba(10, 15, 13, 0.96);
+    --nav-bg:         rgba(12, 12, 12, 0.96);
     --nav-border:     rgba(201, 168, 76, 0.10);
     --nav-text:       rgba(245, 240, 232, 0.75);
     --nav-text-hover: #f5f0e8;
 
-    --card-bg:        rgba(0, 0, 0, 0.25);
-    --card-hover:     rgba(0, 0, 0, 0.40);
+    --card-bg:        rgba(255, 255, 255, 0.04);
+    --card-hover:     rgba(255, 255, 255, 0.08);
 
-    --scrollbar-track: #0a0f0d;
+    --scrollbar-track: #0c0c0c;
     --scrollbar-thumb: rgba(201, 168, 76, 0.15);
 
     /* Section-specific */
-    --section-how:       #0f1f16;
+    --section-how:       #111111;
     --section-how-text:  #f5f0e8;
     --section-how-sub:   rgba(245, 240, 232, 0.55);
     --section-how-label: rgba(201, 168, 76, 0.50);
-    --section-how-btn-bg: #1a3328;
+    --section-how-btn-bg: #1e1e1e;
     --section-how-btn-text: #f5f0e8;
     --section-how-btn-border: rgba(245, 240, 232, 0.15);
 
-    --section-nb:        #080e0b;
+    --section-nb:        #0a0a0a;
     --section-nb-text:   #f5f0e8;
     --section-nb-sub:    rgba(245, 240, 232, 0.50);
     --section-nb-label:  rgba(201, 168, 76, 0.50);
