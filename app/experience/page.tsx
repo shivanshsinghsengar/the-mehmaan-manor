@@ -6,7 +6,6 @@ import { Wifi, Tv, Sparkles, MapPin, ArrowRight } from "lucide-react";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { PlaceholderImage } from "@/components/placeholder-image";
-import Link from "next/link";
 
 const amenities = [
   {
