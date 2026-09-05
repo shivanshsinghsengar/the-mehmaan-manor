@@ -101,52 +101,52 @@ export default function SushantLokPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-cream flex items-center justify-center">
+      <div className="min-h-screen bg-[#faf8f4] flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-forest border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="font-mono text-sm text-ink/50">Loading…</p>
+          <p className="font-mono text-sm text-ink/40">Loading…</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-cream">
+    <div className="min-h-screen bg-[#faf8f4]">
       <Navigation />
       <main id="main-content">
 
         {/* Hero */}
-        <section className="pt-20 md:pt-24 relative">
+        <section className="pt-16 md:pt-18 relative">
           {heroPhoto ? (
             <div className="w-full aspect-[4/3] sm:aspect-video relative overflow-hidden">
               <img src={heroPhoto.url} alt={heroPhoto.alt || "Sushant Lok"}
                 className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-ink/70 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
             </div>
           ) : (
-            <div className="relative">
-              <PlaceholderImage caption="PROPERTY HERO — Sushant Lok exterior" className="w-full" aspectRatio="video" />
+            <div className="relative aspect-video overflow-hidden bg-[#eee9df]">
+              <PlaceholderImage caption="SUSHANT LOK — Exterior" className="w-full" aspectRatio="video" />
             </div>
           )}
-          <div className="absolute inset-x-0 bottom-0 top-20 md:top-24 flex items-end">
-            <div className="container mx-auto px-4 md:px-6 pb-6 md:pb-12">
-              <Link href="/homes" className="inline-flex items-center text-cream/80 hover:text-cream mb-4 md:mb-6 transition-colors">
-                <ArrowLeft size={16} className="mr-2" />
-                <span className="font-mono text-sm">All Homes</span>
+          <div className="absolute inset-x-0 bottom-0 top-16 md:top-18 flex items-end pointer-events-none">
+            <div className="max-w-6xl mx-auto w-full px-4 md:px-6 pb-6 md:pb-10 pointer-events-auto">
+              <Link href="/homes" className="inline-flex items-center gap-1.5 text-white/70 hover:text-white mb-4 transition-colors">
+                <ArrowLeft size={14} />
+                <span className="font-mono text-xs">All Homes</span>
               </Link>
-              <p className="font-mono text-gold text-xs md:text-sm tracking-widest mb-1 md:mb-2">HOME 01</p>
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-display text-cream leading-tight mb-4 md:mb-6">
+              <p className="font-mono text-gold text-xs tracking-widest mb-1">HOME 01</p>
+              <h1 className="text-3xl md:text-5xl font-display text-white leading-tight mb-4">
                 Sushant Lok
               </h1>
               <div className="flex flex-wrap gap-3">
                 <a href={`https://wa.me/918828352311?text=${waMessage}`}
                   target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-3 bg-gold text-ink text-sm font-medium hover:bg-gold/90 transition-colors">
-                  <MessageCircle size={16} />Reserve via WhatsApp
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#25D366] text-white text-sm font-semibold hover:bg-[#1fb558] transition-colors shadow-md">
+                  <MessageCircle size={15} />Reserve via WhatsApp
                 </a>
                 <a href="tel:+918828352311"
-                  className="inline-flex items-center gap-2 px-5 py-3 bg-cream/10 backdrop-blur-sm border border-cream/40 text-cream text-sm font-medium hover:bg-cream/20 transition-colors">
-                  <Phone size={16} />Call Simran
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white/15 backdrop-blur-sm border border-white/30 text-white text-sm font-medium hover:bg-white/25 transition-all">
+                  <Phone size={14} />Call Simran
                 </a>
               </div>
             </div>
@@ -154,8 +154,8 @@ export default function SushantLokPage() {
         </section>
 
         {/* Details */}
-        <section className="py-8 md:py-16 px-4 md:px-6">
-          <div className="container mx-auto max-w-7xl">
+        <section className="py-8 md:py-12 px-4 md:px-6">
+          <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
 
               {/* Main content */}
@@ -215,8 +215,8 @@ export default function SushantLokPage() {
                       {pricing.amenities.map((amenity, i) => {
                         const Icon = ICON_MAP[amenity] || Star;
                         return (
-                          <div key={i} className="flex items-center space-x-3 p-3 md:p-4 border border-forest/10">
-                            <Icon size={16} className="text-gold flex-shrink-0" />
+                          <div key={i} className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-forest/8 hover:border-gold/30 transition-colors">
+                            <Icon size={14} className="text-gold flex-shrink-0" />
                             <span className="text-xs md:text-sm text-ink/80">{amenity}</span>
                           </div>
                         );
@@ -251,7 +251,7 @@ export default function SushantLokPage() {
                 </div>
 
                 {/* Policies */}
-                <div className="bg-forest/5 p-4 md:p-6">
+                <div className="bg-white border border-forest/8 rounded-2xl p-5 md:p-6">
                   <h2 className="text-lg md:text-xl font-display text-forest mb-4">House Policies</h2>
                   <div className="grid grid-cols-2 gap-4 font-mono text-sm text-ink/70 mb-4">
                     <div><p className="text-ink/50 text-xs mb-1">CHECK-IN</p><p>{pricing.checkInTime} onwards</p></div>
@@ -263,8 +263,8 @@ export default function SushantLokPage() {
 
               {/* Sidebar */}
               <div className="lg:col-span-1">
-                <div className="sticky top-24 space-y-4">
-                  <div className="border-2 border-forest/10 p-5 md:p-6 bg-cream">
+                <div className="sticky top-24 space-y-3">
+                  <div className="bg-white border border-forest/10 rounded-2xl p-5 md:p-6 shadow-sm">
                     <div className="flex flex-wrap gap-2 mb-4 pb-4 border-b border-forest/10">
                       <span className="flex items-center gap-1 text-[10px] font-mono text-green-700 bg-green-50 border border-green-200 px-2 py-1">
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
@@ -308,17 +308,19 @@ export default function SushantLokPage() {
                       </div>
                     </div>
                     <div className="space-y-3">
-                      <Button asChild variant="gold" size="lg" className="w-full">
-                        <a href={`https://wa.me/918828352311?text=${waMessage}`} target="_blank" rel="noopener noreferrer">
-                          <MessageCircle size={18} className="mr-2" />Reserve via WhatsApp
-                        </a>
-                      </Button>
-                      <Button asChild variant="outline" size="lg" className="w-full">
-                        <a href="tel:+918828352311"><Phone size={18} className="mr-2" />Call Simran</a>
-                      </Button>
-                      <Button asChild size="lg" className="w-full">
-                        <Link href="/contact">Send Enquiry</Link>
-                      </Button>
+                      <a href={`https://wa.me/918828352311?text=${waMessage}`}
+                        target="_blank" rel="noopener noreferrer"
+                        className="w-full py-4 rounded-xl bg-[#25D366] text-white font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#1fb558] transition-colors shadow-sm">
+                        <MessageCircle size={16} />Reserve via WhatsApp
+                      </a>
+                      <a href="tel:+918828352311"
+                        className="w-full py-3.5 rounded-xl border-2 border-forest text-forest font-semibold text-sm flex items-center justify-center gap-2 hover:bg-forest hover:text-cream transition-all">
+                        <Phone size={15} />Call Simran
+                      </a>
+                      <Link href="/contact"
+                        className="w-full py-3.5 rounded-xl border border-forest/20 text-ink/60 text-sm flex items-center justify-center hover:border-forest/50 hover:text-forest transition-all">
+                        Send Enquiry
+                      </Link>
                     </div>
                   </div>
                   <div className="font-mono text-xs text-ink/50 text-center p-4">
@@ -334,25 +336,27 @@ export default function SushantLokPage() {
 
       {/* Mobile sticky bar */}
       <div className={cn(
-        "lg:hidden fixed bottom-0 left-0 right-0 bg-cream border-t border-forest/10 p-3 transition-transform duration-300 z-30",
+        "lg:hidden fixed bottom-0 left-0 right-0 bg-white/97 backdrop-blur-sm border-t border-forest/10 px-4 py-3 transition-transform duration-300 z-30",
         stickyVisible ? "translate-y-0" : "translate-y-full"
       )}>
         <div className="flex items-center justify-between gap-3">
           <div>
             {festivalDiscount.discountActive && festivalDiscount.discountPercent > 0 ? (
               <>
-                <p className="text-sm font-mono text-ink/40 line-through">₹{pricing.baseRate.toLocaleString("en-IN")}</p>
+                <p className="text-xs font-mono text-ink/35 line-through">₹{pricing.baseRate.toLocaleString("en-IN")}</p>
                 <p className="text-xl font-display text-gold">₹{Math.round(pricing.baseRate * (1 - festivalDiscount.discountPercent / 100)).toLocaleString("en-IN")}</p>
               </>
             ) : (
               <p className="text-xl font-display text-forest">₹{pricing.baseRate.toLocaleString("en-IN")}</p>
             )}
-            <p className="font-mono text-xs text-ink/50">per night</p>
+            <p className="font-mono text-xs text-ink/40">per night</p>
           </div>
           <div className="flex gap-2">
-            <Button asChild variant="gold" size="lg" className="flex-shrink-0">
-              <a href={`https://wa.me/918828352311?text=${waMessage}`} target="_blank" rel="noopener noreferrer">Reserve Now</a>
-            </Button>
+            <a href={`https://wa.me/918828352311?text=${waMessage}`}
+              target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-5 py-3 rounded-xl bg-[#25D366] text-white font-bold text-sm hover:bg-[#1fb558] transition-colors">
+              Reserve Now
+            </a>
           </div>
         </div>
       </div>

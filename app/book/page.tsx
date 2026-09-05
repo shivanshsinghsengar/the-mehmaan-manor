@@ -262,10 +262,10 @@ export default function BookPage() {
   };
 
   return (
-    <div className="min-h-screen bg-cream">
+    <div className="min-h-screen bg-[#faf8f4]">
       <Navigation />
-      <main id="main-content" className="pt-28 pb-20 px-6">
-        <div className="container mx-auto max-w-3xl">
+      <main id="main-content" className="pt-24 pb-20 px-4 md:px-6">
+        <div className="max-w-2xl mx-auto">
 
           {/* Header */}
           <div className="mb-10">
@@ -307,7 +307,7 @@ export default function BookPage() {
             </div>
           )}
 
-          <div className="bg-white border border-neutral-200">
+          <div className="bg-white border border-forest/8 rounded-2xl overflow-hidden shadow-sm">
 
             {/* ── STEP 1: Property + Dates ── */}
             {step === 1 && (
@@ -492,7 +492,7 @@ export default function BookPage() {
 
                 <div className="flex gap-3 pt-2">
                   <button onClick={() => setStep(1)}
-                    className="flex-1 py-4 border-2 border-neutral-200 font-medium text-ink/70 hover:border-forest transition-all">
+                    className="flex-1 py-4 border-2 border-forest/15 rounded-xl font-medium text-ink/70 hover:border-forest transition-all">
                     ← Back
                   </button>
                   <button onClick={() => setStep(3)} disabled={!canStep2}
@@ -512,30 +512,30 @@ export default function BookPage() {
                 <h2 className="font-display text-xl text-forest">Review & Pay</h2>
 
                 {/* Stay summary */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-neutral-50 p-4">
-                    <p className="text-xs font-mono text-ink/50 uppercase mb-2">Property</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-[#faf8f4] rounded-xl p-4 border border-forest/6">
+                    <p className="text-xs font-mono text-ink/40 uppercase mb-2">Property</p>
                     <p className="font-display text-lg text-forest">{prop.name}</p>
                     {selectedRoom && (
                       <p className="text-xs font-mono text-gold mt-1">{selectedRoom.label}</p>
                     )}
-                    <p className="text-xs text-ink/50 font-mono">{prop.address}</p>
+                    <p className="text-xs text-ink/45 font-mono">{prop.address}</p>
                   </div>
-                  <div className="bg-neutral-50 p-4">
-                    <p className="text-xs font-mono text-ink/50 uppercase mb-2">Dates</p>
+                  <div className="bg-[#faf8f4] rounded-xl p-4 border border-forest/6">
+                    <p className="text-xs font-mono text-ink/40 uppercase mb-2">Dates</p>
                     <p className="font-mono text-sm text-forest">{checkIn} → {checkOut}</p>
-                    <p className="text-xs text-ink/60">{pricing.nights} nights · {guests} guests</p>
+                    <p className="text-xs text-ink/55">{pricing.nights} nights · {guests} guests</p>
                   </div>
-                  <div className="bg-neutral-50 p-4">
-                    <p className="text-xs font-mono text-ink/50 uppercase mb-2">Guest</p>
+                  <div className="bg-[#faf8f4] rounded-xl p-4 border border-forest/6">
+                    <p className="text-xs font-mono text-ink/40 uppercase mb-2">Guest</p>
                     <p className="font-medium text-forest">{form.name}</p>
-                    <p className="text-xs font-mono text-ink/60">{form.email}</p>
-                    <p className="text-xs font-mono text-ink/60">+91 {form.phone}</p>
+                    <p className="text-xs font-mono text-ink/55">{form.email}</p>
+                    <p className="text-xs font-mono text-ink/55">+91 {form.phone}</p>
                   </div>
-                  <div className="bg-forest/5 border border-forest/10 p-4">
-                    <p className="text-xs font-mono text-ink/50 uppercase mb-2">Total to Pay</p>
+                  <div className="bg-[#eee9df] rounded-xl border border-gold/20 p-4">
+                    <p className="text-xs font-mono text-ink/40 uppercase mb-2">Total to Pay</p>
                     <p className="font-display text-2xl text-forest">{fmt(pricing.total)}</p>
-                    <p className="text-xs text-ink/50">Incl. cleaning & GST</p>
+                    <p className="text-xs text-ink/45">Incl. cleaning & GST</p>
                   </div>
                 </div>
 
@@ -570,11 +570,11 @@ export default function BookPage() {
 
                 <div className="flex gap-3">
                   <button onClick={() => setStep(2)}
-                    className="flex-1 py-4 border-2 border-neutral-200 font-medium text-ink/70 hover:border-forest transition-all">
+                    className="flex-1 py-4 border-2 border-forest/15 rounded-xl font-medium text-ink/70 hover:border-forest transition-all">
                     ← Back
                   </button>
                   <button onClick={handlePay} disabled={paying}
-                    className="flex-1 py-4 bg-forest text-cream font-medium text-base hover:bg-forest-deep transition-all disabled:opacity-60 flex items-center justify-center gap-2">
+                    className="flex-1 py-4 bg-forest text-cream font-medium text-base hover:bg-forest/90 transition-all disabled:opacity-60 flex items-center justify-center gap-2 rounded-xl">
                     {paying ? "Processing…" : <>Pay {fmt(pricing.total)} <ArrowRight size={18} /></>}
                   </button>
                 </div>
@@ -604,25 +604,25 @@ export default function BookPage() {
                   <p className="text-ink/70">A confirmation will be sent to <strong>{form.email}</strong></p>
                 </div>
 
-                <div className="bg-forest/5 border border-forest/10 p-6 text-left space-y-3">
+                <div className="bg-[#faf8f4] border border-forest/8 rounded-xl p-5 text-left space-y-3">
                   <div className="flex justify-between text-sm">
-                    <span className="font-mono text-ink/50 uppercase text-xs">Booking Ref</span>
+                    <span className="font-mono text-ink/40 uppercase text-xs">Booking Ref</span>
                     <span className="font-mono font-bold text-forest text-lg">{booking.bookingNumber}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-ink/60">Property</span>
+                    <span className="text-ink/55">Property</span>
                     <span className="font-medium text-forest">{prop.name}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-ink/60">Check-in</span>
-                    <span className="font-mono">{checkIn} · {prop.checkInTime}</span>
+                    <span className="text-ink/55">Check-in</span>
+                    <span className="font-mono text-forest">{checkIn} · {prop.checkInTime}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-ink/60">Check-out</span>
-                    <span className="font-mono">{checkOut} · {prop.checkOutTime}</span>
+                    <span className="text-ink/55">Check-out</span>
+                    <span className="font-mono text-forest">{checkOut} · {prop.checkOutTime}</span>
                   </div>
-                  <div className="flex justify-between text-sm border-t border-forest/10 pt-3">
-                    <span className="text-ink/60">Amount Paid</span>
+                  <div className="flex justify-between text-sm border-t border-forest/8 pt-3">
+                    <span className="text-ink/55">Amount Paid</span>
                     <span className="font-display text-xl text-forest">{fmt(pricing.total)}</span>
                   </div>
                 </div>
@@ -633,11 +633,11 @@ export default function BookPage() {
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     <a href="https://wa.me/918828352311" target="_blank" rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-green-500 text-white font-medium text-sm hover:bg-green-600 transition-colors">
-                      <MessageCircle size={16} /> WhatsApp Simran
+                      className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#25D366] text-white font-semibold text-sm hover:bg-[#1fb558] transition-colors min-h-[48px]">
+                      <MessageCircle size={15} /> WhatsApp Simran
                     </a>
                     <Link href="/"
-                      className="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-forest text-forest font-medium text-sm hover:bg-forest hover:text-cream transition-all">
+                      className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border-2 border-forest text-forest font-semibold text-sm hover:bg-forest hover:text-cream transition-all min-h-[48px]">
                       Back to Home
                     </Link>
                   </div>

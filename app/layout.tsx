@@ -124,7 +124,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="font-sans bg-cream text-ink antialiased">
+      <body className="font-sans bg-[#faf8f4] text-ink antialiased">
         <a href="#main-content" className="skip-to-content">
           Skip to main content
         </a>

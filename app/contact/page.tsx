@@ -98,105 +98,102 @@ export default function ContactPage() {
         {/* Contact Methods */}
         <section className="pb-8 md:pb-16 px-4 md:px-6">
           <div className="container mx-auto max-w-7xl">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
               {/* Simran */}
-              <div className="reveal bg-forest-deep text-cream p-5 md:p-8 space-y-3 md:space-y-4">
-                <div className="w-16 h-16 bg-gold/10 flex items-center justify-center mb-4">
-                  <span className="font-display text-3xl text-gold">S</span>
+              <div className="reveal bg-white rounded-2xl border border-forest/8 p-5 md:p-8 space-y-3 md:space-y-4 hover:shadow-md transition-shadow">
+                <div className="w-14 h-14 bg-[#faf8f4] border border-forest/10 rounded-xl flex items-center justify-center mb-3 text-2xl">
+                  🌸
                 </div>
                 <div>
-                  <h3 className="text-2xl font-display mb-1">Simran</h3>
-                  <p className="font-mono text-sm text-gold">Your Host</p>
+                  <h3 className="text-2xl font-display text-forest mb-0.5">Simran</h3>
+                  <p className="font-mono text-xs text-gold tracking-wide">Your Host</p>
                 </div>
-                <p className="text-cream/80 text-sm">
+                <p className="text-ink/65 text-sm leading-relaxed">
                   Your first call for bookings, questions, and all things Mehmaan.
                 </p>
-                <div className="space-y-2">
+                <div className="space-y-2 pt-1">
                   <a
                     href="tel:+918828352311"
-                    className="flex items-center space-x-2 text-cream/90 hover:text-gold transition-colors"
+                    className="flex items-center gap-2 text-ink/70 hover:text-forest transition-colors min-h-[36px]"
                   >
-                    <Phone size={16} />
+                    <Phone size={14} className="text-gold shrink-0" />
                     <span className="font-mono text-sm">+91 88283 52311</span>
                   </a>
                   <a
                     href="https://wa.me/918828352311"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center space-x-2 text-cream/90 hover:text-gold transition-colors"
+                    target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-[#1a7a3a] hover:underline min-h-[36px]"
                   >
-                    <MessageCircle size={16} />
-                    <span className="text-sm">WhatsApp</span>
+                    <MessageCircle size={14} className="shrink-0" />
+                    <span className="text-sm font-medium">WhatsApp</span>
                   </a>
                 </div>
               </div>
 
               {/* Vipin */}
               <div
-                className="reveal bg-forest-deep text-cream p-5 md:p-8 space-y-3 md:space-y-4"
-                style={{ animationDelay: "150ms" }}
+                className="reveal bg-white rounded-2xl border border-forest/8 p-5 md:p-8 space-y-3 md:space-y-4 hover:shadow-md transition-shadow"
+                style={{ animationDelay: "100ms" }}
               >
-                <div className="w-16 h-16 bg-gold/10 flex items-center justify-center mb-4">
-                  <span className="font-display text-3xl text-gold">V</span>
+                <div className="w-14 h-14 bg-[#faf8f4] border border-forest/10 rounded-xl flex items-center justify-center mb-3 text-2xl">
+                  🔧
                 </div>
                 <div>
-                  <h3 className="text-2xl font-display mb-1">Vipin</h3>
-                  <p className="font-mono text-sm text-gold">Property Manager</p>
+                  <h3 className="text-2xl font-display text-forest mb-0.5">Vipin</h3>
+                  <p className="font-mono text-xs text-gold tracking-wide">Property Manager</p>
                 </div>
-                <p className="text-cream/80 text-sm">
+                <p className="text-ink/65 text-sm leading-relaxed">
                   For property-specific questions and on-ground support.
                 </p>
-                <div className="space-y-2">
+                <div className="space-y-2 pt-1">
                   <a
                     href="tel:+918796568003"
-                    className="flex items-center space-x-2 text-cream/90 hover:text-gold transition-colors"
+                    className="flex items-center gap-2 text-ink/70 hover:text-forest transition-colors min-h-[36px]"
                   >
-                    <Phone size={16} />
+                    <Phone size={14} className="text-gold shrink-0" />
                     <span className="font-mono text-sm">+91 87965 68003</span>
                   </a>
                   <a
                     href="https://wa.me/918796568003"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center space-x-2 text-cream/90 hover:text-gold transition-colors"
+                    target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-[#1a7a3a] hover:underline min-h-[36px]"
                   >
-                    <MessageCircle size={16} />
-                    <span className="text-sm">WhatsApp</span>
+                    <MessageCircle size={14} className="shrink-0" />
+                    <span className="text-sm font-medium">WhatsApp</span>
                   </a>
                 </div>
               </div>
 
               {/* Jyoti */}
               <div
-                className="reveal bg-forest-deep text-cream p-5 md:p-8 space-y-3 md:space-y-4"
-                style={{ animationDelay: "300ms" }}
+                className="reveal bg-white rounded-2xl border border-forest/8 p-5 md:p-8 space-y-3 md:space-y-4 hover:shadow-md transition-shadow"
+                style={{ animationDelay: "200ms" }}
               >
-                <div className="w-16 h-16 bg-gold/10 flex items-center justify-center mb-4">
-                  <span className="font-display text-3xl text-gold">J</span>
+                <div className="w-14 h-14 bg-[#faf8f4] border border-forest/10 rounded-xl flex items-center justify-center mb-3 text-2xl">
+                  ✨
                 </div>
                 <div>
-                  <h3 className="text-2xl font-display mb-1">Jyoti</h3>
-                  <p className="font-mono text-sm text-gold">Guest Relations</p>
+                  <h3 className="text-2xl font-display text-forest mb-0.5">Jyoti</h3>
+                  <p className="font-mono text-xs text-gold tracking-wide">Guest Relations</p>
                 </div>
-                <p className="text-cream/80 text-sm">
+                <p className="text-ink/65 text-sm leading-relaxed">
                   For reservations, inquiries, and special requests.
                 </p>
-                <div className="space-y-2">
+                <div className="space-y-2 pt-1">
                   <a
                     href="tel:+918796568002"
-                    className="flex items-center space-x-2 text-cream/90 hover:text-gold transition-colors"
+                    className="flex items-center gap-2 text-ink/70 hover:text-forest transition-colors min-h-[36px]"
                   >
-                    <Phone size={16} />
+                    <Phone size={14} className="text-gold shrink-0" />
                     <span className="font-mono text-sm">+91 87965 68002</span>
                   </a>
                   <a
                     href="https://wa.me/918796568002"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center space-x-2 text-cream/90 hover:text-gold transition-colors"
+                    target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-[#1a7a3a] hover:underline min-h-[36px]"
                   >
-                    <MessageCircle size={16} />
-                    <span className="text-sm">WhatsApp</span>
+                    <MessageCircle size={14} className="shrink-0" />
+                    <span className="text-sm font-medium">WhatsApp</span>
                   </a>
                 </div>
               </div>
@@ -399,29 +396,28 @@ export default function ContactPage() {
               {/* Instagram */}
               <div className="reveal" style={{ animationDelay: "150ms" }}>
                 <h2 className="text-2xl font-display text-forest mb-6">Follow Our Story</h2>
-                <div className="bg-forest-deep text-cream p-8 space-y-6">
+                <div className="bg-white rounded-2xl border border-forest/8 p-8 space-y-6 hover:shadow-md transition-shadow">
                   <div className="flex items-center space-x-4">
-                    <div className="w-16 h-16 bg-gold/10 flex items-center justify-center">
-                      <Instagram size={28} className="text-gold" />
+                    <div className="w-14 h-14 bg-[#faf8f4] border border-forest/10 rounded-xl flex items-center justify-center">
+                      <Instagram size={24} className="text-gold" />
                     </div>
                     <div>
-                      <p className="font-mono text-gold text-sm">Instagram</p>
-                      <p className="font-display text-2xl">@the_mehmaan_manor</p>
+                      <p className="font-mono text-xs text-gold tracking-wide uppercase mb-0.5">Instagram</p>
+                      <p className="font-display text-xl text-forest">@the_mehmaan_manor</p>
                     </div>
                   </div>
-                  <p className="text-cream/80 leading-relaxed">
+                  <p className="text-ink/65 text-sm leading-relaxed">
                     See our homes in real life, guest stories, local Gurugram gems, and
                     behind-the-scenes moments. We keep it real, never filtered.
                   </p>
-                  <Button asChild variant="gold" size="lg" className="w-full">
-                    <a
-                      href="https://www.instagram.com/the_mehmaan_manor"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Follow Us on Instagram
-                    </a>
-                  </Button>
+                  <a
+                    href="https://www.instagram.com/the_mehmaan_manor"
+                    target="_blank" rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-forest text-cream font-semibold text-sm hover:bg-forest/90 transition-colors min-h-[52px]"
+                  >
+                    <Instagram size={16} />
+                    Follow Us on Instagram
+                  </a>
                 </div>
               </div>
             </div>

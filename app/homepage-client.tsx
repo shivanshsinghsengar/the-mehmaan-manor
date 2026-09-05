@@ -1,27 +1,15 @@
 ﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
-import type React from "react";
 import Link from "next/link";
-import { ArrowRight, Instagram, MapPin, ExternalLink } from "lucide-react";
+import { ArrowRight, MapPin, Star, CheckCircle2, Clock, Wifi, Tv, UtensilsCrossed, AirVent, Car, TreePine, Phone } from "lucide-react";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
-import { ScrollProgressBar } from "@/components/3d-effects";
-import { heroImageUrl, cardImageUrl, thumbnailUrl } from "@/lib/cloudinary";
-import {
-  SplitText,
-  SplitChars,
-  ImgReveal,
-  ParallaxImg,
-  LineReveal,
-  GridReveal,
-  LineDraw,
-  SectionProgressLine,
-} from "@/components/mova-animations";
+import { heroImageUrl, cardImageUrl } from "@/lib/cloudinary";
 
-/* ─────────────────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════════════════
    Types
-───────────────────────────────────────────────────────────────── */
+═══════════════════════════════════════════════════════════════════ */
 interface SiteData {
   properties: {
     id: string; name: string; slug: string;
@@ -41,12 +29,16 @@ interface SiteData {
   discountActive: boolean;
 }
 
-const SLIDE_ANIMATIONS = [
-  "kenBurnsIn", "kenBurnsOut", "panLeft", "panRight", "panUp",
-];
+const SLIDE_ANIMATIONS = ["kenBurnsIn", "kenBurnsOut", "panLeft", "panRight", "panUp"];
+
+const WA_SVG = (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+  </svg>
+);
 
 /* ─────────────────────────────────────────────────────────────────
-   Legacy reveal hook
+   Scroll reveal hook
 ───────────────────────────────────────────────────────────────── */
 function useReveal() {
   useEffect(() => {
@@ -54,121 +46,74 @@ function useReveal() {
       (entries) => entries.forEach((e) => {
         if (e.isIntersecting) { e.target.classList.add("active"); io.unobserve(e.target); }
       }),
-      { threshold: 0.08, rootMargin: "0px 0px -48px 0px" }
+      { threshold: 0.08, rootMargin: "0px 0px -40px 0px" }
     );
-    document.querySelectorAll(".reveal, .reveal-up, .clip-reveal").forEach((el) => io.observe(el));
+    document.querySelectorAll(".reveal, .reveal-up").forEach((el) => io.observe(el));
     return () => io.disconnect();
   }, []);
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   Festival Ambience
+   Festival Ambience (light-friendly colours)
 ───────────────────────────────────────────────────────────────── */
 function FestivalAmbience({ festival, active }: { festival: string; active: boolean }) {
   const containerRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     if (!active || !festival || !containerRef.current) return;
     const container = containerRef.current;
     container.innerHTML = "";
-    const count = 28;
-
     const configs: Record<string, () => HTMLElement> = {
-      "republic-day": () => {
-        const el = document.createElement("div");
-        const colors = ["#FF9933", "#ffffff", "#138808"];
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        const size = Math.random() * 10 + 5;
-        el.style.cssText = `position:absolute;width:${size}px;height:${size}px;border-radius:50%;background:${color};left:${Math.random() * 100}%;top:-${Math.random() * 20 + 10}px;opacity:${Math.random() * 0.5 + 0.2};animation:festivalFall ${Math.random() * 6 + 5}s linear ${Math.random() * 4}s infinite;`;
-        return el;
-      },
-      "independence-day": () => {
-        const el = document.createElement("div");
-        const colors = ["#FF9933", "#ffffff", "#138808"];
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        const size = Math.random() * 10 + 5;
-        el.style.cssText = `position:absolute;width:${size}px;height:${size}px;border-radius:50%;background:${color};left:${Math.random() * 100}%;top:-${Math.random() * 20 + 10}px;opacity:${Math.random() * 0.5 + 0.2};animation:festivalFall ${Math.random() * 6 + 5}s linear ${Math.random() * 4}s infinite;`;
+      "diwali": () => {
+        const el = document.createElement("span");
+        const icons = ["✨", "🪔", "⭐", "🌟"];
+        el.textContent = icons[Math.floor(Math.random() * icons.length)];
+        el.style.cssText = `position:absolute;font-size:${Math.random() * 14 + 8}px;left:${Math.random() * 100}%;top:-30px;opacity:${Math.random() * 0.5 + 0.2};animation:festivalFall ${Math.random() * 7 + 5}s linear ${Math.random() * 5}s infinite;pointer-events:none;`;
         return el;
       },
       "holi": () => {
         const el = document.createElement("div");
         const colors = ["#FF69B4", "#9B59B6", "#FFD700", "#2ECC71", "#FF6347", "#00BFFF"];
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        const size = Math.random() * 18 + 8;
-        const br = `${Math.random() * 50}% ${Math.random() * 50}% ${Math.random() * 50}% ${Math.random() * 50}%`;
-        el.style.cssText = `position:absolute;width:${size}px;height:${size * 0.7}px;border-radius:${br};background:${color};left:${Math.random() * 100}%;top:${Math.random() * 100}%;opacity:${Math.random() * 0.35 + 0.1};animation:holiFloat ${Math.random() * 8 + 5}s ease-in-out ${Math.random() * 4}s infinite alternate;filter:blur(${Math.random() * 2}px);`;
+        const size = Math.random() * 14 + 6;
+        el.style.cssText = `position:absolute;width:${size}px;height:${size * 0.7}px;border-radius:50%;background:${colors[Math.floor(Math.random() * colors.length)]};left:${Math.random() * 100}%;top:${Math.random() * 100}%;opacity:${Math.random() * 0.25 + 0.08};animation:holiFloat ${Math.random() * 8 + 5}s ease-in-out ${Math.random() * 4}s infinite alternate;pointer-events:none;`;
         return el;
       },
-      "diwali": () => {
-        const el = document.createElement("span");
-        const icons = ["✨", "🪔", "✨", "⭐", "✨"];
-        el.textContent = icons[Math.floor(Math.random() * icons.length)];
-        el.style.cssText = `position:absolute;font-size:${Math.random() * 16 + 10}px;left:${Math.random() * 100}%;top:-30px;opacity:${Math.random() * 0.6 + 0.2};animation:festivalFall ${Math.random() * 7 + 5}s linear ${Math.random() * 5}s infinite;`;
+      "republic-day": () => {
+        const el = document.createElement("div");
+        const colors = ["#FF9933", "#138808"];
+        const size = Math.random() * 8 + 4;
+        el.style.cssText = `position:absolute;width:${size}px;height:${size}px;border-radius:50%;background:${colors[Math.floor(Math.random() * colors.length)]};left:${Math.random() * 100}%;top:-20px;opacity:${Math.random() * 0.4 + 0.15};animation:festivalFall ${Math.random() * 6 + 5}s linear ${Math.random() * 4}s infinite;pointer-events:none;`;
         return el;
       },
     };
-
-    const buildParticle = configs[festival];
-    if (!buildParticle) return;
-    for (let i = 0; i < count; i++) container.appendChild(buildParticle());
+    const factory = configs[festival];
+    if (!factory) return;
+    for (let i = 0; i < 24; i++) container.appendChild(factory());
     return () => { container.innerHTML = ""; };
   }, [festival, active]);
-
   if (!active || !festival) return null;
-
-  const borderColor: Record<string, string> = {
-    "republic-day": "linear-gradient(90deg, #FF9933 33%, #ffffff 33% 66%, #138808 66%)",
-    "independence-day": "linear-gradient(90deg, #FF9933 33%, #ffffff 33% 66%, #138808 66%)",
-    "holi": "linear-gradient(90deg, #FF69B4, #FFD700, #2ECC71, #9B59B6, #FF6347)",
-    "diwali": "linear-gradient(90deg, #FFD700, #FF8C00, #FFD700)",
-  };
-
-  return (
-    <>
-      <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none"
-        style={{ height: "4px", background: borderColor[festival] || "#c9a84c" }} />
-      <div ref={containerRef} className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden="true" />
-      <style>{`
-        @keyframes festivalFall{0%{transform:translateY(-20px) rotate(0deg);opacity:.7}100%{transform:translateY(110vh) rotate(360deg);opacity:0}}
-        @keyframes holiFloat{0%{transform:translate(0,0) scale(1) rotate(0deg)}50%{transform:translate(30px,-40px) scale(1.1) rotate(180deg)}100%{transform:translate(0,20px) scale(.95) rotate(360deg)}}
-      `}</style>
-    </>
-  );
+  return <div ref={containerRef} className="fixed inset-0 z-[5] pointer-events-none overflow-hidden" aria-hidden="true" />;
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   Festival Discount Banner
+   Discount Banner
 ───────────────────────────────────────────────────────────────── */
 function DiscountBanner({ discountPercent, activeFestival, discountActive }: {
   discountPercent: number; activeFestival: string; discountActive: boolean;
 }) {
-  if (!discountActive || discountPercent <= 0) return null;
-
-  const festivalLabels: Record<string, string> = {
-    "republic-day": "Republic Day", "independence-day": "Independence Day",
-    "holi": "Holi", "diwali": "Diwali",
-  };
-  const festivalStyles: Record<string, React.CSSProperties> = {
-    "republic-day": { background: "#ffffff", borderTop: "3px solid #FF9933", borderBottom: "3px solid #138808", color: "#1a1a1a" },
-    "independence-day": { background: "#ffffff", borderTop: "3px solid #FF9933", borderBottom: "3px solid #138808", color: "#1a1a1a" },
-    "holi": { background: "linear-gradient(90deg,#FF69B4,#FFD700,#2ECC71,#9B59B6)", color: "#fff" },
-    "diwali": { background: "linear-gradient(90deg,#FF8C00,#FFD700,#FF8C00)", color: "#1a1a1a" },
-  };
-
-  const style = festivalStyles[activeFestival] || { background: "#c9a84c", color: "#000" };
-  const label = festivalLabels[activeFestival] || "Festival";
-  const waMessage = encodeURIComponent(`Hi! I'd like to book a stay and avail the ${label} offer of ${discountPercent}% off. Can you help me?`);
-
+  const [dismissed, setDismissed] = useState(false);
+  if (!discountActive || !discountPercent || dismissed) return null;
   return (
-    <div className="relative z-30 w-full px-4 py-2.5 text-center text-sm font-medium" style={style} role="banner">
-      <span className="inline-flex flex-wrap items-center justify-center gap-2">
-        <span>🎉 {label} Offer: <strong>{discountPercent}% off</strong> on all stays!</span>
-        <a href={`https://wa.me/918828352311?text=${waMessage}`} target="_blank" rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold"
-          style={{ background: "rgba(0,0,0,0.15)", color: "inherit", border: "1px solid rgba(0,0,0,0.2)" }}>
-          Book Now →
-        </a>
-      </span>
+    <div className="relative z-30 bg-gold text-ink py-2.5 px-4 text-center text-sm font-medium">
+      <span className="mr-2">🎉</span>
+      {activeFestival && <span className="capitalize">{activeFestival.replace(/-/g, " ")} special:</span>}{" "}
+      <strong>{discountPercent}% off</strong> all bookings this week.
+      <button
+        onClick={() => setDismissed(true)}
+        className="absolute right-4 top-1/2 -translate-y-1/2 text-ink/50 hover:text-ink transition-colors text-base leading-none"
+        aria-label="Dismiss"
+      >
+        ×
+      </button>
     </div>
   );
 }
@@ -187,35 +132,39 @@ function HeroSlideshow({ slides }: { slides: { url: string; alt: string }[] }) {
       setPrev(current);
       setCurrent((c) => (c + 1) % slides.length);
       setAnimKey((k) => k + 1);
-    }, 6500);
+    }, 7000);
     return () => clearInterval(timer);
   }, [current, slides.length]);
 
-  if (slides.length === 0) return <div className="absolute inset-0 bg-gradient-to-br from-[#111] via-[#0a0a0a] to-[#080808]" />;
+  if (slides.length === 0) {
+    return <div className="absolute inset-0 bg-gradient-to-br from-[#eee9df] to-[#d9d0c3]" />;
+  }
 
   return (
     <div className="absolute inset-0">
       {prev !== null && (
-        <div key={`prev-${prev}`} className="absolute inset-0" style={{ animation: "fadeOut 1.4s ease-in-out forwards", zIndex: 1 }}>
-          <img src={heroImageUrl(slides[prev].url)} alt={slides[prev].alt}
-            className="w-full h-full object-cover" loading="lazy" sizes="100vw" />
+        <div key={`prev-${prev}`} className="absolute inset-0" style={{ animation: "fadeOut 1.2s ease-in-out forwards", zIndex: 1 }}>
+          <img src={heroImageUrl(slides[prev].url)} alt={slides[prev].alt} className="w-full h-full object-cover" loading="lazy" />
         </div>
       )}
-      <div key={`slide-${current}-${animKey}`} className="absolute inset-0" style={{ animation: "fadeIn 1.4s ease-in-out forwards", zIndex: 2 }}>
-        <img src={heroImageUrl(slides[current].url)} alt={slides[current].alt}
+      <div key={`slide-${current}-${animKey}`} className="absolute inset-0" style={{ animation: "fadeIn 1.2s ease-in-out forwards", zIndex: 2 }}>
+        <img
+          src={heroImageUrl(slides[current].url)}
+          alt={slides[current].alt}
           className="w-full h-full object-cover"
           style={{ animation: `${SLIDE_ANIMATIONS[current % SLIDE_ANIMATIONS.length]} 9s ease-in-out forwards` }}
-          sizes="100vw"
           loading={current === 0 ? "eager" : "lazy"}
-          fetchPriority={current === 0 ? "high" : "low"}
-          decoding={current === 0 ? "sync" : "async"} />
+        />
       </div>
       {slides.length > 1 && (
-        <div className="absolute bottom-20 right-6 z-30 flex gap-2">
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-30 flex gap-2">
           {slides.map((_, i) => (
-            <button key={i} onClick={() => { setPrev(current); setCurrent(i); setAnimKey(k => k + 1); }}
-              className={`transition-all duration-500 ${i === current ? "w-8 h-0.5 bg-[#c9a84c]" : "w-2 h-0.5 bg-white/25"}`}
-              aria-label={`Go to slide ${i + 1}`} />
+            <button
+              key={i}
+              onClick={() => { setPrev(current); setCurrent(i); setAnimKey((k) => k + 1); }}
+              className={`transition-all duration-400 rounded-full ${i === current ? "w-6 h-2 bg-white" : "w-2 h-2 bg-white/50"}`}
+              aria-label={`Slide ${i + 1}`}
+            />
           ))}
         </div>
       )}
@@ -224,984 +173,628 @@ function HeroSlideshow({ slides }: { slides: { url: string; alt: string }[] }) {
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   HERO SECTION — MOVA per-char cinematic entrance
+   Hero Section — light overlay, readable text on any photo
 ───────────────────────────────────────────────────────────────── */
-function HeroSection({ slides, content }: {
+function HeroSection({ slides, content, discountPercent, discountActive }: {
   slides: { url: string; alt: string }[];
   content: SiteData["content"];
+  discountPercent: number;
+  discountActive: boolean;
 }) {
-  // each word of the headline enters character by character
-  const lines = [
-    { text: "The", delay: 0.3, color: "text-white" },
-    { text: "Mehmaan", delay: 0.5, color: "text-[#c9a84c] italic" },
-    { text: "Experience", delay: 0.85, color: "text-white" },
-  ];
-
   return (
-    <section className="relative w-full overflow-hidden" style={{ height: "100svh" }}>
+    <section className="relative w-full overflow-hidden" style={{ height: "100svh", minHeight: 520 }}>
       <HeroSlideshow slides={slides} />
 
-      {/* Overlays */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/25 to-black/15 z-10" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/55 to-transparent z-10" />
-      <div className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-b from-black/45 to-transparent z-10" />
+      {/* Gradient overlay — stays light-friendly */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/10 z-10" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent z-10" />
 
-      <div className="absolute inset-0 z-20 flex flex-col justify-end px-5 md:px-14 lg:px-24 pb-20 md:pb-28">
+      <div className="absolute inset-0 z-20 flex flex-col justify-end px-5 md:px-12 lg:px-20 pb-16 md:pb-24">
 
         {/* Location tag */}
-        <div className="flex items-center gap-3 mb-5 hero-line-enter" style={{ animationDelay: "0.15s" }}>
-          <div className="w-6 h-px bg-[#c9a84c]/50" />
-          <span className="label-badge text-[#c9a84c] text-[10px]">Gurugram · India</span>
+        <div
+          className="flex items-center gap-2 mb-4 hero-line-enter"
+          style={{ animationDelay: "0.2s" }}
+        >
+          <MapPin size={12} className="text-gold" />
+          <span className="label-badge text-white/80 text-[10px]">Gurugram · Haryana · India</span>
         </div>
 
-        {/* Giant headline — per-character stagger */}
+        {/* Headline */}
         <h1
-          className="font-display leading-[0.88] tracking-[-0.02em] mb-6"
-          style={{ fontSize: "clamp(3.4rem,11vw,8.5rem)" }}
-          aria-label="The Mehmaan Experience"
+          className="font-display text-white leading-tight mb-4 hero-line-enter"
+          style={{ fontSize: "clamp(2.8rem, 9vw, 7rem)", lineHeight: "1.0", animationDelay: "0.35s" }}
         >
-          {lines.map(({ text, delay, color }) => (
-            <span key={text} className={`block ${color}`}>
-              {text.split("").map((ch, i) => (
-                <span
-                  key={i}
-                  className="inline-block hero-line-enter"
-                  style={{ animationDelay: `${delay + i * 0.052}s` }}
-                >
-                  {ch}
-                </span>
-              ))}
-            </span>
-          ))}
+          A Home Away
+          <br />
+          <span className="text-[#f0d98a] italic">From Home.</span>
         </h1>
 
         {/* Subtitle */}
         <p
-          className="text-white/65 text-sm md:text-lg font-light leading-relaxed mb-8 max-w-xs md:max-w-md hero-line-enter"
-          style={{ animationDelay: "1.35s" }}
+          className="text-white/75 text-sm md:text-lg leading-relaxed mb-7 max-w-sm md:max-w-md hero-line-enter"
+          style={{ animationDelay: "0.6s" }}
         >
-          {content.heroSubtitle}
+          {content.heroSubtitle || "Two beautiful homes in Gurugram. Warm hosts. No booking fees."}
         </p>
 
         {/* CTAs */}
-        <div className="flex flex-col sm:flex-row gap-3 hero-line-enter" style={{ animationDelay: "1.55s" }}>
+        <div
+          className="flex flex-col sm:flex-row gap-3 hero-line-enter"
+          style={{ animationDelay: "0.8s" }}
+        >
           <a
             href="https://wa.me/918828352311"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2.5 px-7 py-3.5 bg-[#c9a84c] text-black font-semibold text-sm tracking-wide hover:bg-[#d4b55c] transition-all duration-300 min-h-[50px] group"
+            className="inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-xl bg-[#25D366] text-white font-semibold text-sm hover:bg-[#1fb558] transition-colors min-h-[52px] shadow-lg"
           >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
-            Reserve Now <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
+            {WA_SVG}
+            Reserve on WhatsApp
           </a>
           <Link
             href="/homes"
-            className="inline-flex items-center justify-center gap-2 px-7 py-3.5 border border-white/25 text-white text-sm font-medium tracking-wide hover:bg-white/10 hover:border-white/50 transition-all duration-300 min-h-[50px]"
+            className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-xl bg-white/15 backdrop-blur-sm border border-white/30 text-white font-medium text-sm hover:bg-white/25 transition-all min-h-[52px]"
           >
-            Explore Homes <ArrowRight size={13} />
+            Explore Homes <ArrowRight size={14} />
           </Link>
         </div>
 
         {/* Trust badges */}
-        <div className="flex gap-5 mt-5 hero-line-enter" style={{ animationDelay: "1.8s" }}>
-          <span className="text-white/30 text-[10px] font-mono">✓ Direct booking</span>
-          <span className="text-white/30 text-[10px] font-mono">✓ No booking fees</span>
-          <span className="text-white/30 text-[10px] font-mono">✓ 4.9★ rated</span>
-        </div>
-      </div>
-
-      {/* Scroll cue */}
-      <div
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1.5"
-        style={{ opacity: 0, animation: "fadeIn 1s 2.2s forwards" }}
-      >
-        <span className="font-mono text-white/25 text-[9px] tracking-[0.3em]">SCROLL</span>
-        <div className="w-px h-8 bg-gradient-to-b from-[#c9a84c]/60 to-transparent scroll-indicator" />
-      </div>
-    </section>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   Social Proof Ticker — rotating recent activity
-───────────────────────────────────────────────────────────────── */
-const SOCIAL_PROOF_ITEMS = [
-  { icon: "🏠", text: "Someone from Delhi just viewed Sushant Lok", time: "2 min ago" },
-  { icon: "📅", text: "Weekend dates filling fast — only a few open slots left", time: "" },
-  { icon: "⭐", text: "\"Felt like home the moment we walked in\" — Priya M.", time: "last week" },
-  { icon: "✅", text: "Booking confirmed for this weekend", time: "4 hours ago" },
-  { icon: "💬", text: "Host responded in under 3 minutes", time: "today" },
-  { icon: "🎉", text: "2 groups stayed last weekend — both rated 5 stars", time: "" },
-];
-
-function SocialProofTicker() {
-  const [idx, setIdx] = useState(0);
-  const [visible, setVisible] = useState(true);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setVisible(false);
-      setTimeout(() => {
-        setIdx((i) => (i + 1) % SOCIAL_PROOF_ITEMS.length);
-        setVisible(true);
-      }, 350);
-    }, 4500);
-    return () => clearInterval(interval);
-  }, []);
-
-  const item = SOCIAL_PROOF_ITEMS[idx];
-
-  return (
-    <div
-      className="relative z-10 py-2.5 px-4"
-      style={{ background: "var(--bg-elevated)", borderBottom: "1px solid var(--border-gold)" }}
-    >
-      <div className="container mx-auto max-w-5xl">
         <div
-          className="flex items-center justify-center gap-3 text-xs font-mono transition-all duration-300"
-          style={{
-            color: "var(--text-secondary)",
-            opacity: visible ? 1 : 0,
-            transform: visible ? "translateY(0)" : "translateY(-6px)",
-          }}
+          className="flex flex-wrap gap-4 mt-5 hero-line-enter"
+          style={{ animationDelay: "1s" }}
         >
-          <span className="text-sm">{item.icon}</span>
-          <span style={{ color: "var(--text-secondary)" }}>{item.text}</span>
-          {item.time && (
-            <span
-              className="px-2 py-0.5 rounded-full font-mono text-[10px] tracking-wider"
-              style={{ background: "var(--gold-faint)", color: "var(--gold)" }}
-            >
-              {item.time}
+          <span className="flex items-center gap-1.5 text-white/55 text-xs">
+            <CheckCircle2 size={11} /> Direct booking · No fees
+          </span>
+          <span className="flex items-center gap-1.5 text-white/55 text-xs">
+            <Star size={11} className="fill-white/55" /> 4.9★ rated stays
+          </span>
+          <span className="flex items-center gap-1.5 text-white/55 text-xs">
+            <Clock size={11} /> Responds in &lt;5 min
+          </span>
+          {discountActive && discountPercent > 0 && (
+            <span className="flex items-center gap-1.5 text-[#f0d98a] text-xs font-medium">
+              🎉 {discountPercent}% off this week
             </span>
           )}
         </div>
       </div>
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   Urgency Banner — above property cards
-───────────────────────────────────────────────────────────────── */
-function UrgencyBanner() {
-  const [dismissed, setDismissed] = useState(false);
-
-  if (dismissed) return null;
-
-  return (
-    <div
-      className="relative z-10"
-      style={{ background: "rgba(201,168,76,0.08)", borderBottom: "1px solid rgba(201,168,76,0.2)" }}
-    >
-      <div className="container mx-auto max-w-7xl px-4 md:px-8 py-3 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3 flex-wrap">
-          <span className="text-base">🔥</span>
-          <p className="text-xs font-mono" style={{ color: "var(--text-secondary)" }}>
-            <span style={{ color: "var(--gold)", fontWeight: 600 }}>Only 2 properties available</span>
-            {" "}— weekend dates book 3–5 days in advance on average.
-          </p>
-          <a
-            href="https://wa.me/918828352311?text=Hi%21+I%27d+like+to+check+availability+for+a+stay."
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-mono tracking-wider uppercase transition-all duration-200"
-            style={{ background: "var(--gold)", color: "#000" }}
-          >
-            Check Dates →
-          </a>
-        </div>
-        <button
-          onClick={() => setDismissed(true)}
-          className="flex-shrink-0 text-xs font-mono opacity-40 hover:opacity-70 transition-opacity"
-          style={{ color: "var(--text-secondary)" }}
-          aria-label="Dismiss"
-        >
-          ✕
-        </button>
-      </div>
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   Scarcity Strip — before final CTA
-───────────────────────────────────────────────────────────────── */
-function ScarcityStrip() {
-  return (
-    <section
-      className="py-10 md:py-14 relative overflow-hidden"
-      style={{ background: "var(--bg-elevated)", borderTop: "1px solid var(--border-default)" }}
-    >
-      <div className="container mx-auto max-w-5xl px-4 md:px-8">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          {/* Left: trust signals */}
-          <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center md:justify-start">
-            {[
-              { icon: "⭐⭐⭐⭐⭐", label: "4.9 on Google", sub: "from real guests" },
-              { icon: "⚡", label: "Responds in 5 min", sub: "avg WhatsApp reply time" },
-              { icon: "🏠", label: "2 homes only", sub: "limited availability" },
-              { icon: "💸", label: "No OTA markup", sub: "save vs Airbnb" },
-            ].map(({ icon, label, sub }) => (
-              <div key={label} className="text-center px-4">
-                <p className="text-base leading-none mb-1">{icon}</p>
-                <p className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{label}</p>
-                <p className="text-[10px] font-mono mt-0.5" style={{ color: "var(--text-tertiary)" }}>{sub}</p>
-              </div>
-            ))}
-          </div>
-          {/* Right: CTA */}
-          <a
-            href="https://wa.me/918828352311?text=Hi%21+I%27d+like+to+book+a+stay+at+The+Mehmaan+Manor."
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2.5 px-7 py-3.5 font-semibold text-sm tracking-wide transition-all duration-300 flex-shrink-0 group"
-            style={{ background: "var(--gold)", color: "#000" }}
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-            Message Us Now
-            <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
-          </a>
-        </div>
-      </div>
     </section>
   );
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   Exit Intent Nudge — fires once when cursor leaves top of page
+   Stats Row
 ───────────────────────────────────────────────────────────────── */
-function ExitIntentNudge() {
-  const [show, setShow] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
-  const firedRef = useRef(false);
-
-  useEffect(() => {
-    const onMouseLeave = (e: MouseEvent) => {
-      if (e.clientY <= 10 && !firedRef.current && !dismissed) {
-        firedRef.current = true;
-        setTimeout(() => setShow(true), 200);
-      }
-    };
-    document.addEventListener("mouseleave", onMouseLeave);
-    return () => document.removeEventListener("mouseleave", onMouseLeave);
-  }, [dismissed]);
-
-  const handleDismiss = () => { setShow(false); setDismissed(true); };
-
-  if (!show) return null;
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.65)", backdropFilter: "blur(4px)" }}
-      onClick={handleDismiss}
-    >
-      <div
-        className="relative max-w-md w-full p-8 text-center"
-        style={{ background: "var(--bg-raised)", border: "1px solid var(--border-gold)" }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          onClick={handleDismiss}
-          className="absolute top-4 right-4 font-mono text-xs opacity-40 hover:opacity-70"
-          style={{ color: "var(--text-secondary)" }}
-        >✕</button>
-
-        <p className="text-3xl mb-4">🏠</p>
-        <h3
-          className="font-display text-2xl md:text-3xl italic mb-3 leading-tight"
-          style={{ color: "var(--text-primary)" }}
-        >
-          Before you go…
-        </h3>
-        <p className="text-sm leading-relaxed mb-6" style={{ color: "var(--text-secondary)" }}>
-          Weekend dates fill up fast. Drop us a message — no commitment, just a quick chat about availability.
-        </p>
-
-        <a
-          href="https://wa.me/918828352311?text=Hi%21+I+was+browsing+The+Mehmaan+Manor+and+wanted+to+check+availability."
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={handleDismiss}
-          className="w-full flex items-center justify-center gap-2.5 py-3.5 font-semibold text-sm mb-3"
-          style={{ background: "var(--gold)", color: "#000" }}
-        >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-          Check Availability on WhatsApp
-        </a>
-        <button
-          onClick={handleDismiss}
-          className="w-full text-xs font-mono py-2 transition-opacity opacity-40 hover:opacity-60"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          No thanks, I&rsquo;ll decide later
-        </button>
-
-        <p className="text-[10px] font-mono mt-4 tracking-wider" style={{ color: "var(--text-faint)" }}>
-          SIMRAN · +91 88283 52311 · RESPONDS IN &lt;5 MIN
-        </p>
-      </div>
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   Marquee Ribbon
-───────────────────────────────────────────────────────────────── */
-function MarqueeRibbon() {
-  const items = [
-    "Direct Booking", "No Hidden Fees", "Real Hosts", "Gurugram's Finest",
-    "4.9★ Rated", "Warm Hospitality", "Two Premium Homes", "Book via WhatsApp",
-  ];
-  const doubled = [...items, ...items];
-  return (
-    <div className="relative overflow-hidden py-3 z-10" style={{ background: "var(--gold)" }} aria-hidden="true">
-      <div className="marquee-track">
-        {doubled.map((item, i) => (
-          <span key={i} className="inline-flex items-center gap-4 px-6 font-mono text-[11px] tracking-[0.25em] uppercase whitespace-nowrap" style={{ color: "rgba(0,0,0,0.75)" }}>
-            {item}<span className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: "rgba(0,0,0,0.3)" }} />
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   Stats Row — kinetic character stagger
-───────────────────────────────────────────────────────────────── */
-function StatsRow({ discountPercent, discountActive }: { discountPercent: number; discountActive: boolean }) {
+function StatsRow() {
   const stats = [
-    { value: "2", label: "Curated Homes" },
-    { value: "4.9★", label: "Average Rating" },
-    { value: "24/7", label: "Host Availability" },
-    ...(discountActive && discountPercent > 0
-      ? [{ value: `${discountPercent}%`, label: "Current Offer" }]
-      : [{ value: "Free", label: "No Platform Fees" }]),
+    { value: "2", label: "Beautiful Homes" },
+    { value: "4.9★", label: "Guest Rating" },
+    { value: "₹1,999", label: "Starting from/night" },
+    { value: "24/7", label: "Host Support" },
   ];
   return (
-    <section className="theme-transition" style={{ background: "var(--bg-surface)", borderBottom: "1px solid var(--border-gold)" }}>
-      <div className="container mx-auto max-w-5xl px-4">
-        <GridReveal className="grid grid-cols-2 md:grid-cols-4" stagger={80}>
-          {stats.map(({ value, label }) => (
-            <div key={label} className="py-6 md:py-7 px-4 text-center" style={{ borderRight: "1px solid var(--border-gold)" }}>
-              <SplitChars
-                text={value}
-                as="p"
-                className="font-display text-2xl md:text-3xl italic"
-                style={{ color: "var(--gold)" }}
-                stagger={60}
-              />
-              <p className="text-[10px] font-mono uppercase tracking-widest mt-1" style={{ color: "var(--text-tertiary)" }}>{label}</p>
+    <section className="bg-white border-y border-forest/8">
+      <div className="max-w-5xl mx-auto px-4 md:px-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-forest/8">
+          {stats.map((s) => (
+            <div key={s.label} className="py-5 px-4 md:px-6 text-center">
+              <p className="font-display text-2xl md:text-3xl text-forest font-medium">{s.value}</p>
+              <p className="text-xs text-ink/50 mt-1 font-mono">{s.label}</p>
             </div>
           ))}
-        </GridReveal>
+        </div>
       </div>
     </section>
   );
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   Property Cards — image wipe + split headline + scrim text
+   Property Cards
 ───────────────────────────────────────────────────────────────── */
 function PropertyCards({ properties, propertyCards, discountPercent, discountActive }: {
-  properties: SiteData["properties"]; propertyCards: SiteData["propertyCards"];
-  discountPercent: number; discountActive: boolean;
+  properties: SiteData["properties"];
+  propertyCards: SiteData["propertyCards"];
+  discountPercent: number;
+  discountActive: boolean;
 }) {
-  return (
-    <section className="theme-transition py-16 md:py-24 relative overflow-hidden" style={{ background: "var(--bg-surface)" }}>
-      <SectionProgressLine />
+  const fallbackImages: Record<string, string> = {
+    "sushant-lok": "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800",
+    "jharsa-village": "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800",
+  };
 
-      <div className="container mx-auto max-w-7xl px-4 md:px-8">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-12 md:mb-16 gap-6">
-          <div>
-            <LineReveal>
-              <p className="label-badge mb-3" style={{ color: "var(--text-tertiary)" }}>Our Properties</p>
-            </LineReveal>
-            <SplitText
-              text="Two Homes."
-              as="h2"
-              className="font-display leading-[1.05] block"
-              style={{ fontSize: "clamp(2.2rem,5vw,4rem)", color: "var(--text-primary)" }}
-              delay={80}
-            />
-            <SplitText
-              text="One Promise."
-              as="span"
-              className="font-display italic leading-[1.05] block"
-              style={{ fontSize: "clamp(2.2rem,5vw,4rem)", color: "var(--gold)" }}
-              delay={220}
-            />
-          </div>
-          <LineReveal delay={300}>
-            <Link href="/homes"
-              className="inline-flex items-center gap-2.5 font-mono text-xs tracking-widest uppercase transition-all duration-300 group self-start md:self-auto pb-1 underline-wipe"
-              style={{ color: "var(--text-tertiary)" }}
-              onMouseEnter={e => (e.currentTarget.style.color = "var(--gold)")}
-              onMouseLeave={e => (e.currentTarget.style.color = "var(--text-tertiary)")}>
-              View All Homes <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </LineReveal>
+  return (
+    <section id="homes" className="py-14 md:py-20 px-4 md:px-6 bg-[#faf8f4]">
+      <div className="max-w-5xl mx-auto">
+
+        {/* Section heading */}
+        <div className="text-center mb-10 md:mb-14 reveal">
+          <span className="label-badge text-gold">Where You'll Stay</span>
+          <h2 className="font-display text-title text-forest mt-3 mb-3">Our Two Homes</h2>
+          <p className="text-ink/60 text-sm md:text-base max-w-xl mx-auto">
+            Both in Gurugram. Both thoughtfully designed. Pick the one that feels right for you.
+          </p>
         </div>
 
-        <div className={`grid grid-cols-1 ${properties.length >= 2 ? "lg:grid-cols-2" : ""} gap-4 md:gap-5`}>
-          {properties.map((p, i) => {
-            const photos = propertyCards[p.id] || [];
-            const mainPhoto = photos[0];
-            const extraPhotos = photos.slice(1, 4);
+        {/* Cards grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+          {properties.map((property, i) => {
+            const photos = propertyCards[property.id] ?? [];
+            const imgUrl = photos[0]?.url
+              ? cardImageUrl(photos[0].url)
+              : fallbackImages[property.slug] ?? "";
+            const rate = discountActive && discountPercent > 0
+              ? Math.round(property.baseRate * (1 - discountPercent / 100))
+              : property.baseRate;
+
             return (
-              <Link key={p.id} href={`/homes/${p.slug}`} className="prop-card group relative block">
-                {/* Main image container — ImgReveal handles fade-in, no clip-path */}
-                <ImgReveal delay={i * 160} className="img-sweep-wrap" style={{ height: "clamp(340px,52vw,620px)" }}>
-                  {mainPhoto ? (
+              <div
+                key={property.id}
+                className="reveal bg-white rounded-2xl overflow-hidden border border-forest/8 hover:border-gold/40 hover:shadow-xl transition-all duration-300 group"
+                style={{ transitionDelay: `${i * 80}ms` }}
+              >
+                {/* Photo */}
+                <div className="relative aspect-[4/3] overflow-hidden bg-[#eee9df]">
+                  {imgUrl && (
                     <img
-                      src={cardImageUrl(mainPhoto.url)}
-                      alt={p.name}
-                      className="w-full h-full object-cover"
-                      style={{ display: "block", width: "100%", height: "100%" }}
+                      src={imgUrl}
+                      alt={property.name}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      loading="lazy"
                     />
-                  ) : (
-                    <div className="w-full h-full" style={{ background: "linear-gradient(135deg,#1a1a1a,#0a0a0a)" }} />
                   )}
-                  {/* Gradient overlays — absolutely positioned over the image */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/5 pointer-events-none" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent pointer-events-none" />
-
-                  <div className="absolute top-5 left-5 z-10">
-                    <span className="label-badge bg-black/50 backdrop-blur-sm px-3 py-1.5 block" style={{ color: "var(--gold)" }}>
-                      Home {String(i + 1).padStart(2, "0")}
-                    </span>
+                  {/* Price badge */}
+                  <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-sm">
+                    {discountActive && discountPercent > 0 && (
+                      <p className="text-[10px] font-mono text-ink/40 line-through leading-none">
+                        ₹{property.baseRate.toLocaleString("en-IN")}
+                      </p>
+                    )}
+                    <p className="text-sm font-semibold text-forest leading-tight">
+                      ₹{rate.toLocaleString("en-IN")}
+                      <span className="text-xs font-normal text-ink/50">/night</span>
+                    </p>
                   </div>
+                  {discountActive && discountPercent > 0 && (
+                    <div className="absolute top-3 left-3 bg-gold text-ink text-xs font-semibold px-2.5 py-1 rounded-lg">
+                      {discountPercent}% OFF
+                    </div>
+                  )}
+                </div>
 
-                  <div className="absolute bottom-0 left-0 right-0 z-10 p-6 md:p-8">
-                    <div className="prop-card-line mb-3" />
-                    <h3 className="font-display text-white leading-tight mb-2 transition-colors duration-500 group-hover:text-[#c9a84c]"
-                      style={{ fontSize: "clamp(1.8rem,3.5vw,2.8rem)" }}>{p.name}</h3>
-                    <p className="text-white/55 text-sm mb-5 leading-relaxed line-clamp-2 max-w-sm scrim-text">{p.vibe}</p>
-                    <div className="flex items-end justify-between">
-                      <div>
-                        {discountActive && discountPercent > 0 ? (
-                          <div className="flex flex-col gap-0.5">
-                            <span className="font-mono text-white/35 text-xs line-through">₹{p.baseRate.toLocaleString("en-IN")}/night</span>
-                            <span className="font-mono text-sm" style={{ color: "var(--gold)" }}>from ₹{Math.round(p.baseRate * (1 - discountPercent / 100)).toLocaleString("en-IN")}/night</span>
-                            <span className="label-badge text-[9px]" style={{ color: "rgba(201,168,76,0.7)" }}>🎉 {discountPercent}% off active</span>
-                          </div>
-                        ) : (
-                          <span className="font-mono text-sm" style={{ color: "var(--gold)" }}>from ₹{p.baseRate.toLocaleString("en-IN")}/night</span>
-                        )}
-                      </div>
-                      <span className="inline-flex items-center gap-2 text-xs font-mono tracking-wider text-white/50 group-hover:text-[#c9a84c] group-hover:gap-3 transition-all duration-300">
-                        Explore <ArrowRight size={12} />
-                      </span>
+                {/* Content */}
+                <div className="p-5 md:p-6">
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <h3 className="font-display text-xl md:text-2xl text-forest">{property.name}</h3>
+                    <div className="flex items-center gap-1 text-xs font-mono text-gold shrink-0 mt-1">
+                      <Star size={11} className="fill-gold" /> 4.9
                     </div>
                   </div>
-                </ImgReveal>
-
-                {extraPhotos.length > 0 && (
-                  <div className="grid grid-cols-3 gap-1 mt-1">
-                    {extraPhotos.map((ph, j) => (
-                      <ImgReveal key={j} delay={i * 160 + 300 + j * 70} style={{ height: "72px" }}>
-                        <img
-                          src={thumbnailUrl(ph.url, 300)}
-                          alt={ph.alt || p.name}
-                          className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-500"
-                          style={{ display: "block", width: "100%", height: "100%" }}
-                        />
-                      </ImgReveal>
-                    ))}
+                  <div className="flex items-center gap-1.5 mb-3">
+                    <MapPin size={12} className="text-ink/35 shrink-0" />
+                    <p className="text-xs text-ink/55 font-mono">{property.address}</p>
                   </div>
-                )}
-              </Link>
+                  {property.vibe && (
+                    <p className="text-sm text-ink/65 leading-relaxed mb-5 line-clamp-2">{property.vibe}</p>
+                  )}
+
+                  <div className="flex gap-3">
+                    <Link
+                      href={`/homes/${property.slug}`}
+                      className="flex-1 flex items-center justify-center py-3 rounded-xl border-2 border-forest text-forest text-sm font-semibold hover:bg-forest hover:text-cream transition-all min-h-[48px]"
+                    >
+                      Explore Home
+                    </Link>
+                    <a
+                      href={`https://wa.me/918828352311?text=${encodeURIComponent(`Hi! I'd like to reserve ${property.name}. Can you help?`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center px-4 py-3 rounded-xl bg-[#dcf5e5] text-[#1a7a3a] hover:bg-[#c8efda] transition-colors min-h-[48px]"
+                      aria-label="WhatsApp"
+                    >
+                      {WA_SVG}
+                    </a>
+                  </div>
+                </div>
+              </div>
             );
           })}
         </div>
+
+        {/* No properties fallback */}
+        {properties.length === 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+            {[
+              { name: "Sushant Lok", address: "Sector 57, Phase 2, Gurugram", rate: 2999, slug: "sushant-lok", vibe: "Peaceful and green — a quiet retreat from the city. Perfect for work trips and longer stays." },
+              { name: "Jharsa Village", address: "Sector 39, Gurugram – 122003", rate: 1999, slug: "jharsa-village", vibe: "Cosy and connected — feel the pulse of local life. Great for families and weekend getaways." },
+            ].map((p, i) => (
+              <div key={i} className="reveal bg-white rounded-2xl overflow-hidden border border-forest/8 hover:border-gold/40 hover:shadow-xl transition-all duration-300 group">
+                <div className="aspect-[4/3] bg-gradient-to-br from-[#eee9df] to-[#d9d0c3] flex items-center justify-center">
+                  <span className="font-display text-4xl text-forest/20">{p.name[0]}</span>
+                </div>
+                <div className="p-5 md:p-6">
+                  <h3 className="font-display text-xl md:text-2xl text-forest mb-1">{p.name}</h3>
+                  <div className="flex items-center gap-1.5 mb-3">
+                    <MapPin size={12} className="text-ink/35 shrink-0" />
+                    <p className="text-xs text-ink/55 font-mono">{p.address}</p>
+                  </div>
+                  <p className="text-sm text-ink/65 leading-relaxed mb-5">{p.vibe}</p>
+                  <div className="flex items-center justify-between mb-5">
+                    <p className="font-semibold text-forest">
+                      ₹{p.rate.toLocaleString("en-IN")}
+                      <span className="text-xs font-normal text-ink/45 ml-1">/night</span>
+                    </p>
+                  </div>
+                  <Link href={`/homes/${p.slug}`} className="block w-full text-center py-3 rounded-xl border-2 border-forest text-forest text-sm font-semibold hover:bg-forest hover:text-cream transition-all">
+                    Explore Home
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   How It Works
+   How It Works — 3 clear steps
 ───────────────────────────────────────────────────────────────── */
 function HowItWorks() {
   const steps = [
-    { n: "01", title: "Browse & Choose", body: "Explore our two Gurugram homes at your pace — no pressure, no pushy sales. Find the one that fits your group and your vibe.", icon: "🏡" },
-    { n: "02", title: "Message Your Hosts", body: "Reach Simran or Jyoti directly on WhatsApp. Real people, real answers — not a call centre script. Questions answered in minutes.", icon: "💬" },
-    { n: "03", title: "Arrive & Unwind", body: "Check-in on your terms. No gatekeepers, no queues. Your home is ready — from a stocked kitchen to fresh linens.", icon: "✨" },
+    {
+      number: "01",
+      title: "Choose Your Home",
+      desc: "Browse both properties, see photos and pricing. Pick the one that fits your trip.",
+      icon: "🏠",
+    },
+    {
+      number: "02",
+      title: "Message Us on WhatsApp",
+      desc: "Just send a message with your dates. We'll confirm availability within 5 minutes.",
+      icon: "💬",
+    },
+    {
+      number: "03",
+      title: "Arrive & Feel at Home",
+      desc: "We'll welcome you personally. The home is all yours — clean, comfortable, and ready.",
+      icon: "🗝️",
+    },
   ];
 
   return (
-    <section className="theme-transition relative py-20 md:py-32 overflow-hidden grain-overlay" style={{ background: "var(--section-how)" }}>
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
-        <span className="font-display whitespace-nowrap" style={{ fontSize: "clamp(8rem,20vw,18rem)", fontStyle: "italic", color: "var(--text-faint)" }}>
-          Mehmaan
-        </span>
-      </div>
-
-      <div className="container mx-auto max-w-7xl px-4 md:px-8 relative z-10">
-        <div className="text-center mb-16 md:mb-20">
-          <LineReveal>
-            <p className="label-badge mb-3" style={{ color: "var(--section-how-label)" }}>The Process</p>
-          </LineReveal>
-          <SplitText
-            text="Effortless from Start"
-            as="h2"
-            className="font-display leading-tight block"
-            style={{ fontSize: "clamp(2rem,4.5vw,3.6rem)", color: "var(--section-how-text)" }}
-            delay={80}
-          />
-          <SplitText
-            text="to Stay"
-            as="span"
-            className="font-display italic block"
-            style={{ fontSize: "clamp(2rem,4.5vw,3.6rem)", color: "var(--gold)" }}
-            delay={280}
-          />
-          <LineDraw className="mx-auto mt-5" style={{ maxWidth: "48px" }} delay={450} />
+    <section className="py-14 md:py-20 px-4 md:px-6 bg-[#eee9df]">
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-10 md:mb-14 reveal">
+          <span className="label-badge text-gold">Simple Process</span>
+          <h2 className="font-display text-title text-forest mt-3 mb-3">How It Works</h2>
+          <p className="text-ink/60 text-sm md:text-base">
+            Booking with us is as easy as sending a message.
+          </p>
         </div>
 
-        <GridReveal className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 lg:gap-12" stagger={130}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-10">
           {steps.map((step, i) => (
-            <div key={step.n} className="step-card group relative">
-              {i < steps.length - 1 && (
-                <div className="hidden md:block absolute top-12 h-px z-0"
-                  style={{ left: "calc(100% - 24px)", width: "calc(100% + 1.5rem)", background: "linear-gradient(90deg,var(--gold-muted),transparent)" }} />
-              )}
-              <div className="relative z-10">
-                <div className="step-number mb-2 leading-none select-none">{step.n}</div>
-                <div className="text-2xl mb-4 block" aria-hidden="true">{step.icon}</div>
-                <h3 className="font-display text-xl md:text-2xl mb-3 transition-colors duration-300 group-hover:text-[#c9a84c]"
-                  style={{ color: "var(--section-how-text)" }}>{step.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "var(--section-how-sub)" }}>{step.body}</p>
-                <div className="warm-divider mt-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              </div>
-            </div>
-          ))}
-        </GridReveal>
-
-        <LineReveal delay={400}>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-14 md:mt-16">
-            <a href="https://wa.me/918828352311" target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2.5 px-8 py-4 font-medium text-sm tracking-wide transition-colors duration-300"
-              style={{ background: "var(--section-how-btn-bg)", color: "var(--section-how-btn-text)" }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
-              Start on WhatsApp
-            </a>
-            <Link href="/homes"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 border font-medium text-sm tracking-wide transition-colors duration-300"
-              style={{ borderColor: "var(--section-how-btn-border)", color: "var(--section-how-text)" }}>
-              Explore Both Homes <ArrowRight size={14} />
-            </Link>
-          </div>
-        </LineReveal>
-      </div>
-    </section>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   Philosophy — parallax image + split text
-───────────────────────────────────────────────────────────────── */
-function PhilosophySection({ text }: { text: string }) {
-  return (
-    <section className="theme-transition relative py-20 md:py-32 overflow-hidden" style={{ background: "var(--bg-raised)" }}>
-      <div className="absolute inset-0 opacity-[0.025]" style={{
-        backgroundImage: "linear-gradient(var(--gold) 1px,transparent 1px),linear-gradient(90deg,var(--gold) 1px,transparent 1px)",
-        backgroundSize: "60px 60px"
-      }} />
-      <SectionProgressLine />
-
-      <div className="container mx-auto max-w-7xl px-4 md:px-8 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-16 lg:gap-24 items-center">
-
-          <div>
-            <LineReveal>
-              <p className="label-badge mb-4" style={{ color: "var(--text-tertiary)" }}>Our Philosophy</p>
-            </LineReveal>
-            <SplitText
-              text="Hospitality Isn't a"
-              as="h2"
-              className="font-display leading-[1.1] block"
-              style={{ fontSize: "clamp(2rem,4vw,3.4rem)", color: "var(--text-primary)" }}
-              delay={80}
-            />
-            <SplitText
-              text="Service. It's a Feeling."
-              as="span"
-              className="font-display italic leading-[1.1] block mb-8"
-              style={{ fontSize: "clamp(2rem,4vw,3.4rem)", color: "var(--gold)" }}
-              delay={280}
-            />
-            <LineDraw className="mb-7" style={{ maxWidth: "48px" }} delay={450} />
-            <LineReveal delay={500}>
-              <p className="text-base md:text-lg leading-[1.85] max-w-lg font-light" style={{ color: "var(--text-secondary)" }}>{text}</p>
-            </LineReveal>
-            <LineReveal delay={620}>
-              <div className="mt-10 flex items-center gap-5">
-                <div className="flex flex-col gap-0.5">
-                  <p className="font-display text-lg italic" style={{ color: "var(--text-primary)" }}>Simran &amp; Jyoti</p>
-                  <p className="font-mono text-[10px] tracking-[0.25em] uppercase" style={{ color: "var(--text-tertiary)" }}>Your Hosts · Gurugram</p>
-                </div>
-                <div className="w-px h-10" style={{ background: "var(--border-gold)" }} />
-                <a href="https://www.instagram.com/the_mehmaan_manor" target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-2 font-mono text-xs tracking-widest transition-colors hover:text-[#c9a84c] underline-wipe"
-                  style={{ color: "var(--text-tertiary)" }}>
-                  <Instagram size={13} /> @the_mehmaan_manor
-                </a>
-              </div>
-            </LineReveal>
-          </div>
-
-          {/* Parallax image column */}
-          <LineReveal delay={200}>
-            <div className="relative">
-              <div className="absolute -top-4 -left-4 w-24 h-24 pointer-events-none" style={{ border: "1px solid var(--border-gold)" }} />
-              <div className="absolute -bottom-4 -right-4 w-24 h-24 pointer-events-none" style={{ border: "1px solid var(--border-gold)" }} />
-
-              <ParallaxImg speed={0.14} style={{ height: "clamp(320px,50vw,560px)" }}>
-                <img src="/logo.png" alt="" className="w-full h-full object-contain p-8 select-none"
-                  style={{ opacity: 0.06, filter: "grayscale(100%) brightness(3)" }} aria-hidden="true" />
-              </ParallaxImg>
-
-              {/* Quote card overlay */}
-              <div className="absolute bottom-6 left-6 right-6 z-10">
-                <div className="p-6 md:p-8 backdrop-blur-sm" style={{ border: "1px solid var(--border-gold)", background: "var(--card-bg)" }}>
-                  <div className="text-3xl font-display mb-3 leading-none" style={{ color: "var(--gold)" }}>&ldquo;</div>
-                  <p className="font-display text-lg md:text-xl italic leading-snug mb-4" style={{ color: "var(--text-primary)" }}>
-                    Come as a guest,<br />leave as family.
-                  </p>
-                  <p className="font-mono text-[10px] tracking-[0.2em]" style={{ color: "var(--text-faint)" }}>— The Mehmaan Manor Promise</p>
-                </div>
-              </div>
-            </div>
-          </LineReveal>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   Gallery Mosaic — staggered wipe-in grid
-───────────────────────────────────────────────────────────────── */
-function GalleryMosaic({ photos }: { photos: { url: string; alt: string }[] }) {
-  if (photos.length === 0) return null;
-  const [main, ...rest] = photos.slice(0, 7);
-
-  return (
-    <section className="theme-transition py-16 md:py-24 relative overflow-hidden" style={{ background: "var(--bg-surface)" }}>
-      <SectionProgressLine />
-
-      <div className="container mx-auto max-w-7xl px-4 md:px-8">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-10 md:mb-12 gap-4">
-          <div>
-            <LineReveal>
-              <p className="label-badge mb-3" style={{ color: "var(--text-tertiary)" }}>Our Gallery</p>
-            </LineReveal>
-            <SplitText
-              text="Inside the Manor"
-              as="h2"
-              className="font-display block"
-              style={{ fontSize: "clamp(1.8rem,4vw,3rem)", color: "var(--text-primary)" }}
-              delay={80}
-            />
-          </div>
-          <LineReveal delay={200}>
-            <a href="https://www.instagram.com/the_mehmaan_manor" target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 font-mono text-xs tracking-widest uppercase transition-colors self-start group hover:text-[#c9a84c] underline-wipe"
-              style={{ color: "var(--text-tertiary)" }}>
-              <Instagram size={13} className="group-hover:scale-110 transition-transform" /> Follow on Instagram
-            </a>
-          </LineReveal>
-        </div>
-
-        {/* Mosaic grid — each cell fades + scales in staggered */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
-          {main && (
-            <ImgReveal
-              delay={0}
-              className="col-span-2 row-span-2 md:row-span-2 gallery-cell img-sweep-wrap"
-              style={{ height: "clamp(240px,40vw,500px)" }}
-            >
-              <img
-                src={cardImageUrl(main.url)}
-                alt={main.alt || "The Mehmaan Manor"}
-                className="w-full h-full object-cover"
-                style={{ display: "block", width: "100%", height: "100%" }}
-                loading="lazy"
-              />
-              <div className="gallery-cell-overlay" />
-            </ImgReveal>
-          )}
-          {rest.map((photo, i) => (
-            <ImgReveal
+            <div
               key={i}
-              delay={120 + i * 90}
-              className="gallery-cell img-sweep-wrap"
-              style={{ height: "clamp(100px,18vw,240px)" }}
+              className="reveal bg-white rounded-2xl p-6 md:p-8 text-center hover:shadow-md transition-shadow border border-forest/6"
+              style={{ transitionDelay: `${i * 80}ms` }}
             >
-              <img
-                src={thumbnailUrl(photo.url, 600)}
-                alt={photo.alt || "The Mehmaan Manor"}
-                className="w-full h-full object-cover"
-                style={{ display: "block", width: "100%", height: "100%" }}
-                loading="lazy"
-              />
-              <div className="gallery-cell-overlay" />
-            </ImgReveal>
+              <div className="text-3xl mb-3">{step.icon}</div>
+              <div className="font-mono text-xs text-gold tracking-widest mb-2">{step.number}</div>
+              <h3 className="font-display text-xl text-forest mb-3">{step.title}</h3>
+              <p className="text-sm text-ink/65 leading-relaxed">{step.desc}</p>
+            </div>
           ))}
         </div>
 
-        <LineReveal delay={300}>
-          <div className="mt-6 text-center">
-            <Link href="/gallery" className="inline-flex items-center gap-2 font-mono text-xs tracking-widest uppercase transition-colors border-b border-transparent hover:border-[#c9a84c]/30 pb-0.5 hover:text-[#c9a84c]"
-              style={{ color: "var(--text-faint)" }}>
-              View Full Gallery <ArrowRight size={11} />
-            </Link>
-          </div>
-        </LineReveal>
+        {/* CTA */}
+        <div className="text-center reveal">
+          <a
+            href="https://wa.me/918828352311"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl bg-[#25D366] text-white font-semibold text-sm hover:bg-[#1fb558] transition-colors min-h-[52px] shadow-md"
+          >
+            {WA_SVG}
+            Start Your Booking on WhatsApp
+          </a>
+        </div>
       </div>
     </section>
   );
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   Neighbourhood
+   About / Philosophy
+───────────────────────────────────────────────────────────────── */
+function AboutSection({ text }: { text: string }) {
+  return (
+    <section className="py-14 md:py-20 px-4 md:px-6 bg-white">
+      <div className="max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center">
+
+          {/* Text side */}
+          <div className="reveal">
+            <span className="label-badge text-gold">About the Manor</span>
+            <h2 className="font-display text-title text-forest mt-3 mb-5">
+              Not a Hotel. <span className="italic">A Home.</span>
+            </h2>
+            <div className="space-y-4 text-sm md:text-base text-ink/70 leading-relaxed">
+              <p>
+                <span className="font-display text-xl text-gold italic">Mehmaan</span> — a Hindi word
+                for "guest." When someone is your mehmaan, you treat them like family.
+              </p>
+              <p>
+                {text || "That's the foundation of The Mehmaan Manor. Two carefully curated homes in Gurugram, run by real people who genuinely care about your experience. No corporate policies, no anonymous check-ins — just warm hospitality."}
+              </p>
+            </div>
+            <div className="mt-7 flex flex-col sm:flex-row gap-3">
+              <Link
+                href="/about"
+                className="inline-flex items-center gap-2 text-sm font-medium text-forest hover:text-gold transition-colors underline-wipe"
+              >
+                Our Story <ArrowRight size={14} />
+              </Link>
+              <Link
+                href="/contact"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#faf8f4] border border-forest/15 text-sm font-medium text-ink/70 hover:border-forest/40 hover:text-forest transition-all"
+              >
+                Meet the Hosts
+              </Link>
+            </div>
+          </div>
+
+          {/* Values grid */}
+          <div className="reveal grid grid-cols-2 gap-4">
+            {[
+              { icon: "🤝", title: "Personal Welcome", desc: "We greet every guest ourselves." },
+              { icon: "✨", title: "Spotless Spaces", desc: "Deep-cleaned before every stay." },
+              { icon: "📞", title: "Always Reachable", desc: "Call or WhatsApp anytime." },
+              { icon: "🚫", title: "Zero Hidden Fees", desc: "What you see is what you pay." },
+            ].map((v, i) => (
+              <div key={i} className="bg-[#faf8f4] rounded-xl p-4 border border-forest/8">
+                <div className="text-xl mb-2">{v.icon}</div>
+                <h4 className="text-sm font-semibold text-forest mb-1">{v.title}</h4>
+                <p className="text-xs text-ink/55 leading-relaxed">{v.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Gallery
+───────────────────────────────────────────────────────────────── */
+function GallerySection({ photos }: { photos: { url: string; alt: string }[] }) {
+  const display = photos.slice(0, 6);
+  if (display.length === 0) return null;
+
+  return (
+    <section className="py-14 md:py-20 px-4 md:px-6 bg-[#faf8f4]">
+      <div className="max-w-5xl mx-auto">
+        <div className="flex items-end justify-between mb-8 reveal">
+          <div>
+            <span className="label-badge text-gold">Our Spaces</span>
+            <h2 className="font-display text-title text-forest mt-2">A Glimpse Inside</h2>
+          </div>
+          <Link
+            href="/gallery"
+            className="hidden sm:flex items-center gap-1.5 text-sm text-ink/55 hover:text-forest transition-colors"
+          >
+            View all <ArrowRight size={14} />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 reveal">
+          {display.map((photo, i) => (
+            <div
+              key={i}
+              className={`gallery-cell rounded-xl overflow-hidden ${i === 0 ? "md:col-span-2 aspect-[2/1]" : "aspect-square"}`}
+            >
+              <img
+                src={photo.url}
+                alt={photo.alt || "Mehmaan Manor interior"}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+              <div className="gallery-cell-overlay rounded-xl" />
+            </div>
+          ))}
+        </div>
+
+        <div className="text-center mt-6 sm:hidden">
+          <Link
+            href="/gallery"
+            className="inline-flex items-center gap-2 text-sm font-medium text-forest hover:text-gold transition-colors"
+          >
+            See all photos <ArrowRight size={14} />
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Amenities strip
+───────────────────────────────────────────────────────────────── */
+function AmenitiesStrip() {
+  const items = [
+    { icon: Wifi, label: "High-Speed Wi-Fi" },
+    { icon: Tv, label: "Smart TV" },
+    { icon: UtensilsCrossed, label: "Full Kitchen" },
+    { icon: AirVent, label: "Air Conditioning" },
+    { icon: Car, label: "Free Parking" },
+    { icon: TreePine, label: "Garden Access" },
+  ];
+  return (
+    <section className="py-10 px-4 md:px-6 bg-white border-y border-forest/8">
+      <div className="max-w-5xl mx-auto">
+        <p className="text-center text-xs font-mono text-ink/40 uppercase tracking-widest mb-6">
+          What's included in every stay
+        </p>
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+          {items.map(({ icon: Icon, label }) => (
+            <div key={label} className="flex flex-col items-center gap-2 text-center">
+              <div className="w-10 h-10 rounded-xl bg-[#faf8f4] border border-forest/8 flex items-center justify-center">
+                <Icon size={18} className="text-gold" />
+              </div>
+              <span className="text-xs text-ink/60 leading-tight">{label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Neighbourhood / Location
 ───────────────────────────────────────────────────────────────── */
 function NeighbourhoodSection() {
   const highlights = [
-    { icon: "🚇", title: "Metro Access", sub: "IFFCO Chowk — 10 min walk" },
-    { icon: "🛍️", title: "Shopping", sub: "Galleria & Town Square nearby" },
-    { icon: "🏥", title: "Healthcare", sub: "Medanta Hospital — 15 min" },
-    { icon: "🛣️", title: "Connectivity", sub: "NH-48 & Golf Course Rd close" },
+    { emoji: "🏥", label: "Near Medanta Hospital" },
+    { emoji: "🚇", label: "Metro Accessible" },
+    { emoji: "🍽️", label: "Great Restaurants Nearby" },
+    { emoji: "🛍️", label: "Shopping Malls Close By" },
+    { emoji: "🌳", label: "Parks & Green Spaces" },
+    { emoji: "✈️", label: "Easy IGI Airport Access" },
   ];
-
   return (
-    <section className="theme-transition relative py-20 md:py-28 overflow-hidden grain-overlay" style={{ background: "var(--section-nb)" }}>
-      <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "linear-gradient(90deg,transparent,var(--gold-muted),transparent)" }} />
-
-      <div className="container mx-auto max-w-7xl px-4 md:px-8 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
-          <div>
-            <LineReveal>
-              <p className="label-badge mb-3" style={{ color: "var(--section-nb-label)" }}>The Location</p>
-            </LineReveal>
-            <SplitText
-              text="Central Gurugram,"
-              as="h2"
-              className="font-display leading-tight block"
-              style={{ fontSize: "clamp(1.8rem,4vw,3.2rem)", color: "var(--section-nb-text)" }}
-              delay={80}
-            />
-            <SplitText
-              text="At Your Doorstep"
-              as="span"
-              className="font-display italic block mb-6"
-              style={{ fontSize: "clamp(1.8rem,4vw,3.2rem)", color: "var(--gold)" }}
-              delay={240}
-            />
-            <LineDraw className="mb-6" style={{ maxWidth: "48px" }} delay={400} />
-            <LineReveal delay={450}>
-              <p className="text-base leading-relaxed mb-8 max-w-md" style={{ color: "var(--section-nb-sub)" }}>
-                Both homes sit in Gurugram&rsquo;s most connected corridors — minutes from the metro, top hospitals, and the city&rsquo;s best dining.
-              </p>
-            </LineReveal>
-            <LineReveal delay={500}>
-              <div className="flex items-center gap-2 font-mono text-xs tracking-wider" style={{ color: "var(--section-nb-sub)" }}>
-                <MapPin size={12} style={{ color: "var(--gold)" }} /> Gurugram, Haryana — India
-              </div>
-            </LineReveal>
-          </div>
-
-          <GridReveal className="grid grid-cols-2 gap-4" stagger={90} delay={100}>
-            {highlights.map(({ icon, title, sub }) => (
-              <div key={title}
-                className="group transition-all duration-300 p-5 md:p-6"
-                style={{ border: "1px solid var(--section-nb-card-border)", background: "var(--section-nb-card)" }}
-                onMouseEnter={e => {
-                  (e.currentTarget as HTMLDivElement).style.borderColor = "var(--gold-muted)";
-                  (e.currentTarget as HTMLDivElement).style.background = "var(--section-nb-card-hover)";
-                }}
-                onMouseLeave={e => {
-                  (e.currentTarget as HTMLDivElement).style.borderColor = "var(--section-nb-card-border)";
-                  (e.currentTarget as HTMLDivElement).style.background = "var(--section-nb-card)";
-                }}>
-                <span className="text-2xl mb-3 block">{icon}</span>
-                <h3 className="font-display text-base md:text-lg mb-1 transition-colors" style={{ color: "var(--section-nb-text)" }}>{title}</h3>
-                <p className="text-xs leading-relaxed" style={{ color: "var(--section-nb-sub)" }}>{sub}</p>
-              </div>
-            ))}
-          </GridReveal>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   Review Nudge
-───────────────────────────────────────────────────────────────── */
-function ReviewNudge() {
-  return (
-    <section className="theme-transition py-16 md:py-20" style={{ background: "var(--bg-elevated)", borderTop: "1px solid var(--border-default)" }}>
-      <div className="container mx-auto max-w-3xl px-4 md:px-8 text-center">
-        <LineReveal>
-          <p className="label-badge mb-4" style={{ color: "var(--text-tertiary)" }}>Guest Reviews</p>
-        </LineReveal>
-        <SplitText
-          text="Stayed with Us?"
-          as="h2"
-          className="font-display leading-tight mb-4 block"
-          style={{ fontSize: "clamp(1.6rem,3.5vw,2.6rem)", color: "var(--text-primary)" }}
-          delay={80}
-        />
-        <LineReveal delay={200}>
-          <p className="text-base leading-relaxed mb-8 max-w-md mx-auto" style={{ color: "var(--text-secondary)" }}>
-            We let real experiences speak for themselves. If you&rsquo;ve stayed at The Mehmaan Manor, we&rsquo;d love to hear from you — directly on Google.
+    <section className="py-14 md:py-20 px-4 md:px-6 bg-[#faf8f4]">
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-10 reveal">
+          <span className="label-badge text-gold">Location</span>
+          <h2 className="font-display text-title text-forest mt-3 mb-3">Everything Close By</h2>
+          <p className="text-ink/60 text-sm md:text-base">
+            Both homes are in great Gurugram neighbourhoods — convenient and connected.
           </p>
-        </LineReveal>
-        <LineReveal delay={320}>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="https://share.google/RwgxvS7f96SnNjflk" target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2.5 px-7 py-3.5 font-medium text-sm tracking-wide transition-all duration-300 group"
-              style={{ background: "var(--gold)", color: "#000" }}>
-              Leave a Google Review
-              <ExternalLink size={13} className="group-hover:translate-x-0.5 transition-transform" />
-            </a>
-            <a href="https://www.instagram.com/the_mehmaan_manor" target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2.5 px-7 py-3.5 font-medium text-sm tracking-wide transition-all duration-300"
-              style={{ border: "1px solid var(--border-default)", color: "var(--text-secondary)" }}>
-              <Instagram size={14} /> Tag Us on Instagram
-            </a>
-          </div>
-        </LineReveal>
-        <LineReveal delay={420}>
-          <p className="font-mono text-[10px] tracking-[0.2em] mt-6" style={{ color: "var(--text-faint)" }}>
-            4.9 · Rated on Google Maps by real guests
-          </p>
-        </LineReveal>
-      </div>
-    </section>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   Instagram Strip
-───────────────────────────────────────────────────────────────── */
-function InstagramStrip({ photos }: { photos: { url: string; alt: string }[] }) {
-  if (photos.length === 0) return null;
-
-  return (
-    <section className="theme-transition py-16 md:py-20" style={{ background: "var(--bg-surface)", borderTop: "1px solid var(--border-default)" }}>
-      <div className="container mx-auto max-w-7xl px-4 md:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-3">
-          <div>
-            <LineReveal>
-              <p className="label-badge mb-1" style={{ color: "var(--text-tertiary)" }}>Follow the Story</p>
-            </LineReveal>
-            <SplitText
-              text="@the_mehmaan_manor"
-              as="h2"
-              className="font-display text-xl md:text-2xl block"
-              style={{ color: "var(--text-primary)" }}
-              delay={80}
-            />
-          </div>
-          <LineReveal delay={200}>
-            <a href="https://www.instagram.com/the_mehmaan_manor" target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 font-mono text-xs tracking-widest transition-colors self-start group hover:text-[#c9a84c] underline-wipe"
-              style={{ color: "var(--text-tertiary)" }}>
-              <Instagram size={13} className="group-hover:scale-110 transition-transform" /> Open Instagram
-            </a>
-          </LineReveal>
         </div>
-
-        <GridReveal className="flex gap-8 md:grid md:grid-cols-6 overflow-x-auto pb-3 md:overflow-visible" stagger={70} delay={100}>
-          {photos.slice(0, 6).map((photo, i) => (
-            <a key={photo.url + i} href="https://www.instagram.com/the_mehmaan_manor" target="_blank" rel="noopener noreferrer"
-              className="flex-shrink-0 flex flex-col items-center gap-3 group" style={{ minWidth: "150px" }}>
-              <div className="p-[3px] rounded-full bg-gradient-to-tr from-[#c9a84c]/40 via-[#c9a84c] to-[#e8d08a] transition-all duration-300 group-hover:shadow-[0_0_18px_rgba(201,168,76,0.45)]">
-                <div className="p-[3px] rounded-full" style={{ background: "var(--bg-surface)" }}>
-                  <div className="w-32 h-32 md:w-full md:aspect-square rounded-full overflow-hidden">
-                    <img src={thumbnailUrl(photo.url, 400)} alt={photo.alt || "The Mehmaan Manor"}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                  </div>
-                </div>
-              </div>
-              <p className="font-mono text-[10px] tracking-widest uppercase transition-colors duration-300 text-center truncate w-full px-1 group-hover:text-[#c9a84c]"
-                style={{ color: "var(--text-tertiary)" }}>
-                {photo.alt || "View"}
-              </p>
-            </a>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 reveal">
+          {highlights.map((h, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 border border-forest/8 hover:border-gold/30 hover:shadow-sm transition-all"
+            >
+              <span className="text-xl shrink-0">{h.emoji}</span>
+              <span className="text-sm text-ink/70">{h.label}</span>
+            </div>
           ))}
-        </GridReveal>
+        </div>
       </div>
     </section>
   );
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   Final CTA
+   Final CTA / Contact
 ───────────────────────────────────────────────────────────────── */
 function FinalCTA() {
   return (
-    <section className="relative pt-20 md:pt-28 pb-16 md:pb-20 px-4 md:px-8 angled-top overflow-hidden grain-overlay" style={{ background: "var(--gold)" }}>
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
-        <span className="font-display whitespace-nowrap" style={{ fontSize: "clamp(6rem,16vw,14rem)", fontStyle: "italic", color: "rgba(0,0,0,0.05)" }}>
-          Reserve
-        </span>
+    <section className="py-14 md:py-24 px-4 md:px-6 bg-[#eee9df]">
+      <div className="max-w-2xl mx-auto text-center reveal">
+        <span className="label-badge text-gold">Ready to Book?</span>
+        <h2 className="font-display text-title text-forest mt-4 mb-3">
+          Book Your Stay Today
+        </h2>
+        <p className="text-ink/65 text-sm md:text-base mb-8 leading-relaxed max-w-md mx-auto">
+          No booking platforms, no extra fees. Just message us directly and we'll take care of everything.
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+          <a
+            href="https://wa.me/918828352311"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl bg-[#25D366] text-white font-semibold text-base hover:bg-[#1fb558] transition-colors min-h-[56px] shadow-md"
+          >
+            {WA_SVG}
+            WhatsApp Us Now
+          </a>
+          <a
+            href="tel:+918828352311"
+            className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl border-2 border-forest text-forest font-semibold text-sm hover:bg-forest hover:text-cream transition-all min-h-[56px]"
+          >
+            <Phone size={16} />
+            Call Simran
+          </a>
+        </div>
+
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center text-sm">S</div>
+          <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center text-sm">J</div>
+          <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center text-sm">V</div>
+        </div>
+        <p className="text-xs text-ink/45 font-mono">
+          Simran · Jyoti · Vipin — your hosts, ready to help
+        </p>
       </div>
+    </section>
+  );
+}
 
-      <div className="container mx-auto max-w-5xl relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-10 lg:gap-16 items-center">
-          <div>
-            <LineReveal>
-              <p className="label-badge mb-4" style={{ color: "rgba(0,0,0,0.45)" }}>Ready to Stay?</p>
-            </LineReveal>
-            <SplitText
-              text="Reserve Your"
-              as="h2"
-              className="font-display leading-[1.0] block"
-              style={{ fontSize: "clamp(2.4rem,5vw,4.2rem)", color: "rgba(0,0,0,0.88)" }}
-              delay={80}
-            />
-            <SplitText
-              text="Mehmaan Experience"
-              as="span"
-              className="font-display italic leading-[1.0] block"
-              style={{ fontSize: "clamp(2.4rem,5vw,4.2rem)", color: "rgba(0,0,0,0.88)" }}
-              delay={280}
-            />
-            <LineDraw
-              className="mt-6 mb-6"
-              style={{ maxWidth: "48px", background: "linear-gradient(90deg,rgba(0,0,0,0.3),rgba(0,0,0,0.05))" }}
-              delay={450}
-            />
-            <LineReveal delay={520}>
-              <p className="text-base leading-relaxed max-w-md" style={{ color: "rgba(0,0,0,0.55)" }}>
-                Speak directly with Simran or Jyoti — real hosts, not bots. Get answers, pick your dates, and make it yours.
-              </p>
-            </LineReveal>
-          </div>
-
-          <LineReveal delay={200}>
-            <div className="flex flex-col gap-4">
-              <a href="https://wa.me/918828352311" target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2.5 px-8 py-4 font-medium text-sm tracking-wide transition-all duration-300 group min-w-[220px] hover:opacity-90"
-                style={{ background: "#181818", color: "#f5f0e8" }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
-                WhatsApp Now
-                <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
-              </a>
-              <Link href="/contact"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 font-medium text-sm tracking-wide transition-colors duration-300 hover:bg-black/10"
-                style={{ borderColor: "rgba(0,0,0,0.22)", color: "rgba(0,0,0,0.75)" }}>
-                Enquiry Form
-              </Link>
-              <p className="font-mono text-[10px] tracking-[0.2em] text-center" style={{ color: "rgba(0,0,0,0.35)" }}>Simran · +91 88283 52311</p>
+/* ─────────────────────────────────────────────────────────────────
+   Testimonials / Review nudge
+───────────────────────────────────────────────────────────────── */
+function ReviewsSection() {
+  const reviews = [
+    {
+      text: "Felt like staying at a friend's home. Simran was incredibly warm and helpful. The place was spotless.",
+      author: "Priya M.",
+      city: "Delhi",
+      stars: 5,
+    },
+    {
+      text: "Best short stay I've had in Gurugram. No hotel can match this level of personal care. Will definitely be back.",
+      author: "Rahul K.",
+      city: "Bengaluru",
+      stars: 5,
+    },
+    {
+      text: "The kitchen, the Wi-Fi, the cleanliness — everything was perfect. And the hosts respond within minutes!",
+      author: "Anjali S.",
+      city: "Mumbai",
+      stars: 5,
+    },
+  ];
+  return (
+    <section className="py-14 md:py-20 px-4 md:px-6 bg-white">
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-10 reveal">
+          <span className="label-badge text-gold">Guest Love</span>
+          <h2 className="font-display text-title text-forest mt-3">What Guests Say</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
+          {reviews.map((r, i) => (
+            <div
+              key={i}
+              className="reveal bg-[#faf8f4] rounded-2xl p-5 md:p-6 border border-forest/8 hover:shadow-md transition-shadow"
+              style={{ transitionDelay: `${i * 80}ms` }}
+            >
+              <div className="flex gap-0.5 mb-3">
+                {Array.from({ length: r.stars }).map((_, j) => (
+                  <Star key={j} size={13} className="fill-gold text-gold" />
+                ))}
+              </div>
+              <p className="text-sm text-ink/75 leading-relaxed mb-4 italic">"{r.text}"</p>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-[#eee9df] flex items-center justify-center text-xs font-semibold text-forest">
+                  {r.author[0]}
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-ink">{r.author}</p>
+                  <p className="text-xs text-ink/40 font-mono">{r.city}</p>
+                </div>
+              </div>
             </div>
-          </LineReveal>
+          ))}
         </div>
       </div>
     </section>
@@ -1214,47 +807,51 @@ function FinalCTA() {
 export function HomePageClient({ siteData }: { siteData: SiteData }) {
   useReveal();
 
-  const { properties, heroPhotos, instagramPhotos, galleryPhotos, propertyCards, content, discountPercent, activeFestival, discountActive } = siteData;
+  const {
+    properties, heroPhotos, instagramPhotos, galleryPhotos,
+    propertyCards, content, discountPercent, activeFestival, discountActive,
+  } = siteData;
 
-  const heroSlides = heroPhotos.length > 0 ? heroPhotos : [];
-  const finalSlides = heroSlides.length > 0
-    ? heroSlides
-    : content.heroMediaUrl
-      ? [{ url: content.heroMediaUrl, alt: "The Mehmaan Manor" }]
-      : [];
-  const mosaicPhotos = [...galleryPhotos, ...instagramPhotos]
-    .filter((p, i, arr) => arr.findIndex(x => x.url === p.url) === i)
-    .slice(0, 7);
+  const heroSlides = heroPhotos.length > 0 ? heroPhotos : content.heroMediaUrl
+    ? [{ url: content.heroMediaUrl, alt: "The Mehmaan Manor" }]
+    : [];
+
+  const allPhotos = [...galleryPhotos, ...instagramPhotos]
+    .filter((p, i, arr) => arr.findIndex((x) => x.url === p.url) === i)
+    .slice(0, 6);
 
   return (
-    <div className="min-h-screen theme-transition" style={{ background: "var(--bg-page)" }}>
+    <div className="min-h-screen bg-[#faf8f4]">
       <FestivalAmbience festival={activeFestival} active={discountActive} />
-      <ScrollProgressBar />
       <Navigation />
-      <DiscountBanner discountPercent={discountPercent} activeFestival={activeFestival} discountActive={discountActive} />
+      <DiscountBanner
+        discountPercent={discountPercent}
+        activeFestival={activeFestival}
+        discountActive={discountActive}
+      />
 
       <main id="main-content">
-        <HeroSection slides={finalSlides} content={content} />
-        {/* Social proof activity ticker — right after hero, before ribbon */}
-        <SocialProofTicker />
-        <MarqueeRibbon />
-        <StatsRow discountPercent={discountPercent} discountActive={discountActive} />
-        {/* Urgency banner — scarcity nudge above property cards */}
-        <UrgencyBanner />
-        <PropertyCards properties={properties} propertyCards={propertyCards} discountPercent={discountPercent} discountActive={discountActive} />
+        <HeroSection
+          slides={heroSlides}
+          content={content}
+          discountPercent={discountPercent}
+          discountActive={discountActive}
+        />
+        <StatsRow />
+        <PropertyCards
+          properties={properties}
+          propertyCards={propertyCards}
+          discountPercent={discountPercent}
+          discountActive={discountActive}
+        />
         <HowItWorks />
-        <PhilosophySection text={content.philosophyText} />
-        <GalleryMosaic photos={mosaicPhotos} />
+        <AboutSection text={content.philosophyText} />
+        <AmenitiesStrip />
+        <GallerySection photos={allPhotos} />
+        <ReviewsSection />
         <NeighbourhoodSection />
-        <ReviewNudge />
-        <InstagramStrip photos={instagramPhotos} />
-        {/* Scarcity trust strip — between instagram and final CTA */}
-        <ScarcityStrip />
         <FinalCTA />
       </main>
-
-      {/* Exit intent — fires once when user tries to leave */}
-      <ExitIntentNudge />
 
       <Footer />
     </div>
