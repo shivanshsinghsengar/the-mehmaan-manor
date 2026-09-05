@@ -80,7 +80,12 @@ export function Navigation() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="relative text-forest/80 font-medium transition-colors duration-300 hover:text-forest group py-2 text-sm"
+                  className={cn(
+                    "relative font-medium transition-colors duration-300 group py-2 text-sm",
+                    isScrolled
+                      ? "text-forest/80 hover:text-forest"
+                      : "text-white/85 hover:text-[#c9a84c]"
+                  )}
                 >
                   {link.label}
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gold transition-all duration-300 group-hover:w-full" />
@@ -94,7 +99,10 @@ export function Navigation() {
             {/* Mobile Menu Button â€” 44Ã—44px touch target */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="lg:hidden min-w-[44px] min-h-[44px] flex items-center justify-center text-forest hover:text-gold transition-colors"
+              className={cn(
+                "lg:hidden min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors",
+                isScrolled ? "text-forest hover:text-gold" : "text-white hover:text-[#c9a84c]"
+              )}
               aria-label={isOpen ? "Close menu" : "Open menu"}
               aria-expanded={isOpen}
             >
