@@ -137,7 +137,16 @@ function HeroSlideshow({ slides }: { slides: { url: string; alt: string }[] }) {
   }, [current, slides.length]);
 
   if (slides.length === 0) {
-    return <div className="absolute inset-0 bg-gradient-to-br from-[#eee9df] to-[#d9d0c3]" />;
+    return (
+      <div className="absolute inset-0">
+        <img
+          src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1600&q=85&auto=format&fit=crop"
+          alt="A bright, beautifully styled bedroom at The Mehmaan Manor"
+          className="w-full h-full object-cover"
+          loading="eager"
+        />
+      </div>
+    );
   }
 
   return (
@@ -234,7 +243,7 @@ function HeroSection({ slides, content, discountPercent, discountActive }: {
           </a>
           <Link
             href="/homes"
-            className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-xl bg-white/80 backdrop-blur-sm border border-forest/20 text-forest font-medium text-sm hover:bg-white hover:border-forest/40 transition-all min-h-[52px]"
+            className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-xl bg-white border-2 border-forest text-forest font-semibold text-sm hover:bg-forest hover:text-white transition-all min-h-[52px] shadow-sm"
           >
             Explore Homes <ArrowRight size={14} />
           </Link>
@@ -306,7 +315,7 @@ function PropertyCards({ properties, propertyCards, discountPercent, discountAct
   };
 
   return (
-    <section id="homes" className="py-14 md:py-20 px-4 md:px-6 bg-[#faf8f4]">
+    <section id="homes" className="py-20 md:py-28 px-4 md:px-6 bg-[#faf8f4]">
       <div className="max-w-5xl mx-auto">
 
         {/* Section heading */}
@@ -466,7 +475,7 @@ function HowItWorks() {
   ];
 
   return (
-    <section className="py-14 md:py-20 px-4 md:px-6 bg-[#eee9df]">
+    <section className="py-20 md:py-28 px-4 md:px-6 bg-[#eee9df]">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-10 md:mb-14 reveal">
           <span className="label-badge text-gold">Simple Process</span>
@@ -513,7 +522,7 @@ function HowItWorks() {
 ───────────────────────────────────────────────────────────────── */
 function AboutSection({ text }: { text: string }) {
   return (
-    <section className="py-14 md:py-20 px-4 md:px-6 bg-white">
+    <section className="py-20 md:py-28 px-4 md:px-6 bg-white">
       <div className="max-w-5xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center">
 
@@ -577,7 +586,7 @@ function GallerySection({ photos }: { photos: { url: string; alt: string }[] }) 
   if (display.length === 0) return null;
 
   return (
-    <section className="py-14 md:py-20 px-4 md:px-6 bg-[#faf8f4]">
+    <section className="py-20 md:py-28 px-4 md:px-6 bg-[#faf8f4]">
       <div className="max-w-5xl mx-auto">
         <div className="flex items-end justify-between mb-8 reveal">
           <div>
@@ -635,7 +644,7 @@ function AmenitiesStrip() {
     { icon: TreePine, label: "Garden Access" },
   ];
   return (
-    <section className="py-10 px-4 md:px-6 bg-white border-y border-forest/8">
+    <section className="py-14 px-4 md:px-6 bg-white border-y border-forest/8">
       <div className="max-w-5xl mx-auto">
         <p className="text-center text-xs font-mono text-ink/40 uppercase tracking-widest mb-6">
           What's included in every stay
@@ -668,7 +677,7 @@ function NeighbourhoodSection() {
     { emoji: "✈️", label: "Easy IGI Airport Access" },
   ];
   return (
-    <section className="py-14 md:py-20 px-4 md:px-6 bg-[#faf8f4]">
+    <section className="py-20 md:py-28 px-4 md:px-6 bg-[#faf8f4]">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-10 reveal">
           <span className="label-badge text-gold">Location</span>
@@ -698,7 +707,7 @@ function NeighbourhoodSection() {
 ───────────────────────────────────────────────────────────────── */
 function FinalCTA() {
   return (
-    <section className="py-14 md:py-24 px-4 md:px-6 bg-[#eee9df]">
+    <section className="py-20 md:py-28 px-4 md:px-6 bg-[#eee9df]">
       <div className="max-w-2xl mx-auto text-center reveal">
         <span className="label-badge text-gold">Ready to Book?</span>
         <h2 className="font-display text-title text-forest mt-4 mb-3">
@@ -762,7 +771,7 @@ function ReviewsSection() {
     },
   ];
   return (
-    <section className="py-14 md:py-20 px-4 md:px-6 bg-white">
+    <section className="py-20 md:py-28 px-4 md:px-6 bg-white">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-10 reveal">
           <span className="label-badge text-gold">We Hear You</span>
