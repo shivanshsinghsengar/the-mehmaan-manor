@@ -1063,7 +1063,7 @@ function ReviewNudge() {
         </LineReveal>
         <LineReveal delay={320}>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="https://g.page/r/the-mehmaan-manor/review" target="_blank" rel="noopener noreferrer"
+            <a href="https://share.google/RwgxvS7f96SnNjflk" target="_blank" rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2.5 px-7 py-3.5 font-medium text-sm tracking-wide transition-all duration-300 group"
               style={{ background: "var(--gold)", color: "#000" }}>
               Leave a Google Review
