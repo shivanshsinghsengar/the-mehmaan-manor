@@ -744,58 +744,61 @@ function FinalCTA() {
    Testimonials / Review nudge
 ───────────────────────────────────────────────────────────────── */
 function ReviewsSection() {
-  const reviews = [
+  const wishes = [
     {
-      text: "Felt like staying at a friend's home. Simran was incredibly warm and helpful. The place was spotless.",
-      author: "Priya M.",
-      city: "Delhi",
-      stars: 5,
+      emoji: "😩",
+      text: "I want to stop paying ₹8,000/night at hotels where the Wi-Fi only works in the lobby and the AC sounds like a helicopter.",
+      tag: "Every business traveller ever",
     },
     {
-      text: "Best short stay I've had in Gurugram. No hotel can match this level of personal care. Will definitely be back.",
-      author: "Rahul K.",
-      city: "Bengaluru",
-      stars: 5,
+      emoji: "🥹",
+      text: "I want a place that actually feels like home — where the kitchen works, the bed doesn't squeak, and someone picks up the phone.",
+      tag: "Every guest, always",
     },
     {
-      text: "The kitchen, the Wi-Fi, the cleanliness — everything was perfect. And the hosts respond within minutes!",
-      author: "Anjali S.",
-      city: "Mumbai",
-      stars: 5,
+      emoji: "😤",
+      text: "I want to stop explaining to hotel staff that yes, I do need a working power socket near the bed. Is that too much to ask?",
+      tag: "Laptop warriors, 11 PM",
     },
   ];
   return (
     <section className="py-14 md:py-20 px-4 md:px-6 bg-white">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-10 reveal">
-          <span className="label-badge text-gold">Guest Love</span>
-          <h2 className="font-display text-title text-forest mt-3">What Guests Say</h2>
+          <span className="label-badge text-gold">We Hear You</span>
+          <h2 className="font-display text-title text-forest mt-3 font-bold">
+            What Our Clients{" "}
+            <span className="relative inline-block">
+              <span className="relative z-10 text-gold">Want</span>
+              <span
+                className="absolute left-0 bottom-1 w-full h-2 rounded-sm -z-0 opacity-30"
+                style={{ background: "#c9a84c" }}
+              />
+            </span>{" "}
+            to Say
+          </h2>
+          <p className="text-ink/50 text-sm mt-3 max-w-md mx-auto">
+            (We can't put words in their mouths — but if we could, it'd sound something like this.)
+          </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
-          {reviews.map((r, i) => (
+          {wishes.map((w, i) => (
             <div
               key={i}
-              className="reveal bg-[#faf8f4] rounded-2xl p-5 md:p-6 border border-forest/8 hover:shadow-md transition-shadow"
+              className="reveal bg-[#faf8f4] rounded-2xl p-5 md:p-6 border border-forest/8 hover:border-gold/30 hover:shadow-md transition-all"
               style={{ transitionDelay: `${i * 80}ms` }}
             >
-              <div className="flex gap-0.5 mb-3">
-                {Array.from({ length: r.stars }).map((_, j) => (
-                  <Star key={j} size={13} className="fill-gold text-gold" />
-                ))}
-              </div>
-              <p className="text-sm text-ink/75 leading-relaxed mb-4 italic">"{r.text}"</p>
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-[#eee9df] flex items-center justify-center text-xs font-semibold text-forest">
-                  {r.author[0]}
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-ink">{r.author}</p>
-                  <p className="text-xs text-ink/40 font-mono">{r.city}</p>
-                </div>
+              <div className="text-3xl mb-4">{w.emoji}</div>
+              <p className="text-sm text-ink/75 leading-relaxed mb-5 italic">"{w.text}"</p>
+              <div className="pt-3 border-t border-forest/8">
+                <p className="text-xs font-mono text-gold/80">— {w.tag}</p>
               </div>
             </div>
           ))}
         </div>
+        <p className="text-center text-xs text-ink/35 font-mono mt-8">
+          We built Mehmaan Manor to fix exactly this. You're welcome. 😌
+        </p>
       </div>
     </section>
   );
