@@ -183,7 +183,7 @@ export default function AboutPage() {
                       href={`https://wa.me/${member.phoneLink}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center w-9 h-9 rounded-lg border border-forest/15 text-ink/50 hover:bg-[#25D366] hover:text-white hover:border-[#25D366] transition-all"
+                      className="flex items-center justify-center w-9 h-9 rounded-lg border border-forest/15 text-ink/50 hover:bg-[#4caf6e] hover:text-white hover:border-[#4caf6e] transition-all"
                       aria-label={`WhatsApp ${member.name}`}
                     >
                       {WA_SVG}
@@ -218,7 +218,7 @@ export default function AboutPage() {
               </a>
               <Link
                 href="/contact"
-                className="inline-flex items-center justify-center px-7 py-3.5 rounded-xl text-sm font-semibold text-cream bg-forest hover:bg-forest/90 transition-colors min-h-[52px] shadow-sm"
+                className="inline-flex items-center justify-center px-7 py-3.5 rounded-xl text-sm font-semibold text-forest bg-[#eee9df] border border-forest/20 hover:bg-[#e0d9cc] transition-colors min-h-[52px]"
               >
                 Get in Touch
               </Link>

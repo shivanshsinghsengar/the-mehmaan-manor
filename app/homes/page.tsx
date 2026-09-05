@@ -230,7 +230,7 @@ export default function HomesPage() {
             <a
               href="https://wa.me/918828352311"
               target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-2.5 px-8 py-4 rounded-xl bg-[#25D366] text-white font-semibold text-sm hover:bg-[#1fb558] transition-colors min-h-[52px] shadow-md"
+              className="inline-flex items-center gap-2.5 px-8 py-4 rounded-xl bg-[#4caf6e] text-white font-semibold text-sm hover:bg-[#3d9d5e] transition-colors min-h-[52px] shadow-md"
             >
               {WA_SVG}
               Ask Us on WhatsApp

@@ -5,7 +5,7 @@
 @layer base {
   /* ── Font variables ───────────────────────────────────────────── */
   :root {
-    --font-cormorant: 'Cormorant Garamond', serif;
+    --font-cormorant: 'Inter', sans-serif;
     --font-inter: 'Inter', sans-serif;
     --font-jetbrains: 'JetBrains Mono', monospace;
 

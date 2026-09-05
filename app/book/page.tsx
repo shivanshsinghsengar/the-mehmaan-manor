@@ -633,7 +633,7 @@ export default function BookPage() {
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     <a href="https://wa.me/918828352311" target="_blank" rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#25D366] text-white font-semibold text-sm hover:bg-[#1fb558] transition-colors min-h-[48px]">
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#4caf6e] text-white font-semibold text-sm hover:bg-[#3d9d5e] transition-colors min-h-[48px]">
                       <MessageCircle size={15} /> WhatsApp Simran
                     </a>
                     <Link href="/"

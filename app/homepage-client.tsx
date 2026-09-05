@@ -185,9 +185,9 @@ function HeroSection({ slides, content, discountPercent, discountActive }: {
     <section className="relative w-full overflow-hidden" style={{ height: "100svh", minHeight: 520 }}>
       <HeroSlideshow slides={slides} />
 
-      {/* Gradient overlay — stays light-friendly */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/10 z-10" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent z-10" />
+      {/* Very light overlay — just enough to keep text readable on bright photos */}
+      <div className="absolute inset-0 bg-white/15 z-10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-white/60 via-white/10 to-transparent z-10" />
 
       <div className="absolute inset-0 z-20 flex flex-col justify-end px-5 md:px-12 lg:px-20 pb-16 md:pb-24">
 
@@ -197,22 +197,22 @@ function HeroSection({ slides, content, discountPercent, discountActive }: {
           style={{ animationDelay: "0.2s" }}
         >
           <MapPin size={12} className="text-gold" />
-          <span className="label-badge text-white/80 text-[10px]">Gurugram · Haryana · India</span>
+          <span className="label-badge text-ink/60 text-[10px]">Gurugram · Haryana · India</span>
         </div>
 
         {/* Headline */}
         <h1
-          className="font-display text-white leading-tight mb-4 hero-line-enter"
+          className="font-display text-[#1a2420] leading-tight mb-4 hero-line-enter font-bold"
           style={{ fontSize: "clamp(2.8rem, 9vw, 7rem)", lineHeight: "1.0", animationDelay: "0.35s" }}
         >
           A Home Away
           <br />
-          <span className="text-[#f0d98a] italic">From Home.</span>
+          <span className="text-gold">From Home.</span>
         </h1>
 
         {/* Subtitle */}
         <p
-          className="text-white/75 text-sm md:text-lg leading-relaxed mb-7 max-w-sm md:max-w-md hero-line-enter"
+          className="text-[#1a2420]/70 text-sm md:text-lg leading-relaxed mb-7 max-w-sm md:max-w-md hero-line-enter"
           style={{ animationDelay: "0.6s" }}
         >
           {content.heroSubtitle || "Two beautiful homes in Gurugram. Warm hosts. No booking fees."}
@@ -227,14 +227,14 @@ function HeroSection({ slides, content, discountPercent, discountActive }: {
             href="https://wa.me/918828352311"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-xl bg-[#25D366] text-white font-semibold text-sm hover:bg-[#1fb558] transition-colors min-h-[52px] shadow-lg"
+            className="inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-xl bg-[#4caf6e] text-white font-semibold text-sm hover:bg-[#3d9d5e] transition-colors min-h-[52px] shadow-md"
           >
             {WA_SVG}
             Reserve on WhatsApp
           </a>
           <Link
             href="/homes"
-            className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-xl bg-white/15 backdrop-blur-sm border border-white/30 text-white font-medium text-sm hover:bg-white/25 transition-all min-h-[52px]"
+            className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-xl bg-white/80 backdrop-blur-sm border border-forest/20 text-forest font-medium text-sm hover:bg-white hover:border-forest/40 transition-all min-h-[52px]"
           >
             Explore Homes <ArrowRight size={14} />
           </Link>
@@ -245,17 +245,17 @@ function HeroSection({ slides, content, discountPercent, discountActive }: {
           className="flex flex-wrap gap-4 mt-5 hero-line-enter"
           style={{ animationDelay: "1s" }}
         >
-          <span className="flex items-center gap-1.5 text-white/55 text-xs">
+          <span className="flex items-center gap-1.5 text-[#1a2420]/55 text-xs">
             <CheckCircle2 size={11} /> Direct booking · No fees
           </span>
-          <span className="flex items-center gap-1.5 text-white/55 text-xs">
-            <Star size={11} className="fill-white/55" /> 4.9★ rated stays
+          <span className="flex items-center gap-1.5 text-[#1a2420]/55 text-xs">
+            <Star size={11} className="fill-[#1a2420]/55" /> 4.9★ rated stays
           </span>
-          <span className="flex items-center gap-1.5 text-white/55 text-xs">
+          <span className="flex items-center gap-1.5 text-[#1a2420]/55 text-xs">
             <Clock size={11} /> Responds in &lt;5 min
           </span>
           {discountActive && discountPercent > 0 && (
-            <span className="flex items-center gap-1.5 text-[#f0d98a] text-xs font-medium">
+            <span className="flex items-center gap-1.5 text-gold text-xs font-medium">
               🎉 {discountPercent}% off this week
             </span>
           )}
@@ -497,7 +497,7 @@ function HowItWorks() {
             href="https://wa.me/918828352311"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl bg-[#25D366] text-white font-semibold text-sm hover:bg-[#1fb558] transition-colors min-h-[52px] shadow-md"
+            className="inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl bg-[#4caf6e] text-white font-semibold text-sm hover:bg-[#3d9d5e] transition-colors min-h-[52px] shadow-md"
           >
             {WA_SVG}
             Start Your Booking on WhatsApp
@@ -713,7 +713,7 @@ function FinalCTA() {
             href="https://wa.me/918828352311"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl bg-[#25D366] text-white font-semibold text-base hover:bg-[#1fb558] transition-colors min-h-[56px] shadow-md"
+            className="inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl bg-[#4caf6e] text-white font-semibold text-base hover:bg-[#3d9d5e] transition-colors min-h-[56px] shadow-md"
           >
             {WA_SVG}
             WhatsApp Us Now

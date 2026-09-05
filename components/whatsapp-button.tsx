@@ -36,15 +36,15 @@ export function WhatsAppButton() {
         ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
       `}
       style={{
-        background: "#25D366",
-        boxShadow: "0 4px 24px rgba(37,211,102,0.35)",
+        background: "#4caf6e",
+        boxShadow: "0 4px 24px rgba(76,175,110,0.30)",
       }}
     >
       {/* Pulse ring */}
       {pulse && (
         <span
           className="absolute inset-0 rounded-full animate-ping"
-          style={{ background: "#25D366", opacity: 0.4 }}
+          style={{ background: "#4caf6e", opacity: 0.35 }}
         />
       )}
 

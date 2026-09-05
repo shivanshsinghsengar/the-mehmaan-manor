@@ -55,14 +55,14 @@ const config: Config = {
         },
       },
       fontFamily: {
-        display: ["var(--font-cormorant)", "serif"],
+        display: ["var(--font-inter)", "sans-serif"],
         sans:    ["var(--font-inter)", "sans-serif"],
         mono:    ["var(--font-jetbrains)", "monospace"],
       },
       fontSize: {
-        hero:    ["clamp(4rem, 10vw, 8.75rem)", { lineHeight: "0.95", letterSpacing: "-0.02em" }],
-        display: ["clamp(2.5rem, 5vw, 4.5rem)",  { lineHeight: "1.1",  letterSpacing: "-0.01em" }],
-        title:   ["clamp(1.75rem, 3vw, 2.5rem)", { lineHeight: "1.2",  letterSpacing: "-0.01em" }],
+        hero:    ["clamp(3rem, 8vw, 6.5rem)",    { lineHeight: "1.0",  letterSpacing: "-0.025em" }],
+        display: ["clamp(2.2rem, 4.5vw, 3.75rem)", { lineHeight: "1.1",  letterSpacing: "-0.02em" }],
+        title:   ["clamp(1.6rem, 2.8vw, 2.25rem)", { lineHeight: "1.2",  letterSpacing: "-0.015em" }],
       },
       transitionDuration: {
         "800":  "800ms",

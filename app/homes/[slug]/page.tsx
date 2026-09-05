@@ -418,7 +418,7 @@ function BookingSidebar({
             <a
               href={`https://wa.me/918828352311?text=${waMessage}`}
               target="_blank" rel="noopener noreferrer"
-              className="w-full py-3.5 border-2 border-[#25D366] text-[#1a7a3a] font-semibold text-sm rounded-xl flex items-center justify-center gap-2 hover:bg-[#dcf5e5] transition-all"
+              className="w-full py-3.5 border-2 border-[#4caf6e] text-[#2d7a4a] font-semibold text-sm rounded-xl flex items-center justify-center gap-2 hover:bg-[#edf7f1] transition-all"
             >
               {WA_SVG} Reserve via WhatsApp
             </a>
@@ -706,7 +706,7 @@ export default function PropertyPage() {
                 <a
                   href={`https://wa.me/918828352311?text=${waMessage}`}
                   target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#25D366] text-white text-sm font-semibold hover:bg-[#1fb558] transition-colors shadow-md"
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#4caf6e] text-white text-sm font-semibold hover:bg-[#3d9d5e] transition-colors shadow-md"
                 >
                   {WA_SVG} Reserve via WhatsApp
                 </a>
@@ -864,7 +864,7 @@ export default function PropertyPage() {
                   <a
                     href={`https://wa.me/918828352311?text=${waMessage}`}
                     target="_blank" rel="noopener noreferrer"
-                    className="w-full py-4 bg-[#25D366] text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2 hover:bg-[#1fb558] transition-colors shadow-md"
+                    className="w-full py-4 bg-[#4caf6e] text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2 hover:bg-[#3d9d5e] transition-colors shadow-md"
                   >
                     {WA_SVG} Book via WhatsApp · Fastest Response
                   </a>
@@ -916,7 +916,7 @@ export default function PropertyPage() {
             <a
               href={`https://wa.me/918828352311?text=${waMessage}`}
               target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-4 py-3 rounded-xl bg-[#25D366] text-white font-bold text-sm hover:bg-[#1fb558] transition-colors"
+              className="flex items-center gap-1.5 px-4 py-3 rounded-xl bg-[#4caf6e] text-white font-bold text-sm hover:bg-[#3d9d5e] transition-colors"
             >
               {WA_SVG} Book
             </a>

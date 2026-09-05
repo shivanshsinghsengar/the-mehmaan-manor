@@ -413,7 +413,7 @@ export default function ContactPage() {
                   <a
                     href="https://www.instagram.com/the_mehmaan_manor"
                     target="_blank" rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-forest text-cream font-semibold text-sm hover:bg-forest/90 transition-colors min-h-[52px]"
+                    className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-[#eee9df] border border-forest/20 text-forest font-semibold text-sm hover:bg-[#e0d9cc] transition-colors min-h-[52px]"
                   >
                     <Instagram size={16} />
                     Follow Us on Instagram

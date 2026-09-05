@@ -141,7 +141,7 @@ export default function SushantLokPage() {
               <div className="flex flex-wrap gap-3">
                 <a href={`https://wa.me/918828352311?text=${waMessage}`}
                   target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#25D366] text-white text-sm font-semibold hover:bg-[#1fb558] transition-colors shadow-md">
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#4caf6e] text-white text-sm font-semibold hover:bg-[#3d9d5e] transition-colors shadow-md">
                   <MessageCircle size={15} />Reserve via WhatsApp
                 </a>
                 <a href="tel:+918828352311"
@@ -310,7 +310,7 @@ export default function SushantLokPage() {
                     <div className="space-y-3">
                       <a href={`https://wa.me/918828352311?text=${waMessage}`}
                         target="_blank" rel="noopener noreferrer"
-                        className="w-full py-4 rounded-xl bg-[#25D366] text-white font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#1fb558] transition-colors shadow-sm">
+                        className="w-full py-4 rounded-xl bg-[#4caf6e] text-white font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#3d9d5e] transition-colors shadow-sm">
                         <MessageCircle size={16} />Reserve via WhatsApp
                       </a>
                       <a href="tel:+918828352311"
@@ -354,7 +354,7 @@ export default function SushantLokPage() {
           <div className="flex gap-2">
             <a href={`https://wa.me/918828352311?text=${waMessage}`}
               target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-5 py-3 rounded-xl bg-[#25D366] text-white font-bold text-sm hover:bg-[#1fb558] transition-colors">
+              className="flex items-center gap-1.5 px-5 py-3 rounded-xl bg-[#4caf6e] text-white font-bold text-sm hover:bg-[#3d9d5e] transition-colors">
               Reserve Now
             </a>
           </div>
