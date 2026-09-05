@@ -60,7 +60,7 @@ export function Navigation() {
       >
         <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
-            {/* Logo â€” always visible */}
+            {/* Logo — always visible */}
             <Link
               href="/"
               className="flex items-center group min-h-[44px]"
@@ -96,7 +96,7 @@ export function Navigation() {
               </Button>
             </div>
 
-            {/* Mobile Menu Button â€” 44Ã—44px touch target */}
+            {/* Mobile Menu Button — 44Ã—44px touch target */}
             <button
               onClick={() => setIsOpen(!isOpen)}
               className={cn(
@@ -112,7 +112,7 @@ export function Navigation() {
         </div>
       </nav>
 
-      {/* Mobile Menu â€” full screen overlay */}
+      {/* Mobile Menu — full screen overlay */}
       <div
         className={cn(
           "fixed inset-0 z-50 bg-forest text-cream transition-transform duration-500 lg:hidden overflow-y-auto",

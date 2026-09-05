@@ -32,7 +32,7 @@ export default function PropertiesPage() {
     name: "", slug: "", address: "", coordinates: "", description: "",
     vibe: "", baseRate: 3500, weekendRate: 4500, cleaningFee: 500,
     maxGuests: 4, checkInTime: "14:00", checkOutTime: "11:00",
-    amenities: [...DEFAULT_AMENITIES], policies: "No smoking indoors. Quiet hours 10 PM â€“ 8 AM.",
+    amenities: [...DEFAULT_AMENITIES], policies: "No smoking indoors. Quiet hours 10 PM – 8 AM.",
   });
 
   const load = () => {
@@ -63,7 +63,7 @@ export default function PropertiesPage() {
       if (data.success) {
         setShowAdd(false);
         load();
-        setNewProp({ name: "", slug: "", address: "", coordinates: "", description: "", vibe: "", baseRate: 3500, weekendRate: 4500, cleaningFee: 500, maxGuests: 4, checkInTime: "14:00", checkOutTime: "11:00", amenities: [...DEFAULT_AMENITIES], policies: "No smoking indoors. Quiet hours 10 PM â€“ 8 AM." });
+        setNewProp({ name: "", slug: "", address: "", coordinates: "", description: "", vibe: "", baseRate: 3500, weekendRate: 4500, cleaningFee: 500, maxGuests: 4, checkInTime: "14:00", checkOutTime: "11:00", amenities: [...DEFAULT_AMENITIES], policies: "No smoking indoors. Quiet hours 10 PM – 8 AM." });
       } else {
         setError(data.error || "Failed to add property");
       }
@@ -87,7 +87,7 @@ export default function PropertiesPage() {
       </div>
 
       {loading ? (
-        <div className="py-24 text-center text-ink/40 font-mono text-sm">Loading propertiesâ€¦</div>
+        <div className="py-24 text-center text-ink/40 font-mono text-sm">Loading properties…</div>
       ) : properties.length === 0 ? (
         <div className="py-24 text-center text-ink/40">No properties found.</div>
       ) : (
@@ -127,7 +127,7 @@ export default function PropertiesPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-forest mb-1">Coordinates</label>
-                  <Input value={newProp.coordinates} onChange={(e) => setNewProp({ ...newProp, coordinates: e.target.value })} placeholder="28.4595Â° N, 77.0266Â° E" className="font-mono" />
+                  <Input value={newProp.coordinates} onChange={(e) => setNewProp({ ...newProp, coordinates: e.target.value })} placeholder="28.4595° N, 77.0266° E" className="font-mono" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-forest mb-1">Max Guests</label>
@@ -144,15 +144,15 @@ export default function PropertiesPage() {
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-forest mb-1">Base Rate (â‚¹)</label>
+                  <label className="block text-sm font-medium text-forest mb-1">Base Rate (₹)</label>
                   <Input type="number" value={newProp.baseRate} onChange={(e) => setNewProp({ ...newProp, baseRate: +e.target.value })} className="font-mono" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-forest mb-1">Weekend Rate (â‚¹)</label>
+                  <label className="block text-sm font-medium text-forest mb-1">Weekend Rate (₹)</label>
                   <Input type="number" value={newProp.weekendRate} onChange={(e) => setNewProp({ ...newProp, weekendRate: +e.target.value })} className="font-mono" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-forest mb-1">Cleaning Fee (â‚¹)</label>
+                  <label className="block text-sm font-medium text-forest mb-1">Cleaning Fee (₹)</label>
                   <Input type="number" value={newProp.cleaningFee} onChange={(e) => setNewProp({ ...newProp, cleaningFee: +e.target.value })} className="font-mono" />
                 </div>
               </div>
@@ -174,7 +174,7 @@ export default function PropertiesPage() {
             <div className="flex gap-3 p-6 border-t border-neutral-100">
               <Button variant="outline" className="flex-1" onClick={() => { setShowAdd(false); setError(""); }}>Cancel</Button>
               <Button variant="gold" className="flex-1" onClick={handleAddProperty} disabled={saving}>
-                <Save size={14} className="mr-2" />{saving ? "Addingâ€¦" : "Add Property"}
+                <Save size={14} className="mr-2" />{saving ? "Adding…" : "Add Property"}
               </Button>
             </div>
           </div>
@@ -198,7 +198,7 @@ function PropertyCard({ property }: { property: any }) {
   return (
     <div className="bg-white border border-neutral-200 overflow-hidden">
       <div className="relative h-48 bg-forest/10">
-        <PlaceholderImage caption={`${property.name.toUpperCase()} â€” Property exterior`} className="h-full" aspectRatio="landscape" />
+        <PlaceholderImage caption={`${property.name.toUpperCase()} — Property exterior`} className="h-full" aspectRatio="landscape" />
         <div className="absolute top-3 left-3">
           <span className="bg-forest text-cream text-xs font-mono px-3 py-1">HOME {String(property.id).padStart(2, "0")}</span>
         </div>
@@ -302,7 +302,7 @@ function PropertyCard({ property }: { property: any }) {
 
       <div className="px-6 pb-6 flex gap-3">
         <Button variant="default" size="sm" className="flex-1" asChild>
-          <Link href={`/homes/${property.slug}`} target="_blank">View Public Page â†—</Link>
+          <Link href={`/homes/${property.slug}`} target="_blank">View Public Page ↗</Link>
         </Button>
         <Button variant="outline" size="sm" className="flex-1" asChild>
           <Link href={`/admin/properties/${property.id}`}>Edit Property</Link>
