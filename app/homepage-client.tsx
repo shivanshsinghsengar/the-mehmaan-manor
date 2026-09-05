@@ -1117,13 +1117,13 @@ function InstagramStrip({ photos }: { photos: { url: string; alt: string }[] }) 
           </LineReveal>
         </div>
 
-        <GridReveal className="flex gap-6 md:grid md:grid-cols-6 overflow-x-auto pb-3 md:overflow-visible" stagger={70} delay={100}>
+        <GridReveal className="flex gap-8 md:grid md:grid-cols-6 overflow-x-auto pb-3 md:overflow-visible" stagger={70} delay={100}>
           {photos.slice(0, 6).map((photo, i) => (
             <a key={photo.url + i} href="https://www.instagram.com/the_mehmaan_manor" target="_blank" rel="noopener noreferrer"
-              className="flex-shrink-0 flex flex-col items-center gap-3 group" style={{ minWidth: "110px" }}>
+              className="flex-shrink-0 flex flex-col items-center gap-3 group" style={{ minWidth: "150px" }}>
               <div className="p-[3px] rounded-full bg-gradient-to-tr from-[#c9a84c]/40 via-[#c9a84c] to-[#e8d08a] transition-all duration-300 group-hover:shadow-[0_0_18px_rgba(201,168,76,0.45)]">
                 <div className="p-[3px] rounded-full" style={{ background: "var(--bg-surface)" }}>
-                  <div className="w-24 h-24 md:w-full md:aspect-square rounded-full overflow-hidden">
+                  <div className="w-32 h-32 md:w-full md:aspect-square rounded-full overflow-hidden">
                     <img src={thumbnailUrl(photo.url, 400)} alt={photo.alt || "The Mehmaan Manor"}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                   </div>
