@@ -68,12 +68,13 @@ function BackBtn({ onClick }: { onClick: () => void }) {
     <button
       onClick={onClick}
       aria-label="Back to reception"
-      className="fixed top-4 left-4 z-[10000] inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-mono tracking-wide transition-all select-none focus:outline-none focus:ring-2 focus:ring-[#c9a84c]/60"
+      className="fixed top-4 left-4 z-[10000] inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-mono tracking-wide transition-all select-none focus:outline-none focus:ring-2 focus:ring-[#1a3328]/40"
       style={{
-        background: "rgba(0,0,0,0.55)",
+        background: "rgba(255,255,255,0.92)",
         backdropFilter: "blur(10px)",
-        border: "1px solid rgba(201,168,76,0.25)",
-        color: "rgba(201,168,76,0.85)",
+        border: "1px solid rgba(26,51,40,0.15)",
+        color: "#1a3328",
+        boxShadow: "0 2px 12px rgba(0,0,0,0.10)",
       }}
     >
       ‹ Reception
@@ -636,20 +637,19 @@ function PropertyRoom({
 }) {
   const isP1 = property.id === "1";
   const [activePhoto, setActivePhoto] = useState(0);
-  const [showModal, setShowModal] = useState(false);
 
   const photos = isP1
     ? [
-        { src: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1000&q=80&auto=format&fit=crop", lbl: "Bedroom" },
-        { src: "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=1000&q=80&auto=format&fit=crop",  lbl: "Living Area" },
-        { src: "https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?w=1000&q=80&auto=format&fit=crop", lbl: "Balcony" },
-        { src: "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=1000&q=80&auto=format&fit=crop", lbl: "Bedroom 2" },
+        { src: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1200&q=90&auto=format&fit=crop", lbl: "Bedroom" },
+        { src: "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=1200&q=90&auto=format&fit=crop",  lbl: "Living Area" },
+        { src: "https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?w=1200&q=90&auto=format&fit=crop", lbl: "Balcony" },
+        { src: "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=1200&q=90&auto=format&fit=crop", lbl: "Bedroom 2" },
       ]
     : [
-        { src: "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1000&q=80&auto=format&fit=crop", lbl: "Studio" },
-        { src: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1000&q=80&auto=format&fit=crop",  lbl: "Living Room" },
-        { src: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1000&q=80&auto=format&fit=crop",  lbl: "Kitchen" },
-        { src: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1000&q=80&auto=format&fit=crop", lbl: "Apartment" },
+        { src: "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1200&q=90&auto=format&fit=crop", lbl: "Studio" },
+        { src: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1200&q=90&auto=format&fit=crop",  lbl: "Living Room" },
+        { src: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&q=90&auto=format&fit=crop",  lbl: "Kitchen" },
+        { src: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200&q=90&auto=format&fit=crop", lbl: "Apartment" },
       ];
 
   const amenities = isP1
@@ -659,138 +659,200 @@ function PropertyRoom({
   const waText = encodeURIComponent(`Hi! I'm interested in ${property.name}. Can you share availability?`);
 
   return (
-    <>
-      <div
-        className="fixed inset-0 z-[9993] overflow-y-auto"
-        style={{ background: "linear-gradient(180deg,#0a0702 0%,#160f05 100%)" }}
-        role="dialog" aria-modal="true"
-      >
-        {/* Full-bleed hero photo */}
-        <div className="relative w-full overflow-hidden" style={{ height: "clamp(220px,45vh,420px)" }}>
-          {/* Background photos cycling */}
+    <div
+      className="fixed inset-0 z-[9993] overflow-y-auto"
+      style={{ background: "#faf8f4" }}
+      role="dialog"
+      aria-modal="true"
+    >
+      {/* ── HERO PHOTO SECTION ── */}
+      <div className="relative w-full overflow-hidden" style={{ height: "clamp(260px,52vh,520px)" }}>
+
+        {/* Photos — full colour, no heavy overlay */}
+        {photos.map((p, i) => (
+          <img
+            key={p.src}
+            src={p.src}
+            alt={p.lbl}
+            loading={i === 0 ? "eager" : "lazy"}
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ opacity: i === activePhoto ? 1 : 0, transition: "opacity 0.7s ease" }}
+          />
+        ))}
+
+        {/* Light gradient — just enough for text readability, not a dark curtain */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.10) 45%, rgba(0,0,0,0.55) 100%)" }}
+        />
+
+        {/* Gold accent line top */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#c9a84c] to-transparent" />
+
+        {/* Location + title — bottom left */}
+        <div className="absolute bottom-0 left-0 right-0 px-5 md:px-8 pb-5 md:pb-7">
+          <span className="inline-block text-[#c9a84c] text-[9px] font-mono tracking-[0.28em] uppercase mb-1.5">
+            {isP1 ? "Sector 57" : "Sector 39"} · The Mehmaan Manor
+          </span>
+          <h2 className="font-display text-white text-3xl md:text-4xl leading-tight drop-shadow-sm">
+            {property.name.replace("The Mehmaan Manor — ", "")}
+          </h2>
+          <p className="text-white/60 text-xs mt-1 drop-shadow-sm">{property.address}</p>
+        </div>
+
+        {/* Thumbnail strip — bottom right */}
+        <div className="absolute bottom-4 right-4 flex flex-col gap-1.5">
           {photos.map((p, i) => (
-            <img
-              key={p.src} src={p.src} alt={p.lbl} loading={i === 0 ? "eager" : "lazy"}
-              className="absolute inset-0 w-full h-full object-cover"
-              style={{ opacity: i === activePhoto ? 1 : 0, transition: "opacity 0.8s ease" }}
-            />
+            <button
+              key={i}
+              onClick={() => setActivePhoto(i)}
+              aria-label={`View ${p.lbl}`}
+              className="overflow-hidden rounded-lg focus:outline-none transition-all"
+              style={{
+                width: 48, height: 36,
+                border: `2px solid ${i === activePhoto ? "#c9a84c" : "rgba(255,255,255,0.35)"}`,
+                opacity: i === activePhoto ? 1 : 0.70,
+                boxShadow: i === activePhoto ? "0 0 0 1px rgba(201,168,76,0.4)" : "none",
+              }}
+            >
+              <img src={p.src} alt={p.lbl} loading="lazy" className="w-full h-full object-cover" />
+            </button>
           ))}
-          <div className="absolute inset-0"
-            style={{ background: "linear-gradient(180deg,rgba(0,0,0,0.30) 0%,rgba(0,0,0,0.15) 50%,rgba(10,7,2,0.90) 100%)" }} />
+        </div>
 
-          {/* Gold top strip */}
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[#c9a84c] to-transparent" />
+        {/* Photo label pill */}
+        <div className="absolute top-4 left-1/2 -translate-x-1/2">
+          <span className="px-3 py-1 rounded-full text-[10px] font-mono bg-black/30 backdrop-blur-sm text-white/80 border border-white/15">
+            {photos[activePhoto].lbl}
+          </span>
+        </div>
+      </div>
 
-          {/* Property title */}
-          <div className="absolute bottom-5 left-5 md:left-8 right-16">
-            <span className="text-[#c9a84c] text-[9px] font-mono tracking-[0.28em] uppercase">
-              {isP1 ? "Sector 57" : "Sector 39"} · The Mehmaan Manor
-            </span>
-            <h2 className="font-display text-white text-2xl md:text-3xl mt-1 leading-tight">
-              {property.name.replace("The Mehmaan Manor — ", "")}
-            </h2>
-            <p className="text-white/45 text-xs mt-1">{property.address}</p>
-          </div>
+      {/* ── CONTENT ── light background */}
+      <div className="max-w-3xl mx-auto px-5 md:px-8 py-7">
 
-          {/* Photo thumbnails */}
-          <div className="absolute bottom-4 right-4 flex flex-col gap-1.5">
+        {/* Price + badge row */}
+        <div className="flex items-center gap-3 mb-1">
+          <span className="font-display text-4xl text-[#1a3328] font-semibold">
+            ₹{property.baseRate.toLocaleString("en-IN")}
+          </span>
+          <span className="text-ink/45 text-base">/night</span>
+          <span className="ml-auto px-3 py-1 text-[10px] font-mono rounded-full bg-[#c9a84c]/12 text-[#c9a84c] border border-[#c9a84c]/25">
+            No booking fee
+          </span>
+        </div>
+        <p className="text-ink/40 text-xs font-mono mb-5 pb-5 border-b border-forest/8">
+          Free cancellation up to 48 hours before check-in
+        </p>
+
+        {/* Description */}
+        {property.vibe && (
+          <p className="text-ink/65 text-sm leading-relaxed mb-6">{property.vibe}</p>
+        )}
+
+        {/* Photo grid — 4 thumbnails in a horizontal scroll strip */}
+        <div className="mb-6">
+          <p className="text-[10px] font-mono tracking-widest uppercase text-ink/35 mb-2.5">Photo Gallery</p>
+          <div className="grid grid-cols-4 gap-2">
             {photos.map((p, i) => (
-              <button key={i} onClick={() => setActivePhoto(i)}
+              <button
+                key={i}
+                onClick={() => { setActivePhoto(i); window.scrollTo({ top: 0, behavior: "smooth" }); }}
                 aria-label={`View ${p.lbl}`}
-                className="w-12 h-9 md:w-14 md:h-10 rounded-lg overflow-hidden focus:outline-none"
-                style={{ border: `1.5px solid ${i === activePhoto ? "rgba(201,168,76,0.80)" : "rgba(255,255,255,0.18)"}`,
-                  opacity: i === activePhoto ? 1 : 0.65, transition: "all 0.3s ease" }}>
-                <img src={p.src} alt={p.lbl} loading="lazy" className="w-full h-full object-cover" />
+                className="relative rounded-xl overflow-hidden focus:outline-none group"
+                style={{ aspectRatio: "4/3" }}
+              >
+                <img src={p.src} alt={p.lbl} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <div className={cn(
+                  "absolute inset-0 transition-all duration-300",
+                  i === activePhoto ? "ring-2 ring-[#c9a84c] ring-inset" : "bg-black/0 group-hover:bg-black/10"
+                )} />
+                <span className="absolute bottom-1 left-0 right-0 text-center text-[9px] text-white font-mono opacity-0 group-hover:opacity-100 transition-opacity">{p.lbl}</span>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Content */}
-        <div className="px-5 md:px-8 py-6 max-w-3xl mx-auto">
-
-          {/* Price row */}
-          <div className="flex items-baseline gap-2 mb-5 pb-5 border-b border-[#c9a84c]/12">
-            <span className="font-display text-4xl text-[#c9a84c] font-semibold">
-              ₹{property.baseRate.toLocaleString("en-IN")}
-            </span>
-            <span className="text-[#f5f0e8]/35 text-sm">/night onwards</span>
-            <span className="ml-auto text-[10px] font-mono text-[#c9a84c]/65 bg-[#c9a84c]/10 px-3 py-1 rounded-full border border-[#c9a84c]/20">
-              No booking fee
-            </span>
-          </div>
-
-          {/* Description */}
-          {property.vibe && (
-            <p className="text-[#f5f0e8]/55 text-sm leading-relaxed mb-5">{property.vibe}</p>
-          )}
-
-          {/* Amenities grid */}
-          <div className="mb-5">
-            <p className="text-[#c9a84c]/55 text-[9px] font-mono tracking-widest uppercase mb-3">What's Included</p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              {amenities.map(a => (
-                <div key={a} className="flex items-center gap-2 text-xs text-[#f5f0e8]/60 rounded-xl px-3 py-2.5"
-                  style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.12)" }}>
-                  <span className="text-[#c9a84c] font-bold text-[10px]">✓</span>
-                  {a}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Hosts */}
-          <div className="flex items-center gap-4 p-4 rounded-2xl mb-5"
-            style={{ background: "rgba(201,168,76,0.05)", border: "1px solid rgba(201,168,76,0.15)" }}>
-            <div className="flex -space-x-2">
-              {["👩‍💼", "👩‍🍳"].map((e, i) => (
-                <div key={i} className="w-10 h-10 rounded-full flex items-center justify-center text-xl border-2 border-[#c9a84c]/30"
-                  style={{ background: "rgba(201,168,76,0.10)" }}>{e}</div>
-              ))}
-            </div>
-            <div>
-              <p className="text-[#f5f0e8]/80 text-sm font-semibold">Simran &amp; Jyoti</p>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#4caf6e] opacity-60" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#4caf6e]" />
-                </span>
-                <span className="text-[#4caf6e]/70 text-[10px] font-mono">Online · Responds &lt;5 min</span>
+        {/* Amenities */}
+        <div className="mb-6">
+          <p className="text-[10px] font-mono tracking-widest uppercase text-ink/35 mb-3">What&apos;s Included</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {amenities.map(a => (
+              <div
+                key={a}
+                className="flex items-center gap-2 text-xs text-ink/70 bg-white rounded-xl px-3 py-2.5 border border-forest/8"
+              >
+                <span className="text-[#c9a84c] font-bold">✓</span>
+                {a}
               </div>
-            </div>
-            <div className="ml-auto flex flex-col items-center gap-0.5">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <span key={i} className="text-[#c9a84c] text-[9px]" style={{ lineHeight: 1 }}>★</span>
-              ))}
-              <span className="text-[#f5f0e8]/35 text-[8px] font-mono">4.9</span>
-            </div>
+            ))}
           </div>
-
-          {/* CTA buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 mb-8">
-            <Link href={`/homes/${property.slug}`}
-              className="flex-1 py-4 rounded-2xl font-bold text-sm text-center transition-all active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#c9a84c]"
-              style={{ background: "linear-gradient(135deg,#c9a84c 0%,#e8d070 100%)", color: "#1a0800",
-                boxShadow: "0 4px 20px rgba(201,168,76,0.40)" }}>
-              📋 View Full Details &amp; Book
-            </Link>
-            <a href={`https://wa.me/918828352311?text=${waText}`}
-              target="_blank" rel="noopener noreferrer"
-              className="flex-1 py-4 rounded-2xl font-bold text-sm text-center border-2 border-[#4caf6e]/55 text-[#4caf6e] hover:bg-[#4caf6e] hover:text-white transition-all active:scale-[0.98]">
-              💬 Reserve on WhatsApp
-            </a>
-            <a href="tel:+918828352311"
-              className="sm:w-auto px-5 py-4 rounded-2xl font-semibold text-sm text-center border border-[#f5f0e8]/12 text-[#f5f0e8]/50 hover:text-[#f5f0e8]/80 hover:border-[#f5f0e8]/25 transition-all">
-              📞 Call
-            </a>
-          </div>
-
         </div>
 
-        <BackBtn onClick={onBack} />
-        <ExitBtn onClick={onClose} />
+        {/* Hosts card */}
+        <div className="flex items-center gap-4 p-4 rounded-2xl mb-6 bg-white border border-forest/8">
+          <div className="flex -space-x-2">
+            {["👩‍💼", "👩‍🍳"].map((e, i) => (
+              <div key={i}
+                className="w-11 h-11 rounded-full flex items-center justify-center text-xl border-2 border-white bg-[#eee9df]">
+                {e}
+              </div>
+            ))}
+          </div>
+          <div>
+            <p className="text-ink text-sm font-semibold">Simran &amp; Jyoti</p>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#4caf6e] opacity-60" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#4caf6e]" />
+              </span>
+              <span className="text-[#4caf6e] text-[10px] font-mono">Online · Responds &lt;5 min</span>
+            </div>
+          </div>
+          <div className="ml-auto text-center">
+            <div className="flex gap-0.5 justify-center">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <span key={i} className="text-[#c9a84c] text-xs">★</span>
+              ))}
+            </div>
+            <span className="text-ink/40 text-[9px] font-mono">4.9 / 5</span>
+          </div>
+        </div>
+
+        {/* CTAs */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-10">
+          <Link
+            href={`/homes/${property.slug}`}
+            className="flex-1 py-4 rounded-2xl font-bold text-sm text-center transition-all active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#c9a84c]"
+            style={{
+              background: "linear-gradient(135deg,#1a3328 0%,#0d1f1a 100%)",
+              color: "#f5f0e8",
+              boxShadow: "0 4px 20px rgba(26,51,40,0.25)",
+            }}
+          >
+            📋 View Full Details &amp; Book
+          </Link>
+          <a
+            href={`https://wa.me/918828352311?text=${waText}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 py-4 rounded-2xl font-bold text-sm text-center border-2 border-[#4caf6e] text-[#1a7a40] hover:bg-[#4caf6e] hover:text-white transition-all active:scale-[0.98]"
+          >
+            💬 Reserve on WhatsApp
+          </a>
+          <a
+            href="tel:+918828352311"
+            className="sm:w-auto px-5 py-4 rounded-2xl font-semibold text-sm text-center border-2 border-forest/20 text-forest hover:bg-forest hover:text-white transition-all"
+          >
+            📞 Call
+          </a>
+        </div>
+
       </div>
-    </>
+
+      <BackBtn onClick={onBack} />
+      <ExitBtn onClick={onClose} />
+    </div>
   );
 }
 
