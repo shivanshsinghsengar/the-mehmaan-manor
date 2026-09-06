@@ -152,6 +152,12 @@ const FAQS_DEFAULT = [
   { q: "Can I book for a group/party?", a: "Yes, but please disclose the nature when booking. Noise must be kept reasonable after 10 PM per society rules." },
 ];
 
+// Check-in answer differs per property
+const CHECKIN_FAQ_BY_SLUG: Record<string, string> = {
+  "sushant-lok":   "We do a personal check-in — Simran or Jyoti will meet you at the property. Check-out is self-service; just lock up and message us.",
+  "jharsa-village": "Sector 39 has self check-in — there is no reception. Full instructions and access details will be shared with you before arrival. Check-out is also self-service; just lock up and message us.",
+};
+
 const COOKING_FAQ_BY_SLUG: Record<string, { q: string; a: string }> = {
   "sushant-lok": {
     q: "Is cooking allowed?",
@@ -164,15 +170,21 @@ const COOKING_FAQ_BY_SLUG: Record<string, { q: string; a: string }> = {
 };
 
 function getFaqs(slug: string) {
+  // Build the check-in FAQ with the correct per-property answer
+  const checkinAnswer = CHECKIN_FAQ_BY_SLUG[slug] ?? FAQS_DEFAULT[0].a;
+  const checkinFaq = { q: "What is the check-in process?", a: checkinAnswer };
+
+  // Build the cooking FAQ with the correct per-property answer
   const cookingFaq = COOKING_FAQ_BY_SLUG[slug] ?? {
     q: "Is cooking allowed?",
     a: "Yes — basic kitchen facilities are provided. Please clean up after use.",
   };
-  // Insert cooking FAQ after cancellation policy (index 3)
+
   return [
-    ...FAQS_DEFAULT.slice(0, 4),
+    checkinFaq,
+    ...FAQS_DEFAULT.slice(1, 4), // How many guests, Parking, Cancellation
     cookingFaq,
-    ...FAQS_DEFAULT.slice(4),
+    ...FAQS_DEFAULT.slice(4),    // Pets, Pay, Group
   ];
 }
 
