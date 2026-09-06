@@ -472,7 +472,7 @@ function InteriorScreen({ properties, onClose }: { properties: ManorProperty[]; 
       >
         {/* ── Perspective stage ── */}
         <div className="absolute inset-0 flex items-center justify-center"
-          style={{ perspective:"60vw", perspectiveOrigin:"50% 48%" }}>
+          style={{ perspective:"140vw", perspectiveOrigin:"50% 45%" }}>
 
           {/* ── Rotating scene ── */}
           <div className="relative"
@@ -596,7 +596,7 @@ function InteriorScreen({ properties, onClose }: { properties: ManorProperty[]; 
 function RoomFace({ angle, children }: { angle: number; children: React.ReactNode }) {
   return (
     <div className="absolute inset-0"
-      style={{ transformStyle:"preserve-3d", transform:`rotateY(${angle}deg) translateZ(50vw)`, backfaceVisibility:"hidden" }}>
+      style={{ transformStyle:"preserve-3d", transform:`rotateY(${angle}deg) translateZ(65vw)`, backfaceVisibility:"hidden" }}>
       {children}
     </div>
   );
