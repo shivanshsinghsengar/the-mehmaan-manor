@@ -2,11 +2,19 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 
+// Normalize legacy visitor hours in policy text
+function normalizePolicy(policy: string): string {
+  return policy
+    .replace(/Visitors allowed 10:00 AM\s*[-–]\s*8:00 PM/g, "Visitors allowed 2:00 PM – 8:00 PM")
+    .replace(/Visitors allowed 10:00AM\s*[-–]\s*8:00PM/g, "Visitors allowed 2:00 PM – 8:00 PM")
+    .replace(/\(10AM[-–]8PM\)/g, "(2PM–8PM)");
+}
+
 // Public — individual property detail used by the public site
 export async function GET(_: Request, { params }: { params: { id: string } }) {
   const property = await prisma.property.findUnique({ where: { id: params.id } });
   if (!property) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json(property);
+  return NextResponse.json({ ...property, policies: normalizePolicy(property.policies) });
 }
 
 // Admin only — updating a property

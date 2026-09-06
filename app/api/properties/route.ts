@@ -4,13 +4,23 @@ import { requireAdmin } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
+// Normalize legacy visitor hours text in policy strings
+function normalizePolicy(policy: string): string {
+  return policy
+    .replace(/Visitors allowed 10:00 AM\s*[-–]\s*8:00 PM/g, "Visitors allowed 2:00 PM – 8:00 PM")
+    .replace(/Visitors allowed 10:00AM\s*[-–]\s*8:00PM/g, "Visitors allowed 2:00 PM – 8:00 PM")
+    .replace(/\(10AM[-–]8PM\)/g, "(2PM–8PM)");
+}
+
 // Public — anyone can read active properties (used by the public site)
 export async function GET() {
   const properties = await prisma.property.findMany({
     where: { isActive: true },
     orderBy: { id: "asc" },
   });
-  return NextResponse.json(properties);
+  return NextResponse.json(
+    properties.map((p) => ({ ...p, policies: normalizePolicy(p.policies) }))
+  );
 }
 
 // Admin only — creating properties
