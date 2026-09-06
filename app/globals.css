@@ -610,6 +610,19 @@
 .manor-walkin-arch { animation: manorWalkinArch 1.85s cubic-bezier(0.4,0,0.8,1) forwards; }
 .manor-walkin-glow { animation: manorWalkinGlow 1.85s ease forwards; }
 
+/* ── Host welcome bubble ─────────────────────────────────────── */
+@keyframes manorWelcomeIn {
+  0%   { opacity: 0; transform: translateY(20px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0)    scale(1); }
+}
+@keyframes manorWelcomeOut {
+  0%   { opacity: 1; transform: translateY(0)     scale(1); }
+  100% { opacity: 0; transform: translateY(14px)  scale(0.97); }
+}
+.manor-welcome-in   { animation: manorWelcomeIn  0.55s cubic-bezier(0.22,1,0.36,1) forwards; }
+.manor-welcome-hold { opacity: 1; }
+.manor-welcome-out  { animation: manorWelcomeOut 0.65s ease-in forwards; }
+
 /* ── Pop-in for modal / review card ─────────────────────────── */
 .manor-pop-in { animation: manorPopIn 0.38s cubic-bezier(0.22,1,0.36,1) both; }
 

@@ -21,7 +21,7 @@
  *     └─ exit button → idle
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 
 /* ─── types ──────────────────────────────────────────────── */
@@ -569,6 +569,87 @@ function PropertyModal({
 }
 
 /* ══════════════════════════════════════════════════════════
+   HOST WELCOME OVERLAY
+   Shows when user first enters. Simran greets them.
+   Auto-dismisses after 3 s or on tap.
+══════════════════════════════════════════════════════════ */
+function HostWelcome({ onDone }: { onDone: () => void }) {
+  const [vis, setVis] = useState<"in" | "hold" | "out">("in");
+
+  useEffect(() => {
+    const ids = [
+      setTimeout(() => setVis("hold"), 600),
+      setTimeout(() => setVis("out"),  3200),
+      setTimeout(() => onDone(),        4000),
+    ];
+    return () => ids.forEach(clearTimeout);
+  }, [onDone]);
+
+  const dismiss = () => { setVis("out"); setTimeout(onDone, 700); };
+
+  return (
+    <div
+      className="fixed inset-0 z-[9999] flex items-end justify-start pb-16 pl-8 md:pl-16 pointer-events-none"
+      aria-live="polite"
+    >
+      <div
+        className={cn(
+          "pointer-events-auto max-w-xs cursor-pointer select-none",
+          vis === "in"   && "manor-welcome-in",
+          vis === "hold" && "manor-welcome-hold",
+          vis === "out"  && "manor-welcome-out",
+        )}
+        onClick={dismiss}
+      >
+        <div
+          className="flex items-end gap-3 p-4 rounded-2xl"
+          style={{
+            background: "linear-gradient(135deg,rgba(26,51,40,0.96) 0%,rgba(13,30,20,0.96) 100%)",
+            border: "1px solid rgba(201,168,76,0.35)",
+            boxShadow: "0 8px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(201,168,76,0.08)",
+            backdropFilter: "blur(12px)",
+          }}
+        >
+          {/* Avatar */}
+          <div
+            className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-2xl border-2 border-[#c9a84c]/40"
+            style={{ background: "rgba(201,168,76,0.12)" }}
+          >
+            👩‍💼
+          </div>
+
+          {/* Bubble */}
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[#c9a84c] text-xs font-semibold">Simran</span>
+              <span className="text-[#f5f0e8]/30 text-[9px] font-mono">Host · The Mehmaan Manor</span>
+            </div>
+            <p className="text-[#f5f0e8]/90 text-sm leading-snug">
+              Namaste! 🙏 Welcome to The Mehmaan Manor.
+            </p>
+            <p className="text-[#f5f0e8]/55 text-xs mt-1 leading-snug">
+              Look around — explore our properties on the walls, and Book Now at the center desk.
+            </p>
+            <p className="text-[#c9a84c]/50 text-[9px] font-mono mt-2">Tap to dismiss</p>
+          </div>
+        </div>
+
+        {/* Speech-bubble tail */}
+        <div
+          className="ml-7 w-3 h-3 -mt-px"
+          style={{
+            background: "rgba(26,51,40,0.96)",
+            clipPath: "polygon(0 0, 100% 0, 50% 100%)",
+            borderLeft: "1px solid rgba(201,168,76,0.35)",
+            borderRight: "1px solid rgba(201,168,76,0.35)",
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════
    PHASE: INTERIOR — true first-person 3D room
 
    Layout uses CSS perspective transform to create a room
@@ -579,10 +660,11 @@ function PropertyModal({
      - Ceiling plane
      - Left wall  → Property 1 (Sector 57) photos + info
      - Right wall → Property 2 (Sector 39) photos + info
-     - Back wall  → Reception desk + host panel
-     - Info boards hang on back wall below desk level
+     - Back wall  → LARGE center booking frame + surrounding
+                    property thumbnail frames
+     - Mouse-look: entire room content tilts as mouse moves
 
-   Clicking any wall opens the PropertyModal.
+   Clicking any wall/frame opens the PropertyModal.
 ══════════════════════════════════════════════════════════ */
 function InteriorScreen({
   properties,
@@ -591,33 +673,70 @@ function InteriorScreen({
   properties: ManorProperty[];
   onClose: () => void;
 }) {
-  const [entered,       setEntered]       = useState(false);
-  const [selectedProp,  setSelectedProp]  = useState<ManorProperty | null>(null);
-  const [activeWall,    setActiveWall]    = useState<"none" | "left" | "right" | "desk">("none");
+  const [entered,      setEntered]      = useState(false);
+  const [welcomed,     setWelcomed]     = useState(false); // host welcome shown
+  const [selectedProp, setSelectedProp] = useState<ManorProperty | null>(null);
+  const [activeWall,   setActiveWall]   = useState<"none" | "left" | "right">("none");
+  // Mouse-look: offset in degrees
+  const [look, setLook] = useState({ x: 0, y: 0 });
+  const roomRef = useRef<HTMLDivElement>(null);
 
-  // Slight delay so the room fades in after the black transition
   useEffect(() => {
     const t = setTimeout(() => setEntered(true), 120);
     return () => clearTimeout(t);
   }, []);
 
+  /* ── Mouse-look handler ── */
+  useEffect(() => {
+    const handleMouse = (e: MouseEvent) => {
+      const cx = window.innerWidth  / 2;
+      const cy = window.innerHeight / 2;
+      // Map mouse offset to ±8 deg horizontal, ±5 deg vertical
+      const rx = ((e.clientY - cy) / cy) * -5;
+      const ry = ((e.clientX - cx) / cx) *  8;
+      setLook({ x: rx, y: ry });
+    };
+    const handleTouch = (e: TouchEvent) => {
+      if (e.touches.length === 0) return;
+      const t = e.touches[0];
+      const cx = window.innerWidth  / 2;
+      const cy = window.innerHeight / 2;
+      const rx = ((t.clientY - cy) / cy) * -4;
+      const ry = ((t.clientX - cx) / cx) *  6;
+      setLook({ x: rx, y: ry });
+    };
+    window.addEventListener("mousemove", handleMouse, { passive: true });
+    window.addEventListener("touchmove", handleTouch, { passive: true });
+    return () => {
+      window.removeEventListener("mousemove", handleMouse);
+      window.removeEventListener("touchmove", handleTouch);
+    };
+  }, []);
+
   const prop1 = properties.find(p => p.id === "1") ?? properties[0];
   const prop2 = properties.find(p => p.id === "2") ?? properties[properties.length - 1];
 
-  /* ── photos for wall frames ── */
+  /* ── Wall photos ── */
   const p1Photos = [
-    "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=500&q=75&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=500&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600&q=80&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=600&q=80&auto=format&fit=crop",
   ];
   const p2Photos = [
-    "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=500&q=75&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=600&q=80&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80&auto=format&fit=crop",
+  ];
+
+  /* Thumbnail photos for center wall surrounding frames */
+  const allThumbs = [
+    "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=300&q=70&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=300&q=70&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=300&q=70&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&q=70&auto=format&fit=crop",
   ];
 
   const [p1Img, setP1Img] = useState(0);
   const [p2Img, setP2Img] = useState(0);
 
-  // Cycle wall photos
   useEffect(() => {
     const id = setInterval(() => {
       setP1Img(i => (i + 1) % p1Photos.length);
@@ -626,288 +745,354 @@ function InteriorScreen({
     return () => clearInterval(id);
   }, []);
 
+  /* ── The room tilts with mouse ── */
+  const roomStyle = {
+    transform: `rotateX(${look.x}deg) rotateY(${look.y}deg)`,
+    transition: "transform 0.12s ease-out",
+    transformStyle: "preserve-3d" as const,
+  };
+
   return (
     <>
       {/* ═══ FULL-SCREEN 3D ROOM ═══ */}
       <div
+        ref={roomRef}
         className="fixed inset-0 z-[9992] overflow-hidden"
-        style={{
-          opacity: entered ? 1 : 0,
-          transition: "opacity 0.9s ease",
-        }}
+        style={{ opacity: entered ? 1 : 0, transition: "opacity 0.9s ease" }}
         role="dialog"
         aria-modal="true"
         aria-label="Inside the Mehmaan Manor reception"
       >
-        {/* ── Perspective container ──
-            Everything inside here is positioned in 3D.
-            The user's eye is at the front of this box.        */}
+        {/* ── Mouse-look wrapper ── entire scene rotates together */}
         <div
           className="absolute inset-0"
           style={{
-            perspective: "900px",
+            perspective: "1100px",
             perspectiveOrigin: "50% 42%",
           }}
         >
-          {/* ████ FLOOR ████ */}
-          <div
-            className="absolute left-0 right-0"
-            style={{
-              bottom: 0,
-              height: "100%",
-              transformOrigin: "bottom center",
-              transform: "rotateX(62deg)",
-              background: "repeating-linear-gradient(90deg,#2e1e0e 0,#2e1e0e 80px,#381e0a 80px,#381e0a 160px)",
-            }}
-          />
-          {/* Floor sheen */}
-          <div
-            className="absolute left-0 right-0 bottom-0 pointer-events-none"
-            style={{
-              height: "50%",
-              background: "linear-gradient(0deg,rgba(201,168,76,0.06) 0%,transparent 100%)",
-              transformOrigin: "bottom center",
-              transform: "rotateX(62deg)",
-            }}
-          />
+          <div className="absolute inset-0" style={roomStyle}>
 
-          {/* ████ CEILING ████ */}
-          <div
-            className="absolute left-0 right-0 top-0"
-            style={{
-              height: "100%",
-              transformOrigin: "top center",
-              transform: "rotateX(-62deg)",
-              background: "#130c06",
-            }}
-          />
-          {/* Ceiling light strip */}
-          <div
-            className="absolute left-1/2 top-0 -translate-x-1/2"
-            style={{
-              width: "30%",
-              height: "100%",
-              transformOrigin: "top center",
-              transform: "rotateX(-62deg)",
-              background: "linear-gradient(180deg,rgba(255,240,160,0.18) 0%,transparent 60%)",
-              pointerEvents: "none",
-            }}
-          />
+            {/* ████ FLOOR ████ */}
+            <div
+              className="absolute left-0 right-0"
+              style={{
+                bottom: 0, height: "100%",
+                transformOrigin: "bottom center",
+                transform: "rotateX(62deg)",
+                background: "repeating-linear-gradient(90deg,#2e1e0e 0,#2e1e0e 80px,#381e0a 80px,#381e0a 160px)",
+              }}
+            />
+            {/* Floor sheen */}
+            <div className="absolute left-0 right-0 bottom-0 pointer-events-none"
+              style={{ height: "50%", transformOrigin: "bottom center", transform: "rotateX(62deg)", background: "linear-gradient(0deg,rgba(201,168,76,0.07) 0%,transparent 100%)" }} />
 
-          {/* ████ BACK WALL ████ */}
-          <div
-            className="absolute left-0 right-0"
-            style={{
-              top: "12%",
-              bottom: "12%",
-              transform: "translateZ(-420px)",
-              background: "linear-gradient(180deg,#1a1208 0%,#2a1a0a 100%)",
-              borderTop: "2px solid rgba(201,168,76,0.1)",
-              borderBottom: "2px solid rgba(201,168,76,0.1)",
-            }}
-          >
-            {/* Wainscoting panels */}
-            <div className="absolute inset-x-4 bottom-0 h-1/3" style={{ borderTop: "1.5px solid rgba(201,168,76,0.12)", background: "rgba(0,0,0,0.2)" }} />
-            {/* Chandelier drop from ceiling */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 flex flex-col items-center">
-              <div className="w-px bg-[#c9a84c]/30" style={{ height: 30 }} />
-              <div className="w-12 h-0.5 bg-[#c9a84c]/20 rounded-full" />
-              <div className="w-6 h-5 rounded-full border border-[#c9a84c]/30 flex items-center justify-center"
-                style={{ background: "rgba(201,168,76,0.08)", marginTop: 2 }}>
-                <div className="w-2 h-2 rounded-full" style={{ background: "#fff8c0", boxShadow: "0 0 14px 7px rgba(255,240,140,0.55)" }} />
+            {/* ████ CEILING ████ */}
+            <div className="absolute left-0 right-0 top-0"
+              style={{ height: "100%", transformOrigin: "top center", transform: "rotateX(-62deg)", background: "#100a04" }} />
+            {/* Ceiling light band */}
+            <div className="absolute left-1/2 top-0 -translate-x-1/2 pointer-events-none"
+              style={{ width: "35%", height: "100%", transformOrigin: "top center", transform: "rotateX(-62deg)", background: "linear-gradient(180deg,rgba(255,240,160,0.22) 0%,transparent 55%)" }} />
+
+            {/* ████ BACK WALL ████ — much brighter, clearer */}
+            <div
+              className="absolute left-0 right-0"
+              style={{
+                top: "10%", bottom: "10%",
+                transform: "translateZ(-460px)",
+                background: "linear-gradient(180deg,#2a1e10 0%,#3a2810 60%,#2a1e10 100%)",
+                borderTop: "2px solid rgba(201,168,76,0.20)",
+                borderBottom: "2px solid rgba(201,168,76,0.20)",
+              }}
+            >
+              {/* Wainscoting */}
+              <div className="absolute inset-x-0 bottom-0 h-1/4" style={{ borderTop: "1.5px solid rgba(201,168,76,0.15)", background: "rgba(0,0,0,0.25)" }} />
+              {/* Top cornice */}
+              <div className="absolute inset-x-0 top-0 h-4" style={{ background: "rgba(201,168,76,0.06)", borderBottom: "1px solid rgba(201,168,76,0.12)" }} />
+              {/* Chandelier */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 flex flex-col items-center">
+                <div className="w-px bg-[#c9a84c]/40" style={{ height: 32 }} />
+                <div className="w-14 h-0.5 bg-[#c9a84c]/25 rounded-full" />
+                <div className="w-7 h-6 rounded-full border border-[#c9a84c]/35 flex items-center justify-center mt-0.5"
+                  style={{ background: "rgba(201,168,76,0.10)" }}>
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#fff8c0", boxShadow: "0 0 18px 10px rgba(255,240,140,0.65)" }} />
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* ████ LEFT WALL ████ */}
-          <div
-            className="absolute top-0 bottom-0"
-            style={{
-              left: 0,
-              width: "50%",
-              transformOrigin: "left center",
-              transform: "rotateY(58deg)",
-              background: "linear-gradient(90deg,#0e0802 0%,#1a1208 100%)",
-              borderRight: "1.5px solid rgba(201,168,76,0.08)",
-            }}
-          >
-            {/* Wall trim */}
-            <div className="absolute inset-y-0 right-0 w-px bg-[#c9a84c]/15" />
-          </div>
+            {/* ████ LEFT WALL ████ */}
+            <div className="absolute top-0 bottom-0"
+              style={{ left: 0, width: "50%", transformOrigin: "left center", transform: "rotateY(58deg)", background: "linear-gradient(90deg,#0e0802 0%,#221508 100%)" }}>
+              <div className="absolute inset-y-0 right-0 w-px bg-[#c9a84c]/12" />
+            </div>
 
-          {/* ████ RIGHT WALL ████ */}
-          <div
-            className="absolute top-0 bottom-0"
-            style={{
-              right: 0,
-              width: "50%",
-              transformOrigin: "right center",
-              transform: "rotateY(-58deg)",
-              background: "linear-gradient(270deg,#0e0802 0%,#1a1208 100%)",
-              borderLeft: "1.5px solid rgba(201,168,76,0.08)",
-            }}
-          >
-            <div className="absolute inset-y-0 left-0 w-px bg-[#c9a84c]/15" />
+            {/* ████ RIGHT WALL ████ */}
+            <div className="absolute top-0 bottom-0"
+              style={{ right: 0, width: "50%", transformOrigin: "right center", transform: "rotateY(-58deg)", background: "linear-gradient(270deg,#0e0802 0%,#221508 100%)" }}>
+              <div className="absolute inset-y-0 left-0 w-px bg-[#c9a84c]/12" />
+            </div>
+
+            {/* ═══════════════════════════════════════════════════════
+                ROOM CONTENT — interactive elements
+            ═══════════════════════════════════════════════════════ */}
+
+            {/* ──────── LEFT WALL FRAME ──────── */}
+            <button
+              onClick={() => { setActiveWall("left"); setSelectedProp(prop1); }}
+              aria-label={`Explore ${prop1.name}`}
+              className="absolute focus:outline-none"
+              style={{
+                left: "1.5%", top: "14%", width: "22%", height: "58%",
+                transformOrigin: "left center",
+                transform: `rotateY(58deg) scale(${activeWall === "left" ? 1.04 : 1})`,
+                transition: "transform 0.4s cubic-bezier(0.22,1,0.36,1)",
+              }}
+            >
+              <WallFrame photos={p1Photos} currentPhoto={p1Img} property={prop1} label="Sector 57" active={activeWall === "left"} />
+            </button>
+
+            {/* ──────── RIGHT WALL FRAME ──────── */}
+            <button
+              onClick={() => { setActiveWall("right"); setSelectedProp(prop2); }}
+              aria-label={`Explore ${prop2.name}`}
+              className="absolute focus:outline-none"
+              style={{
+                right: "1.5%", top: "14%", width: "22%", height: "58%",
+                transformOrigin: "right center",
+                transform: `rotateY(-58deg) scale(${activeWall === "right" ? 1.04 : 1})`,
+                transition: "transform 0.4s cubic-bezier(0.22,1,0.36,1)",
+              }}
+            >
+              <WallFrame photos={p2Photos} currentPhoto={p2Img} property={prop2} label="Sector 39" active={activeWall === "right"} />
+            </button>
+
+            {/* ──────── BACK WALL — CENTER BOOKING STATION ──────── */}
+            <CenterWall prop1={prop1} prop2={prop2} thumbs={allThumbs} />
+
+            {/* ── Vignette ── */}
+            <div className="absolute inset-0 pointer-events-none"
+              style={{ background: "radial-gradient(ellipse 80% 70% at 50% 45%, transparent 0%, rgba(0,0,0,0.52) 100%)" }} />
+
+            {/* ── Warm floor glow ── */}
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 pointer-events-none"
+              style={{ width: "55%", height: "28%", background: "radial-gradient(ellipse at 50% 100%, rgba(201,168,76,0.09) 0%, transparent 70%)" }} />
           </div>
         </div>
 
-        {/* ═══════════════════════════════════════════════════════
-            ROOM CONTENT — flat layer on top of the 3D shell.
-            Uses perspective-aware positioning to feel "in" the room.
-            All interactive elements live here.
-        ═══════════════════════════════════════════════════════ */}
-        <div
-          className="absolute inset-0 overflow-hidden"
-          style={{ perspective: "900px", perspectiveOrigin: "50% 42%" }}
-        >
-
-          {/* ──────────────── LEFT WALL FRAME ──────────────── */}
-          <button
-            onClick={() => { setActiveWall("left"); setSelectedProp(prop1); }}
-            aria-label={`Explore ${prop1.name}`}
-            aria-pressed={activeWall === "left"}
-            className="absolute focus:outline-none group"
-            style={{
-              /* Position on the left wall surface */
-              left: "2%",
-              top: "15%",
-              width: "21%",
-              height: "55%",
-              transformOrigin: "left center",
-              transform: `rotateY(58deg) ${activeWall === "left" ? "scale(1.03)" : "scale(1)"}`,
-              transition: "transform 0.4s cubic-bezier(0.22,1,0.36,1)",
-            }}
-          >
-            <WallFrame
-              photos={p1Photos}
-              currentPhoto={p1Img}
-              property={prop1}
-              label="Sector 57"
-              active={activeWall === "left"}
-            />
-          </button>
-
-          {/* ──────────────── RIGHT WALL FRAME ──────────────── */}
-          <button
-            onClick={() => { setActiveWall("right"); setSelectedProp(prop2); }}
-            aria-label={`Explore ${prop2.name}`}
-            aria-pressed={activeWall === "right"}
-            className="absolute focus:outline-none group"
-            style={{
-              right: "2%",
-              top: "15%",
-              width: "21%",
-              height: "55%",
-              transformOrigin: "right center",
-              transform: `rotateY(-58deg) ${activeWall === "right" ? "scale(1.03)" : "scale(1)"}`,
-              transition: "transform 0.4s cubic-bezier(0.22,1,0.36,1)",
-            }}
-          >
-            <WallFrame
-              photos={p2Photos}
-              currentPhoto={p2Img}
-              property={prop2}
-              label="Sector 39"
-              active={activeWall === "right"}
-            />
-          </button>
-
-          {/* ──────────────── BACK WALL CONTENT ──────────────── */}
-          {/* Reception desk */}
-          <div
-            className="absolute left-1/2 -translate-x-1/2"
-            style={{
-              bottom: "14%",
-              width: "clamp(220px,34%,420px)",
-              transform: "translateX(-50%) translateZ(-240px) scale(0.88)",
-            }}
-          >
-            <ReceptionDesk
-              active={activeWall === "desk"}
-              onOpen={() => setActiveWall(activeWall === "desk" ? "none" : "desk")}
-            />
+        {/* ── HUD ── (outside the tilt so it stays fixed on screen) */}
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 pointer-events-none z-20">
+          <div className="flex items-center gap-2">
+            <div className="h-px w-6 bg-[#c9a84c]/30" />
+            <span className="text-[#c9a84c]/50 text-[9px] font-mono tracking-[0.3em] uppercase">Reception</span>
+            <div className="h-px w-6 bg-[#c9a84c]/30" />
           </div>
-
-          {/* Info boards — row above desk */}
-          <div
-            className="absolute left-1/2 -translate-x-1/2"
-            style={{
-              bottom: "48%",
-              width: "clamp(280px,44%,540px)",
-              transform: "translateX(-50%) translateZ(-240px) scale(0.88)",
-            }}
-          >
-            <div className="flex gap-2">
-              <HowItWorksBoard />
-              <GuestReviewsBoard />
-              <HostsBoard />
-            </div>
-          </div>
-
-          {/* Heading HUD — top center */}
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 pointer-events-none">
-            <div className="flex items-center gap-2">
-              <div className="h-px w-6 bg-[#c9a84c]/30" />
-              <span className="text-[#c9a84c]/50 text-[9px] font-mono tracking-[0.3em] uppercase">Reception</span>
-              <div className="h-px w-6 bg-[#c9a84c]/30" />
-            </div>
-            <p className="font-display text-white/75 text-sm md:text-base" style={{ letterSpacing: "0.04em" }}>
-              The Mehmaan Manor
-            </p>
-          </div>
-
-          {/* Wall hint labels */}
-          {activeWall === "none" && (
-            <>
-              <div
-                className="absolute pointer-events-none manor-pop-in"
-                style={{ left: "3%", top: "72%", transform: "rotateY(58deg)", transformOrigin: "left center" }}
-              >
-                <span className="text-[#c9a84c]/55 text-[9px] font-mono tracking-widest whitespace-nowrap">← Tap wall to explore</span>
-              </div>
-              <div
-                className="absolute pointer-events-none manor-pop-in"
-                style={{ right: "3%", top: "72%", transform: "rotateY(-58deg)", transformOrigin: "right center" }}
-              >
-                <span className="text-[#c9a84c]/55 text-[9px] font-mono tracking-widest whitespace-nowrap">Tap wall to explore →</span>
-              </div>
-            </>
-          )}
+          <p className="font-display text-white/70 text-sm md:text-base" style={{ letterSpacing: "0.04em" }}>
+            The Mehmaan Manor
+          </p>
         </div>
 
-        {/* ── Vignette overlay — darkens edges for room feel ── */}
-        <div
-          className="absolute inset-0 pointer-events-none z-10"
-          style={{ background: "radial-gradient(ellipse 75% 65% at 50% 45%, transparent 0%, rgba(0,0,0,0.55) 100%)" }}
-        />
+        {/* Wall tap hints */}
+        {activeWall === "none" && entered && (
+          <>
+            <div className="absolute pointer-events-none z-20 manor-pop-in"
+              style={{ left: "3.5%", bottom: "28%", transform: "rotateY(58deg)", transformOrigin: "left center" }}>
+              <span className="text-[#c9a84c]/50 text-[9px] font-mono tracking-widest whitespace-nowrap">← Sector 57</span>
+            </div>
+            <div className="absolute pointer-events-none z-20 manor-pop-in"
+              style={{ right: "3.5%", bottom: "28%", transform: "rotateY(-58deg)", transformOrigin: "right center" }}>
+              <span className="text-[#c9a84c]/50 text-[9px] font-mono tracking-widest whitespace-nowrap">Sector 39 →</span>
+            </div>
+          </>
+        )}
 
-        {/* ── Warm floor light ── */}
-        <div
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 pointer-events-none z-10"
-          style={{ width: "50%", height: "25%", background: "radial-gradient(ellipse at 50% 100%, rgba(201,168,76,0.08) 0%, transparent 70%)" }}
-        />
+        {/* Mouse-look hint */}
+        {entered && !welcomed && (
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-none z-20 manor-pop-in">
+            <span className="text-[#c9a84c]/35 text-[9px] font-mono tracking-widest">↕ Move mouse to look around</span>
+          </div>
+        )}
 
-        {/* ── Hint footer ── */}
-        <div
-          className="absolute bottom-0 left-0 right-0 z-20 py-2.5 px-4 text-center pointer-events-none"
-          style={{ background: "linear-gradient(0deg,rgba(5,4,2,0.90) 0%,transparent 100%)" }}
-        >
-          <p className="text-[#c9a84c]/35 text-[10px] font-mono tracking-widest">
-            Left wall: Sector 57 · Right wall: Sector 39 · Center: Book now
+        {/* Footer hint */}
+        <div className="absolute bottom-0 left-0 right-0 z-20 py-2.5 px-4 text-center pointer-events-none"
+          style={{ background: "linear-gradient(0deg,rgba(5,4,2,0.88) 0%,transparent 100%)" }}>
+          <p className="text-[#c9a84c]/30 text-[9px] font-mono tracking-widest">
+            Left: Sector 57 · Center: Book Now · Right: Sector 39
           </p>
         </div>
 
         <ExitBtn onClick={onClose} />
       </div>
 
-      {/* Property modal (above everything) */}
+      {/* ── Host welcome ── */}
+      {entered && !welcomed && (
+        <HostWelcome onDone={() => setWelcomed(true)} />
+      )}
+
+      {/* ── Property modal ── */}
       {selectedProp && (
-        <PropertyModal
-          prop={selectedProp}
-          onClose={() => { setSelectedProp(null); setActiveWall("none"); }}
-        />
+        <PropertyModal prop={selectedProp} onClose={() => { setSelectedProp(null); setActiveWall("none"); }} />
       )}
     </>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════
+   CENTER WALL — large Book Now frame + 4 surrounding
+   property thumbnails
+══════════════════════════════════════════════════════════ */
+function CenterWall({
+  prop1,
+  prop2,
+  thumbs,
+}: {
+  prop1: ManorProperty;
+  prop2: ManorProperty;
+  thumbs: string[];
+}) {
+  const labels = ["Sector 57 · Bedroom", "Sector 57 · Living", "Sector 39 · Studio", "Sector 39 · Kitchen"];
+  // 4 small frames arranged: top-left, top-right, bottom-left, bottom-right
+  // Big booking frame in the center
+
+  return (
+    <div
+      className="absolute left-1/2 -translate-x-1/2"
+      style={{
+        top: "12%",
+        bottom: "16%",
+        width: "clamp(260px,36%,460px)",
+        transform: "translateX(-50%) translateZ(-460px)",
+      }}
+    >
+      {/* ── Gold title above ── */}
+      <div className="flex items-center justify-center gap-3 mb-2">
+        <div className="h-px flex-1 bg-[#c9a84c]/25" />
+        <span className="text-[#c9a84c] text-[9px] font-mono tracking-[0.28em] uppercase">The Manor · Book Direct</span>
+        <div className="h-px flex-1 bg-[#c9a84c]/25" />
+      </div>
+
+      {/* ── Grid: 4 thumb frames + 1 center ── */}
+      {/* Layout:
+          [thumb 0] [BOOK NOW] [thumb 1]
+          [thumb 2] [BOOK NOW] [thumb 3]
+        The BOOK NOW spans 2 rows in the middle column
+      */}
+      <div
+        className="grid gap-2 h-full"
+        style={{ gridTemplateColumns: "1fr 1.7fr 1fr", gridTemplateRows: "1fr 1fr" }}
+      >
+        {/* Top-left thumbnail */}
+        <ThumbFrame src={thumbs[0]} label={labels[0]} row="1" col="1" />
+
+        {/* LARGE center booking frame — spans both rows */}
+        <div
+          className="row-span-2 col-start-2 col-end-3 flex flex-col rounded-xl overflow-hidden"
+          style={{
+            border: "2px solid rgba(201,168,76,0.55)",
+            background: "linear-gradient(180deg,#1e1408 0%,#2e1e0c 100%)",
+            boxShadow: "0 0 40px rgba(201,168,76,0.22), inset 0 1px 0 rgba(201,168,76,0.15)",
+          }}
+        >
+          {/* Top band */}
+          <div className="px-3 py-2 border-b border-[#c9a84c]/15 text-center">
+            <p className="text-[#c9a84c] text-[8px] font-mono tracking-[0.25em] uppercase">Reception Desk</p>
+            <p className="font-display text-[#f5f0e8]/90 text-sm mt-0.5">The Mehmaan Manor</p>
+          </div>
+
+          {/* Hosts row */}
+          <div className="flex items-center justify-center gap-3 py-2 border-b border-[#c9a84c]/10">
+            <span className="text-base select-none">👩‍💼</span>
+            <div className="text-center">
+              <p className="text-[#f5f0e8]/70 text-[9px] font-semibold">Simran & Jyoti</p>
+              <div className="flex items-center justify-center gap-1 mt-0.5">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#4caf6e] opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#4caf6e]" />
+                </span>
+                <span className="text-[#4caf6e]/60 text-[8px] font-mono">Online</span>
+              </div>
+            </div>
+            <span className="text-base select-none">👩‍🍳</span>
+          </div>
+
+          {/* Booking options — big clear buttons */}
+          <div className="flex-1 flex flex-col gap-2 p-3 justify-center">
+            <Link
+              href="/book"
+              className="flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs transition-all active:scale-[0.97] focus:outline-none focus:ring-2 focus:ring-[#c9a84c]"
+              style={{
+                background: "linear-gradient(135deg,#c9a84c 0%,#e8d080 50%,#c9a84c 100%)",
+                color: "#1a0a00",
+                boxShadow: "0 4px 18px rgba(201,168,76,0.40)",
+                backgroundSize: "200% 100%",
+              }}
+            >
+              📅 Book Now · No Fees
+            </Link>
+            <a
+              href="https://wa.me/918828352311?text=Hi!%20I%27d%20like%20to%20book%20at%20The%20Mehmaan%20Manor."
+              target="_blank" rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-xs border-2 border-[#4caf6e]/50 text-[#4caf6e] hover:bg-[#4caf6e] hover:text-white transition-all active:scale-[0.97] focus:outline-none focus:ring-2 focus:ring-[#4caf6e]"
+            >
+              💬 WhatsApp Simran
+            </a>
+            <Link
+              href="/homes"
+              className="flex items-center justify-center gap-2 py-2 rounded-xl text-[10px] font-mono text-[#f5f0e8]/45 hover:text-[#c9a84c] border border-[#f5f0e8]/8 hover:border-[#c9a84c]/30 transition-all"
+            >
+              🏠 Browse All Homes
+            </Link>
+          </div>
+
+          {/* Trust strip */}
+          <div className="px-3 pb-3">
+            <div className="flex items-center justify-center gap-3 pt-2 border-t border-[#c9a84c]/10">
+              {["No fees", "Free cancel", "Direct"].map(b => (
+                <span key={b} className="flex items-center gap-1 text-[#f5f0e8]/30 text-[8px]">
+                  <span className="text-[#c9a84c]/50">✓</span>{b}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Top-right thumbnail */}
+        <ThumbFrame src={thumbs[1]} label={labels[1]} row="1" col="3" />
+
+        {/* Bottom-left thumbnail */}
+        <ThumbFrame src={thumbs[2]} label={labels[2]} row="2" col="1" />
+
+        {/* Bottom-right thumbnail */}
+        <ThumbFrame src={thumbs[3]} label={labels[3]} row="2" col="3" />
+      </div>
+    </div>
+  );
+}
+
+/* ── Small thumbnail frame ─────────────────────────────── */
+function ThumbFrame({ src, label, row, col }: { src: string; label: string; row: string; col: string }) {
+  return (
+    <div
+      className="relative rounded-lg overflow-hidden"
+      style={{
+        gridRow: row,
+        gridColumn: col,
+        border: "1.5px solid rgba(201,168,76,0.25)",
+        boxShadow: "inset 0 0 0 3px rgba(201,168,76,0.06)",
+      }}
+    >
+      <img src={src} alt={label} loading="lazy" className="w-full h-full object-cover" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+      {/* Gold corner ornaments */}
+      <div className="absolute top-1 left-1 w-2.5 h-2.5 pointer-events-none"
+        style={{ borderTop: "1.5px solid rgba(201,168,76,0.6)", borderLeft: "1.5px solid rgba(201,168,76,0.6)" }} />
+      <div className="absolute top-1 right-1 w-2.5 h-2.5 pointer-events-none"
+        style={{ borderTop: "1.5px solid rgba(201,168,76,0.6)", borderRight: "1.5px solid rgba(201,168,76,0.6)" }} />
+      <div className="absolute bottom-1 left-1 w-2.5 h-2.5 pointer-events-none"
+        style={{ borderBottom: "1.5px solid rgba(201,168,76,0.6)", borderLeft: "1.5px solid rgba(201,168,76,0.6)" }} />
+      <div className="absolute bottom-1 right-1 w-2.5 h-2.5 pointer-events-none"
+        style={{ borderBottom: "1.5px solid rgba(201,168,76,0.6)", borderRight: "1.5px solid rgba(201,168,76,0.6)" }} />
+      <span className="absolute bottom-1.5 left-0 right-0 text-center text-white/70 text-[8px] font-mono">{label}</span>
+    </div>
   );
 }
 
