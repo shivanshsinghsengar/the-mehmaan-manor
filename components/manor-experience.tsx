@@ -3,22 +3,35 @@
 /**
  * ManorExperience — "Enter the Manor Experience"
  *
- * Phase flow:
- *   idle → intro (text animation) → exterior (building view) → entering (zoom) → interior (scrollable reception)
+ * Full phase flow (website disappears completely on start):
  *
- * Interior layout (scrollable, works on mobile & desktop):
- *   - Top: scene header bar  
- *   - Section A: Property walls (left = Sector 57, right = Sector 39) — side by side cards
- *   - Section B: Reception desk — Book Now / WhatsApp / Browse
- *   - Section C: Three info boards in a row — How it Works · Guest Reviews · Meet Your Hosts
- *   - Footer hint bar
+ *   idle
+ *     └─ click button
+ *   blackout   (0.5s full-screen fade to black)
+ *     └─ auto
+ *   intro      ("The Mehmaan Manor" + "Feel like Mehmaan" on dark bg)
+ *     └─ auto ~6 s
+ *   exterior   (first-person outdoor view of the Manor building)
+ *     └─ click building / door
+ *   entering   (camera walk-in animation through the door — 1.8 s)
+ *     └─ auto
+ *   interior   (true first-person 3D room: left wall, back wall, right wall,
+ *               floor, ceiling — perspective transform. Property photo frames
+ *               on walls. Reception desk centre-back. Info boards near desk.)
+ *     └─ exit button → idle
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 
-/* ─── Types ─────────────────────────────────────────────────── */
-type Phase = "idle" | "intro" | "exterior" | "entering" | "interior";
+/* ─── types ──────────────────────────────────────────────── */
+type Phase =
+  | "idle"
+  | "blackout"
+  | "intro"
+  | "exterior"
+  | "entering"
+  | "interior";
 
 export interface ManorProperty {
   id: string;
@@ -28,36 +41,64 @@ export interface ManorProperty {
   address: string;
 }
 
-/* ─── Utility ────────────────────────────────────────────────── */
+/* ─── tiny helpers ───────────────────────────────────────── */
 function cn(...c: (string | boolean | undefined | null)[]) {
   return c.filter(Boolean).join(" ");
 }
 
-/* ─────────────────────────────────────────────────────────────
-   SHARED — Close / Exit button
-───────────────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   EXIT BUTTON  — always visible during experience
+══════════════════════════════════════════════════════════ */
 function ExitBtn({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
       aria-label="Exit experience and return to website"
-      className="fixed top-4 right-4 z-[9999] inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white/80 hover:text-white hover:bg-black/70 text-xs font-mono tracking-wide transition-all select-none focus:outline-none focus:ring-2 focus:ring-white/40"
+      className="fixed top-4 right-4 z-[10000] inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-mono tracking-wide transition-all select-none focus:outline-none focus:ring-2 focus:ring-white/50"
+      style={{
+        background: "rgba(0,0,0,0.55)",
+        backdropFilter: "blur(10px)",
+        border: "1px solid rgba(255,255,255,0.12)",
+        color: "rgba(255,255,255,0.8)",
+      }}
     >
-      <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true">
-        <path d="M1 1l8 8M9 1L1 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <svg width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden="true">
+        <path d="M1 1l7 7M8 1L1 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
       </svg>
-      Exit
+      Exit Experience
     </button>
   );
 }
 
-/* ─────────────────────────────────────────────────────────────
-   PHASE 1 — INTRO TEXT
+/* ══════════════════════════════════════════════════════════
+   PHASE: BLACKOUT  (screen goes to black on click)
+══════════════════════════════════════════════════════════ */
+function BlackoutScreen({ onDone }: { onDone: () => void }) {
+  const [opacity, setOpacity] = useState(0);
+
+  useEffect(() => {
+    // Ramp to full black then proceed
+    const t1 = setTimeout(() => setOpacity(1), 30);
+    const t2 = setTimeout(() => onDone(), 550);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [onDone]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[9990] bg-black pointer-events-none"
+      style={{ opacity, transition: "opacity 0.45s ease-in" }}
+      aria-hidden="true"
+    />
+  );
+}
+
+/* ══════════════════════════════════════════════════════════
+   PHASE: INTRO TEXT
    "The Mehmaan Manor"  →  "Feel like Mehmaan"
-───────────────────────────────────────────────────────────── */
+══════════════════════════════════════════════════════════ */
 function IntroScreen({ onDone }: { onDone: () => void }) {
   const [lineIdx, setLineIdx] = useState(0);
-  const [stage, setStage] = useState<"in" | "hold" | "out">("in");
+  const [vis,     setVis]     = useState<"in" | "hold" | "out">("in");
 
   const lines = [
     { heading: "The Mehmaan Manor", sub: "Gurugram · Haryana · India" },
@@ -65,146 +106,156 @@ function IntroScreen({ onDone }: { onDone: () => void }) {
   ];
 
   useEffect(() => {
-    const seq: [number, () => void][] = [
-      [850,  () => setStage("hold")],
-      [2200, () => setStage("out")],
-      [2950, () => { setLineIdx(1); setStage("in"); }],
-      [3800, () => setStage("hold")],
-      [5100, () => setStage("out")],
-      [5900, () => onDone()],
+    const T = (ms: number, fn: () => void) => setTimeout(fn, ms);
+    const ids = [
+      T(800,  () => setVis("hold")),
+      T(2100, () => setVis("out")),
+      T(2800, () => { setLineIdx(1); setVis("in"); }),
+      T(3600, () => setVis("hold")),
+      T(4900, () => setVis("out")),
+      T(5600, () => onDone()),
     ];
-    const ids = seq.map(([ms, fn]) => setTimeout(fn, ms));
     return () => ids.forEach(clearTimeout);
   }, [onDone]);
 
-  const current = lines[lineIdx];
+  const line = lines[lineIdx];
 
   return (
     <div
-      className="fixed inset-0 z-[9990] flex items-center justify-center overflow-hidden"
-      style={{ background: "linear-gradient(135deg,#0a1a14 0%,#1a3328 55%,#0d1f1a 100%)" }}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Manor experience intro"
+      className="fixed inset-0 z-[9991] flex items-center justify-center overflow-hidden"
+      style={{ background: "#050c09" }}
     >
-      {/* Ambient radial glow */}
+      {/* soft gold glow */}
       <div
         className="absolute inset-0 pointer-events-none"
-        style={{ background: "radial-gradient(ellipse 70% 50% at 50% 60%, rgba(201,168,76,0.10) 0%, transparent 70%)" }}
+        style={{ background: "radial-gradient(ellipse 60% 40% at 50% 55%, rgba(201,168,76,0.12) 0%, transparent 70%)" }}
       />
 
-      {/* Floating dust particles */}
+      {/* floating particles */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
-        {Array.from({ length: 18 }).map((_, i) => (
+        {Array.from({ length: 20 }).map((_, i) => (
           <span
             key={i}
-            className="absolute rounded-full bg-[#c9a84c]"
+            className="absolute rounded-full"
             style={{
               width: 2 + (i % 3),
               height: 2 + (i % 3),
-              opacity: 0.12 + (i % 4) * 0.06,
-              left: `${5 + i * 5.2}%`,
-              top: `${15 + (i % 5) * 14}%`,
-              animation: `manorFloat ${2.8 + (i % 4) * 0.7}s ease-in-out ${i * 0.35}s infinite alternate`,
+              background: "#c9a84c",
+              opacity: 0.08 + (i % 4) * 0.05,
+              left: `${4 + i * 4.7}%`,
+              top: `${10 + (i % 6) * 13}%`,
+              animation: `manorFloat ${2.5 + (i % 4) * 0.8}s ease-in-out ${i * 0.3}s infinite alternate`,
             }}
           />
         ))}
       </div>
 
-      {/* Text block */}
+      {/* text block */}
       <div
         key={lineIdx}
         className={cn(
-          "relative text-center px-6 max-w-2xl w-full manor-intro-text",
-          stage === "in"   && "manor-intro-fadein",
-          stage === "hold" && "manor-intro-hold",
-          stage === "out"  && "manor-intro-fadeout",
+          "relative text-center px-6 max-w-2xl",
+          "manor-intro-text",
+          vis === "in"   && "manor-intro-fadein",
+          vis === "hold" && "manor-intro-hold",
+          vis === "out"  && "manor-intro-fadeout",
         )}
       >
-        {/* Gold rule */}
+        {/* top rule */}
         <div className="flex items-center justify-center gap-4 mb-8">
-          <div className="h-px flex-1 max-w-[80px] bg-gradient-to-r from-transparent to-[#c9a84c]/60" />
-          <span className="text-[#c9a84c] text-sm select-none">◆</span>
-          <div className="h-px flex-1 max-w-[80px] bg-gradient-to-l from-transparent to-[#c9a84c]/60" />
+          <div className="h-px w-16 bg-gradient-to-r from-transparent to-[#c9a84c]/50" />
+          <span className="text-[#c9a84c] text-xs select-none">◆</span>
+          <div className="h-px w-16 bg-gradient-to-l from-transparent to-[#c9a84c]/50" />
         </div>
 
         <h2
-          className="font-display text-white font-light"
-          style={{ fontSize: "clamp(2.2rem, 7vw, 5rem)", letterSpacing: "0.04em", lineHeight: 1.1 }}
+          className="font-display text-white font-light tracking-wide"
+          style={{ fontSize: "clamp(2.4rem, 8vw, 5.5rem)", lineHeight: 1.05 }}
         >
-          {current.heading}
+          {line.heading}
         </h2>
-
-        <p className="mt-5 text-[#c9a84c]/75 font-mono text-sm tracking-[0.28em] uppercase">
-          {current.sub}
+        <p className="mt-5 font-mono text-sm tracking-[0.3em] uppercase text-[#c9a84c]/70">
+          {line.sub}
         </p>
 
-        {/* Bottom rule */}
-        <div className="flex items-center justify-center gap-4 mt-8">
-          <div className="h-px flex-1 max-w-[60px] bg-gradient-to-r from-transparent to-[#c9a84c]/30" />
-          <div className="h-1 w-1 rounded-full bg-[#c9a84c]/40" />
-          <div className="h-px flex-1 max-w-[60px] bg-gradient-to-l from-transparent to-[#c9a84c]/30" />
+        {/* bottom rule */}
+        <div className="flex items-center justify-center gap-3 mt-8">
+          <div className="h-px w-10 bg-gradient-to-r from-transparent to-[#c9a84c]/25" />
+          <div className="h-1 w-1 rounded-full bg-[#c9a84c]/30" />
+          <div className="h-px w-10 bg-gradient-to-l from-transparent to-[#c9a84c]/25" />
         </div>
       </div>
     </div>
   );
 }
 
-/* ─────────────────────────────────────────────────────────────
-   PHASE 2 — EXTERIOR  (first-person building view)
-───────────────────────────────────────────────────────────── */
-function ExteriorScreen({ onEnter, onClose }: { onEnter: () => void; onClose: () => void }) {
+/* ══════════════════════════════════════════════════════════
+   PHASE: EXTERIOR  (first-person outdoor view)
+══════════════════════════════════════════════════════════ */
+function ExteriorScreen({
+  onEnter,
+  onClose,
+}: {
+  onEnter: () => void;
+  onClose: () => void;
+}) {
   const [hovered, setHovered] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const [visible, setVisible] = useState(false);
 
-  useEffect(() => { const t = setTimeout(() => setMounted(true), 60); return () => clearTimeout(t); }, []);
+  useEffect(() => {
+    const t = setTimeout(() => setVisible(true), 60);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
     <div
-      className={cn("fixed inset-0 z-[9990] overflow-hidden transition-opacity duration-700", mounted ? "opacity-100" : "opacity-0")}
+      className="fixed inset-0 z-[9991] overflow-hidden"
+      style={{
+        opacity: visible ? 1 : 0,
+        transition: "opacity 0.7s ease",
+        background: "linear-gradient(180deg,#6fa8cf 0%,#aed4ea 22%,#c8e6c0 55%,#7aaa6a 100%)",
+      }}
       role="dialog"
       aria-modal="true"
-      aria-label="The Mehmaan Manor exterior"
+      aria-label="Mehmaan Manor exterior — click to enter"
     >
-      {/* Sky */}
-      <div className="absolute inset-0" style={{ background: "linear-gradient(180deg,#7ab0d4 0%,#b8d9ef 28%,#d6ecd3 58%,#7ca86c 100%)" }} />
-
-      {/* Subtle cloud streaks */}
-      <div className="absolute top-[8%] left-[5%] w-[30%] h-[3%] rounded-full bg-white/25 blur-sm pointer-events-none" />
-      <div className="absolute top-[14%] right-[8%] w-[22%] h-[2.5%] rounded-full bg-white/20 blur-sm pointer-events-none" />
-      <div className="absolute top-[6%] left-[45%] w-[18%] h-[2%] rounded-full bg-white/18 blur-sm pointer-events-none" />
-
-      {/* Ground */}
-      <div className="absolute bottom-0 left-0 right-0" style={{ height: "30%", background: "linear-gradient(180deg,#7ca86c 0%,#4a6e3a 100%)" }} />
-
-      {/* Stone path */}
-      <div
-        className="absolute bottom-0 left-1/2 -translate-x-1/2"
-        style={{
-          width: "clamp(70px,11vw,130px)",
-          height: "34%",
-          background: "linear-gradient(180deg,#c8b990 0%,#a09070 100%)",
-          clipPath: "polygon(12% 0%,88% 0%,100% 100%,0% 100%)",
-        }}
-      />
-      {/* Path stones */}
-      {[30, 55, 78].map((pct) => (
+      {/* Clouds */}
+      {[
+        { top: "7%",  left: "8%",  w: "28%", op: 0.22 },
+        { top: "12%", left: "55%", w: "20%", op: 0.18 },
+        { top: "5%",  left: "35%", w: "16%", op: 0.16 },
+      ].map((c, i) => (
         <div
-          key={pct}
-          className="absolute left-1/2 -translate-x-1/2 h-px pointer-events-none"
-          style={{
-            bottom: `${pct * 0.32}%`,
-            width: `clamp(40px,7vw,90px)`,
-            background: "rgba(80,60,30,0.25)",
-          }}
+          key={i}
+          className="absolute rounded-full blur-sm pointer-events-none"
+          style={{ top: c.top, left: c.left, width: c.w, height: "3%", background: `rgba(255,255,255,${c.op})` }}
         />
       ))}
 
-      {/* Trees */}
-      <Trees side="left" />
-      <Trees side="right" />
+      {/* Ground */}
+      <div
+        className="absolute bottom-0 left-0 right-0 pointer-events-none"
+        style={{ height: "30%", background: "linear-gradient(180deg,#7aaa6a 0%,#4d7840 100%)" }}
+      />
 
-      {/* Building — clickable */}
+      {/* Stone path */}
+      <div
+        className="absolute bottom-0 left-1/2"
+        style={{
+          transform: "translateX(-50%)",
+          width: "clamp(60px,10vw,120px)",
+          height: "33%",
+          background: "linear-gradient(180deg,#c8b890 0%,#9a8c6a 100%)",
+          clipPath: "polygon(10% 0%,90% 0%,100% 100%,0% 100%)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* Trees */}
+      <TreesExt side="left" />
+      <TreesExt side="right" />
+
+      {/* ── Building (clickable) ── */}
       <button
         onClick={onEnter}
         onMouseEnter={() => setHovered(true)}
@@ -212,35 +263,31 @@ function ExteriorScreen({ onEnter, onClose }: { onEnter: () => void; onClose: ()
         onFocus={() => setHovered(true)}
         onBlur={() => setHovered(false)}
         aria-label="Click to enter the Manor"
-        className="absolute left-1/2 bottom-[25%] focus:outline-none"
+        className="absolute left-1/2 bottom-[26%] focus:outline-none"
         style={{
-          width: "clamp(220px,40vw,500px)",
-          transform: `translateX(-50%) scale(${hovered ? 1.025 : 1})`,
-          transition: "transform 0.55s cubic-bezier(0.22,1,0.36,1)",
+          width: "clamp(200px,38vw,480px)",
+          transform: `translateX(-50%) scale(${hovered ? 1.03 : 1})`,
+          transition: "transform 0.5s cubic-bezier(0.22,1,0.36,1)",
         }}
       >
-        <ManorBuildingSVG hovered={hovered} />
+        <BuildingSVG hovered={hovered} />
 
-        {/* Enter prompt */}
+        {/* Click prompt */}
         <div
-          className="mt-3 flex items-center justify-center gap-2"
-          style={{
-            opacity: hovered ? 1 : 0.55,
-            transform: `translateY(${hovered ? 0 : 4}px)`,
-            transition: "opacity 0.35s ease, transform 0.35s ease",
-          }}
+          className="mt-3 flex justify-center"
+          style={{ opacity: visible ? 1 : 0, transition: "opacity 1.2s ease 0.8s" }}
         >
           <span
-            className="text-xs font-mono tracking-widest px-4 py-2 rounded-full"
+            className="px-5 py-2 rounded-full text-xs font-mono tracking-widest"
             style={{
-              background: hovered ? "rgba(26,51,40,0.85)" : "rgba(0,0,0,0.35)",
-              color: hovered ? "#c9a84c" : "rgba(255,255,255,0.7)",
+              background: hovered ? "rgba(26,51,40,0.90)" : "rgba(0,0,0,0.38)",
+              color: hovered ? "#c9a84c" : "rgba(255,255,255,0.75)",
+              border: `1px solid ${hovered ? "rgba(201,168,76,0.45)" : "rgba(255,255,255,0.18)"}`,
               backdropFilter: "blur(8px)",
-              border: hovered ? "1px solid rgba(201,168,76,0.4)" : "1px solid rgba(255,255,255,0.15)",
-              transition: "all 0.35s ease",
+              transition: "all 0.3s ease",
             }}
           >
-            {hovered ? "✦  Click to Enter  ✦" : "↑  Step inside the Manor"}
+            {hovered ? "✦  Click to Enter the Manor  ✦" : "↑  Step inside the Manor"}
           </span>
         </div>
       </button>
@@ -248,13 +295,16 @@ function ExteriorScreen({ onEnter, onClose }: { onEnter: () => void; onClose: ()
       {/* Horizon line */}
       <div
         className="absolute left-0 right-0 h-px pointer-events-none"
-        style={{ bottom: "30%", background: "linear-gradient(90deg,transparent,rgba(60,90,50,0.5),transparent)" }}
+        style={{ bottom: "30%", background: "linear-gradient(90deg,transparent,rgba(50,80,40,0.4),transparent)" }}
       />
 
-      {/* Location HUD */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2">
-        <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-black/30 backdrop-blur-sm border border-white/10 text-white/65 text-[11px] font-mono tracking-widest">
-          <span className="text-sm">📍</span> Gurugram · Haryana · India
+      {/* Location pill */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none">
+        <span
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[11px] font-mono tracking-widest"
+          style={{ background: "rgba(0,0,0,0.28)", backdropFilter: "blur(8px)", color: "rgba(255,255,255,0.65)", border: "1px solid rgba(255,255,255,0.1)" }}
+        >
+          📍 Gurugram · Haryana · India
         </span>
       </div>
 
@@ -263,127 +313,98 @@ function ExteriorScreen({ onEnter, onClose }: { onEnter: () => void; onClose: ()
   );
 }
 
-/* ── Building SVG illustration ──────────────────────────────── */
-function ManorBuildingSVG({ hovered }: { hovered: boolean }) {
-  const winFill  = hovered ? "#f8eecc" : "#dac89a";
-  const winGlow  = hovered ? "rgba(255,236,150,0.35)" : "transparent";
+/* ── Building SVG ──────────────────────────────────────── */
+function BuildingSVG({ hovered }: { hovered: boolean }) {
+  const wf = hovered ? "#f5e8b8" : "#d8c090";
+  const wg = hovered ? "rgba(255,230,130,0.30)" : "transparent";
 
   return (
-    <svg viewBox="0 0 520 370" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full drop-shadow-2xl" aria-hidden="true">
-      {/* Main facade */}
-      <rect x="55" y="55" width="410" height="305" rx="3" fill="#ede4cf" stroke="#c8b88a" strokeWidth="1.5" />
-
-      {/* Facade courses */}
-      {[105,155,205,255,305,355].map(y => (
-        <line key={y} x1="55" y1={y} x2="465" y2={y} stroke="#c8b88a" strokeWidth="0.7" />
+    <svg viewBox="0 0 520 360" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full drop-shadow-2xl" aria-hidden="true">
+      {/* Body */}
+      <rect x="50" y="52" width="420" height="300" rx="3" fill="#ede2c8" stroke="#c8b07a" strokeWidth="1.5" />
+      {/* Courses */}
+      {[100,148,196,244,292,340].map(y=>(
+        <line key={y} x1="50" y1={y} x2="470" y2={y} stroke="#c8b07a" strokeWidth="0.7"/>
       ))}
-
       {/* Parapet */}
-      <rect x="42" y="40" width="436" height="20" rx="2" fill="#d8c99e" stroke="#b8a87c" strokeWidth="1.5" />
-      {[72,112,152,192,232,272,312,352,392,432].map(x => (
-        <rect key={x} x={x} y="42" width="12" height="9" rx="1" fill="#b8a87c" />
+      <rect x="36" y="36" width="448" height="22" rx="2" fill="#d8c490" stroke="#b8a068" strokeWidth="1.5"/>
+      {[66,106,146,186,226,266,306,346,386,426].map(x=>(
+        <rect key={x} x={x} y="38" width="12" height="10" rx="1" fill="#b8a068"/>
       ))}
-
-      {/* Windows row 1 */}
-      {[80,165,310,395].map(x => (
-        <g key={`w1-${x}`}>
-          <rect x={x} y="75" width="58" height="62" rx="2" fill={winFill} stroke="#b8a87c" strokeWidth="1.2" />
-          {hovered && <rect x={x} y="75" width="58" height="62" rx="2" fill={winGlow} />}
-          <line x1={x+29} y1="75" x2={x+29} y2={137} stroke="#b8a87c" strokeWidth="0.7" />
-          <line x1={x}    y1={106} x2={x+58} y2={106} stroke="#b8a87c" strokeWidth="0.7" />
+      {/* Win row 1 */}
+      {[75,162,308,395].map(x=>(
+        <g key={`a${x}`}>
+          <rect x={x} y="72" width="58" height="60" rx="2" fill={wf} stroke="#b8a068" strokeWidth="1.2"/>
+          {hovered&&<rect x={x} y="72" width="58" height="60" rx="2" fill={wg}/>}
+          <line x1={x+29} y1="72" x2={x+29} y2={132} stroke="#b8a068" strokeWidth="0.7"/>
+          <line x1={x}    y1={102} x2={x+58} y2={102} stroke="#b8a068" strokeWidth="0.7"/>
         </g>
       ))}
-
-      {/* Windows row 2 */}
-      {[80,165,310,395].map(x => (
-        <g key={`w2-${x}`}>
-          <rect x={x} y="160" width="58" height="62" rx="2" fill={winFill} stroke="#b8a87c" strokeWidth="1.2" />
-          {hovered && <rect x={x} y="160" width="58" height="62" rx="2" fill={winGlow} />}
-          <line x1={x+29} y1="160" x2={x+29} y2={222} stroke="#b8a87c" strokeWidth="0.7" />
-          <line x1={x}    y1={191} x2={x+58} y2={191} stroke="#b8a87c" strokeWidth="0.7" />
+      {/* Win row 2 */}
+      {[75,162,308,395].map(x=>(
+        <g key={`b${x}`}>
+          <rect x={x} y="158" width="58" height="60" rx="2" fill={wf} stroke="#b8a068" strokeWidth="1.2"/>
+          {hovered&&<rect x={x} y="158" width="58" height="60" rx="2" fill={wg}/>}
+          <line x1={x+29} y1="158" x2={x+29} y2={218} stroke="#b8a068" strokeWidth="0.7"/>
+          <line x1={x}    y1={188} x2={x+58} y2={188} stroke="#b8a068" strokeWidth="0.7"/>
         </g>
       ))}
-
-      {/* Windows row 3 (flanking door) */}
-      {[80,165,310,395].map(x => (
-        <g key={`w3-${x}`}>
-          <rect x={x} y="248" width="58" height="48" rx="2" fill={hovered ? "#e8d080" : "#cdb878"} stroke="#b8a87c" strokeWidth="1.2" />
-          {hovered && <rect x={x} y="248" width="58" height="48" rx="2" fill="rgba(255,236,120,0.25)" />}
-          <line x1={x+29} y1="248" x2={x+29} y2={296} stroke="#b8a87c" strokeWidth="0.7" />
+      {/* Win row 3 */}
+      {[75,162,308,395].map(x=>(
+        <g key={`c${x}`}>
+          <rect x={x} y="248" width="58" height="46" rx="2" fill={hovered?"#e8d080":"#c8a860"} stroke="#b8a068" strokeWidth="1.2"/>
+          {hovered&&<rect x={x} y="248" width="58" height="46" rx="2" fill={wg}/>}
+          <line x1={x+29} y1="248" x2={x+29} y2={294} stroke="#b8a068" strokeWidth="0.7"/>
         </g>
       ))}
-
-      {/* Grand entrance arch */}
-      <rect x="210" y="265" width="100" height="95" rx="2" fill="#1a3328" />
-      <ellipse cx="260" cy="265" rx="50" ry="25" fill="#1a3328" />
-      {/* Gold frame */}
-      <rect   x="208" y="263" width="104" height="97"  rx="3" fill="none" stroke="#c9a84c" strokeWidth="2" />
-      <ellipse cx="260" cy="265" rx="52" ry="27" fill="none" stroke="#c9a84c" strokeWidth="2" />
+      {/* Door arch */}
+      <rect x="210" y="260" width="100" height="92" rx="2" fill="#18302a"/>
+      <ellipse cx="260" cy="260" rx="50" ry="26" fill="#18302a"/>
+      <rect x="208" y="258" width="104" height="94" rx="3" fill="none" stroke="#c9a84c" strokeWidth="2.2"/>
+      <ellipse cx="260" cy="260" rx="52" ry="28" fill="none" stroke="#c9a84c" strokeWidth="2.2"/>
       {/* Door panels */}
-      <rect x="215" y="275" width="38" height="63" rx="1" fill="#0d1f1a" stroke="#c9a84c" strokeWidth="1" />
-      <rect x="267" y="275" width="38" height="63" rx="1" fill="#0d1f1a" stroke="#c9a84c" strokeWidth="1" />
-      {/* Knobs */}
-      <circle cx="252" cy="309" r="3.5" fill="#c9a84c" />
-      <circle cx="268" cy="309" r="3.5" fill="#c9a84c" />
-
-      {/* Signboard */}
-      <rect x="190" y="238" width="140" height="22" rx="3" fill="#1a3328" stroke="#c9a84c" strokeWidth="1.5" />
-      <text x="260" y="253" textAnchor="middle" fill="#c9a84c" fontSize="7.5" fontFamily="Georgia,serif" letterSpacing="2.5">
-        THE MEHMAAN MANOR
-      </text>
-
-      {/* Entrance steps */}
-      <rect x="196" y="358" width="128" height="7"  rx="1" fill="#c8b88a" />
-      <rect x="204" y="351" width="112" height="7"  rx="1" fill="#d8c89e" />
-      <rect x="212" y="344" width="96"  height="7"  rx="1" fill="#e0d0a8" />
-
-      {/* Hover overlay glow */}
-      {hovered && <rect x="55" y="55" width="410" height="305" rx="3" fill="rgba(201,168,76,0.05)" />}
+      <rect x="215" y="270" width="38" height="60" rx="1" fill="#0d1f1a" stroke="#c9a84c" strokeWidth="1"/>
+      <rect x="267" y="270" width="38" height="60" rx="1" fill="#0d1f1a" stroke="#c9a84c" strokeWidth="1"/>
+      <circle cx="252" cy="302" r="3.5" fill="#c9a84c"/>
+      <circle cx="268" cy="302" r="3.5" fill="#c9a84c"/>
+      {/* Sign */}
+      <rect x="186" y="232" width="148" height="24" rx="3" fill="#18302a" stroke="#c9a84c" strokeWidth="1.5"/>
+      <text x="260" y="248" textAnchor="middle" fill="#c9a84c" fontSize="7.5" fontFamily="Georgia,serif" letterSpacing="2.5">THE MEHMAAN MANOR</text>
+      {/* Steps */}
+      <rect x="192" y="350" width="136" height="7" rx="1" fill="#c8b08a"/>
+      <rect x="201" y="343" width="118" height="7" rx="1" fill="#d8c098"/>
+      <rect x="210" y="336" width="100" height="7" rx="1" fill="#e0c8a0"/>
+      {/* Hover glow */}
+      {hovered&&<rect x="50" y="52" width="420" height="300" rx="3" fill="rgba(201,168,76,0.05)"/>}
     </svg>
   );
 }
 
-/* ── Decorative trees ────────────────────────────────────────── */
-function Trees({ side }: { side: "left" | "right" }) {
-  const isLeft = side === "left";
+/* ── Exterior trees ────────────────────────────────────── */
+function TreesExt({ side }: { side: "left" | "right" }) {
+  const isL = side === "left";
   const specs = [
-    { pos: isLeft ? "6%"  : "89%", size: 1.1 },
-    { pos: isLeft ? "13%" : "82%", size: 1.4 },
-    { pos: isLeft ? "2%"  : "95%", size: 0.8 },
+    { p: isL ? "6%"  : "90%", s: 1.1 },
+    { p: isL ? "14%" : "81%", s: 1.45 },
+    { p: isL ? "2%"  : "96%", s: 0.8 },
   ];
-
   return (
     <>
       {specs.map((t, i) => {
-        const base   = Math.round(t.size * 30);
-        const trunk  = Math.round(t.size * 22);
-        const widths = [base * 2, base * 1.5, base * 1.1];
-        const heights= [base * 1.8, base * 1.4, base * 1.0];
-
+        const B = Math.round(t.s * 32);
         return (
-          <div
-            key={i}
-            className="absolute bottom-[24%] pointer-events-none"
-            style={{ left: t.pos, transform: "translateX(-50%)", width: widths[0] }}
-          >
-            {/* Layered foliage (bottom → top) */}
-            {[0, 1, 2].map(j => (
-              <div
-                key={j}
-                className="rounded-full mx-auto"
+          <div key={i} className="absolute bottom-[24%] pointer-events-none"
+            style={{ left: t.p, transform: "translateX(-50%)", width: B * 2 }}>
+            {[1, 0.76, 0.56].map((sc, j) => (
+              <div key={j} className="rounded-full mx-auto"
                 style={{
-                  width: widths[j],
-                  height: heights[j],
-                  marginTop: j === 0 ? 0 : -Math.round(heights[j] * 0.35),
-                  background: ["#3a6830","#487d3a","#55914a"][j],
-                }}
-              />
+                  width: B * 2 * sc, height: B * 1.9 * sc,
+                  marginTop: j === 0 ? 0 : -Math.round(B * 1.9 * sc * 0.36),
+                  background: ["#386128","#477534","#549040"][j],
+                }}/>
             ))}
-            {/* Trunk */}
-            <div
-              className="mx-auto rounded-sm"
-              style={{ width: Math.round(widths[0] * 0.16), height: trunk, background: "#5c3d28" }}
-            />
+            <div className="mx-auto rounded-sm"
+              style={{ width: Math.round(B * 0.32), height: Math.round(t.s * 24), background: "#5c3820" }}/>
           </div>
         );
       })}
@@ -391,112 +412,130 @@ function Trees({ side }: { side: "left" | "right" }) {
   );
 }
 
-/* ─────────────────────────────────────────────────────────────
-   ENTER TRANSITION  (zoom through door)
-───────────────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   PHASE: ENTERING  (camera walk-in animation)
+══════════════════════════════════════════════════════════ */
 function EnterTransition({ onDone }: { onDone: () => void }) {
-  useEffect(() => { const t = setTimeout(onDone, 1500); return () => clearTimeout(t); }, [onDone]);
+  useEffect(() => {
+    const t = setTimeout(onDone, 1900);
+    return () => clearTimeout(t);
+  }, [onDone]);
 
   return (
-    <div className="fixed inset-0 z-[9991] flex items-center justify-center overflow-hidden manor-enter-zoom">
-      <div className="absolute inset-0 bg-[#1a3328]" />
-      <div className="flex flex-col items-center gap-3 relative z-10">
-        <div className="w-6 h-6 border-2 border-[#c9a84c]/50 border-t-[#c9a84c] rounded-full animate-spin" />
-        <p className="text-[#c9a84c]/60 text-[11px] font-mono tracking-[0.3em] uppercase">Entering…</p>
+    <div
+      className="fixed inset-0 z-[9992] overflow-hidden"
+      style={{ background: "#050c09" }}
+      aria-hidden="true"
+    >
+      {/* Expanding door-arch shape that fills the screen */}
+      <div className="manor-walkin absolute inset-0 flex items-center justify-center">
+        <div
+          className="manor-walkin-arch"
+          style={{
+            width: "clamp(100px,16vw,200px)",
+            height: "clamp(120px,20vw,240px)",
+            borderRadius: "50% 50% 0 0 / 60% 60% 0 0",
+            background: "radial-gradient(ellipse at 50% 30%, #1a4030, #0a1810)",
+            border: "2px solid rgba(201,168,76,0.5)",
+          }}
+        />
       </div>
+      {/* Warm light burst */}
+      <div
+        className="manor-walkin-glow absolute inset-0 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse 40% 30% at 50% 50%, rgba(201,168,76,0.25) 0%, transparent 70%)" }}
+      />
     </div>
   );
 }
 
-/* ─────────────────────────────────────────────────────────────
+/* ══════════════════════════════════════════════════════════
    PROPERTY DETAIL MODAL
-───────────────────────────────────────────────────────────── */
-function PropertyModal({ prop, onClose }: { prop: ManorProperty; onClose: () => void }) {
-  const isP1       = prop.id === "1";
-  const bookUrl    = `/homes/${prop.slug}`;
-  const waText     = encodeURIComponent(`Hi! I'm interested in ${prop.name}. Could you share availability?`);
+══════════════════════════════════════════════════════════ */
+function PropertyModal({
+  prop,
+  onClose,
+}: {
+  prop: ManorProperty;
+  onClose: () => void;
+}) {
+  const isP1    = prop.id === "1";
+  const bookUrl = `/homes/${prop.slug}`;
+  const waTxt   = encodeURIComponent(`Hi! I'm interested in ${prop.name}. Can you share availability?`);
 
-  const highlights = isP1
-    ? ["Up to 3 guests","Balcony","Wi-Fi & Netflix","24h Hot Water","CCTV Security","Power Backup"]
-    : ["Up to 5 guests","Studio & 2BHK","Near Medanta","Metro Nearby","Wi-Fi & Netflix","Basic Kitchen"];
+  const hi = isP1
+    ? ["Max 3 guests","Balcony","Wi-Fi & Netflix","24 h Hot Water","CCTV Security","Power Backup"]
+    : ["Max 5 guests","Studio & 2BHK","Near Medanta","Metro Nearby","Wi-Fi & Netflix","Basic Kitchen"];
 
-  const tourPhotos = isP1
+  const photos = isP1
     ? [
-        { src: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600&q=80&auto=format&fit=crop", label: "Bedroom" },
-        { src: "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=600&q=80&auto=format&fit=crop",  label: "Living Area" },
-        { src: "https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?w=600&q=80&auto=format&fit=crop", label: "Balcony" },
+        { src: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600&q=80&auto=format&fit=crop", lbl: "Bedroom" },
+        { src: "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=600&q=80&auto=format&fit=crop",  lbl: "Living Area" },
+        { src: "https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?w=600&q=80&auto=format&fit=crop", lbl: "Balcony" },
       ]
     : [
-        { src: "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=600&q=80&auto=format&fit=crop", label: "Studio" },
-        { src: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80&auto=format&fit=crop",  label: "Living Room" },
-        { src: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&q=80&auto=format&fit=crop",  label: "Kitchen" },
+        { src: "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=600&q=80&auto=format&fit=crop", lbl: "Studio" },
+        { src: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80&auto=format&fit=crop",  lbl: "Living Room" },
+        { src: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&q=80&auto=format&fit=crop",  lbl: "Kitchen" },
       ];
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.80)", backdropFilter: "blur(8px)" }}
+      className="fixed inset-0 z-[10001] flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.82)", backdropFilter: "blur(10px)" }}
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-labelledby="prop-modal-title"
+      aria-label={`Details for ${prop.name}`}
     >
       <div
-        className="relative bg-[#faf8f4] rounded-2xl w-full max-w-lg shadow-2xl manor-pop-in overflow-y-auto"
+        className="bg-[#faf8f4] rounded-2xl w-full max-w-md shadow-2xl manor-pop-in overflow-y-auto"
         style={{ maxHeight: "92vh" }}
         onClick={e => e.stopPropagation()}
       >
         {/* Gold strip */}
-        <div className="h-1 w-full bg-gradient-to-r from-[#c9a84c] via-[#f0dc90] to-[#c9a84c] rounded-t-2xl" />
+        <div className="h-1 bg-gradient-to-r from-[#c9a84c] via-[#f0dc90] to-[#c9a84c] rounded-t-2xl" />
 
-        {/* Close */}
-        <button
-          onClick={onClose}
-          aria-label="Close property details"
-          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-[#1a3328]/8 hover:bg-[#1a3328]/15 text-[#1a3328]/60 hover:text-[#1a3328] text-lg leading-none transition-colors focus:outline-none focus:ring-2 focus:ring-[#c9a84c]"
-        >
-          ×
-        </button>
+        <div className="p-6 pb-5 relative">
+          {/* Close */}
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-[#1a3328]/8 hover:bg-[#1a3328]/15 text-[#1a3328]/50 hover:text-[#1a3328] text-lg transition-colors"
+          >×</button>
 
-        <div className="p-6 pb-5">
-          {/* Header */}
           <span className="text-[10px] font-mono tracking-[0.25em] uppercase text-[#c9a84c]">Our Property</span>
-          <h3 id="prop-modal-title" className="font-display text-2xl text-[#1a3328] mt-1 leading-tight pr-8">
-            {prop.name}
-          </h3>
-          <p className="text-[#1a3328]/50 text-xs mt-1 leading-relaxed">{prop.address}</p>
+          <h3 className="font-display text-2xl text-[#1a3328] mt-1 leading-tight pr-8">{prop.name}</h3>
+          <p className="text-[#1a3328]/45 text-xs mt-1">{prop.address}</p>
 
-          {/* Price row */}
+          {/* Price */}
           <div className="flex items-baseline gap-1.5 mt-4 pb-4 border-b border-[#1a3328]/8">
-            <span className="font-display text-4xl text-[#1a3328] font-semibold tracking-tight">
+            <span className="font-display text-4xl text-[#1a3328] font-semibold">
               ₹{prop.baseRate.toLocaleString("en-IN")}
             </span>
-            <span className="text-[#1a3328]/45 text-sm">/night</span>
-            <span className="ml-2 text-[10px] font-mono text-[#c9a84c] bg-[#c9a84c]/10 px-2 py-0.5 rounded-full">
-              No booking fee
-            </span>
+            <span className="text-[#1a3328]/40 text-sm">/night</span>
+            <span className="ml-auto text-[10px] font-mono text-[#c9a84c] bg-[#c9a84c]/10 px-2 py-0.5 rounded-full">No fees</span>
           </div>
 
           {/* Virtual tour strip */}
           <div className="mt-4 mb-4">
-            <p className="text-[10px] font-mono tracking-widest uppercase text-[#1a3328]/40 mb-2">Virtual Tour</p>
-            <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
-              {tourPhotos.map((p, i) => (
-                <div key={i} className="flex-shrink-0 relative rounded-xl overflow-hidden group cursor-default" style={{ width: 130, height: 88 }}>
-                  <img src={p.src} alt={p.label} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                  <span className="absolute bottom-1.5 left-2 text-white/90 text-[10px] font-mono">{p.label}</span>
+            <p className="text-[10px] font-mono tracking-widest uppercase text-[#1a3328]/35 mb-2.5">Virtual Tour</p>
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+              {photos.map((p, i) => (
+                <div key={i} className="flex-shrink-0 relative rounded-xl overflow-hidden" style={{ width: 128, height: 86 }}>
+                  <img src={p.src} alt={p.lbl} loading="lazy" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
+                  <span className="absolute bottom-1.5 left-2 text-white/85 text-[10px] font-mono">{p.lbl}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Highlights grid */}
+          {/* Highlights */}
           <div className="grid grid-cols-2 gap-2 mb-5">
-            {highlights.map(h => (
-              <div key={h} className="flex items-center gap-2 text-xs text-[#1a3328]/70 bg-[#eee9df] rounded-lg px-3 py-2.5">
-                <span className="text-[#c9a84c] font-bold text-sm leading-none">✓</span>
-                {h}
+            {hi.map(h => (
+              <div key={h} className="flex items-center gap-2 text-xs text-[#1a3328]/65 bg-[#eee9df] rounded-lg px-3 py-2.5">
+                <span className="text-[#c9a84c] font-bold">✓</span>{h}
               </div>
             ))}
           </div>
@@ -505,23 +544,22 @@ function PropertyModal({ prop, onClose }: { prop: ManorProperty; onClose: () => 
           <div className="flex flex-col gap-2.5">
             <Link
               href={bookUrl}
-              className="w-full py-4 bg-[#1a3328] text-[#f5f0e8] font-bold text-sm rounded-xl text-center hover:bg-[#0d1f1a] active:scale-[0.98] transition-all focus:outline-none focus:ring-2 focus:ring-[#c9a84c]"
+              className="block w-full py-4 bg-[#1a3328] text-[#f5f0e8] font-bold text-sm rounded-xl text-center hover:bg-[#0d1f1a] active:scale-[0.98] transition-all"
             >
               View Full Details &amp; Book
             </Link>
             <a
-              href={`https://wa.me/918828352311?text=${waText}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full py-3.5 border-2 border-[#4caf6e] text-[#1a7a40] font-semibold text-sm rounded-xl text-center hover:bg-[#4caf6e] hover:text-white active:scale-[0.98] transition-all focus:outline-none focus:ring-2 focus:ring-[#4caf6e]"
+              href={`https://wa.me/918828352311?text=${waTxt}`}
+              target="_blank" rel="noopener noreferrer"
+              className="block w-full py-3.5 border-2 border-[#4caf6e] text-[#1a7a40] font-semibold text-sm rounded-xl text-center hover:bg-[#4caf6e] hover:text-white active:scale-[0.98] transition-all"
             >
               💬 Reserve via WhatsApp
             </a>
             <button
               onClick={onClose}
-              className="w-full py-2.5 text-[#1a3328]/45 text-xs font-mono hover:text-[#1a3328]/70 transition-colors"
+              className="w-full py-2 text-[#1a3328]/40 text-xs font-mono hover:text-[#1a3328]/65 transition-colors"
             >
-              ← Back to reception
+              ← Back to the Manor
             </button>
           </div>
         </div>
@@ -530,371 +568,550 @@ function PropertyModal({ prop, onClose }: { prop: ManorProperty; onClose: () => 
   );
 }
 
-/* ─────────────────────────────────────────────────────────────
-   PHASE 3 — INTERIOR  (fully scrollable reception)
-───────────────────────────────────────────────────────────── */
-function InteriorScreen({ properties, onClose }: { properties: ManorProperty[]; onClose: () => void }) {
-  const [mounted, setMounted]             = useState(false);
-  const [selectedProp, setSelectedProp]   = useState<ManorProperty | null>(null);
+/* ══════════════════════════════════════════════════════════
+   PHASE: INTERIOR — true first-person 3D room
 
-  useEffect(() => { const t = setTimeout(() => setMounted(true), 80); return () => clearTimeout(t); }, []);
+   Layout uses CSS perspective transform to create a room
+   that feels like you are standing inside it.
+
+   Structure (all elements in a perspective container):
+     - Floor plane
+     - Ceiling plane
+     - Left wall  → Property 1 (Sector 57) photos + info
+     - Right wall → Property 2 (Sector 39) photos + info
+     - Back wall  → Reception desk + host panel
+     - Info boards hang on back wall below desk level
+
+   Clicking any wall opens the PropertyModal.
+══════════════════════════════════════════════════════════ */
+function InteriorScreen({
+  properties,
+  onClose,
+}: {
+  properties: ManorProperty[];
+  onClose: () => void;
+}) {
+  const [entered,       setEntered]       = useState(false);
+  const [selectedProp,  setSelectedProp]  = useState<ManorProperty | null>(null);
+  const [activeWall,    setActiveWall]    = useState<"none" | "left" | "right" | "desk">("none");
+
+  // Slight delay so the room fades in after the black transition
+  useEffect(() => {
+    const t = setTimeout(() => setEntered(true), 120);
+    return () => clearTimeout(t);
+  }, []);
 
   const prop1 = properties.find(p => p.id === "1") ?? properties[0];
   const prop2 = properties.find(p => p.id === "2") ?? properties[properties.length - 1];
 
+  /* ── photos for wall frames ── */
+  const p1Photos = [
+    "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=500&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=500&q=75&auto=format&fit=crop",
+  ];
+  const p2Photos = [
+    "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=500&q=75&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&q=75&auto=format&fit=crop",
+  ];
+
+  const [p1Img, setP1Img] = useState(0);
+  const [p2Img, setP2Img] = useState(0);
+
+  // Cycle wall photos
+  useEffect(() => {
+    const id = setInterval(() => {
+      setP1Img(i => (i + 1) % p1Photos.length);
+      setP2Img(i => (i + 1) % p2Photos.length);
+    }, 3500);
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <>
+      {/* ═══ FULL-SCREEN 3D ROOM ═══ */}
       <div
-        className={cn(
-          "fixed inset-0 z-[9990] overflow-y-auto transition-opacity duration-700",
-          mounted ? "opacity-100" : "opacity-0",
-        )}
-        style={{ background: "linear-gradient(180deg,#130d05 0%,#1e1409 60%,#2a1c0e 100%)" }}
+        className="fixed inset-0 z-[9992] overflow-hidden"
+        style={{
+          opacity: entered ? 1 : 0,
+          transition: "opacity 0.9s ease",
+        }}
         role="dialog"
         aria-modal="true"
-        aria-label="The Mehmaan Manor reception"
+        aria-label="Inside the Mehmaan Manor reception"
       >
-        {/* ── Ceiling light ── */}
+        {/* ── Perspective container ──
+            Everything inside here is positioned in 3D.
+            The user's eye is at the front of this box.        */}
         <div
-          className="sticky top-0 z-20 w-full flex items-end justify-center pb-2 pointer-events-none"
-          style={{ height: "clamp(36px,5vh,60px)", background: "linear-gradient(180deg,#0a0602 0%,#1e1409 100%)" }}
+          className="absolute inset-0"
+          style={{
+            perspective: "900px",
+            perspectiveOrigin: "50% 42%",
+          }}
         >
-          {/* Chandelier drop */}
-          <div className="flex flex-col items-center">
-            <div className="w-px bg-[#c9a84c]/30" style={{ height: "clamp(8px,2vw,18px)" }} />
-            <div className="w-12 h-0.5 bg-[#c9a84c]/25 rounded-full" />
-            <div className="mt-0.5 w-5 h-4 rounded-full bg-[#c9a84c]/15 border border-[#c9a84c]/25 flex items-center justify-center">
-              <div className="w-2 h-2 rounded-full bg-[#fff8d0]/60" style={{ boxShadow: "0 0 10px 5px rgba(255,240,150,0.5)" }} />
+          {/* ████ FLOOR ████ */}
+          <div
+            className="absolute left-0 right-0"
+            style={{
+              bottom: 0,
+              height: "100%",
+              transformOrigin: "bottom center",
+              transform: "rotateX(62deg)",
+              background: "repeating-linear-gradient(90deg,#2e1e0e 0,#2e1e0e 80px,#381e0a 80px,#381e0a 160px)",
+            }}
+          />
+          {/* Floor sheen */}
+          <div
+            className="absolute left-0 right-0 bottom-0 pointer-events-none"
+            style={{
+              height: "50%",
+              background: "linear-gradient(0deg,rgba(201,168,76,0.06) 0%,transparent 100%)",
+              transformOrigin: "bottom center",
+              transform: "rotateX(62deg)",
+            }}
+          />
+
+          {/* ████ CEILING ████ */}
+          <div
+            className="absolute left-0 right-0 top-0"
+            style={{
+              height: "100%",
+              transformOrigin: "top center",
+              transform: "rotateX(-62deg)",
+              background: "#130c06",
+            }}
+          />
+          {/* Ceiling light strip */}
+          <div
+            className="absolute left-1/2 top-0 -translate-x-1/2"
+            style={{
+              width: "30%",
+              height: "100%",
+              transformOrigin: "top center",
+              transform: "rotateX(-62deg)",
+              background: "linear-gradient(180deg,rgba(255,240,160,0.18) 0%,transparent 60%)",
+              pointerEvents: "none",
+            }}
+          />
+
+          {/* ████ BACK WALL ████ */}
+          <div
+            className="absolute left-0 right-0"
+            style={{
+              top: "12%",
+              bottom: "12%",
+              transform: "translateZ(-420px)",
+              background: "linear-gradient(180deg,#1a1208 0%,#2a1a0a 100%)",
+              borderTop: "2px solid rgba(201,168,76,0.1)",
+              borderBottom: "2px solid rgba(201,168,76,0.1)",
+            }}
+          >
+            {/* Wainscoting panels */}
+            <div className="absolute inset-x-4 bottom-0 h-1/3" style={{ borderTop: "1.5px solid rgba(201,168,76,0.12)", background: "rgba(0,0,0,0.2)" }} />
+            {/* Chandelier drop from ceiling */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 flex flex-col items-center">
+              <div className="w-px bg-[#c9a84c]/30" style={{ height: 30 }} />
+              <div className="w-12 h-0.5 bg-[#c9a84c]/20 rounded-full" />
+              <div className="w-6 h-5 rounded-full border border-[#c9a84c]/30 flex items-center justify-center"
+                style={{ background: "rgba(201,168,76,0.08)", marginTop: 2 }}>
+                <div className="w-2 h-2 rounded-full" style={{ background: "#fff8c0", boxShadow: "0 0 14px 7px rgba(255,240,140,0.55)" }} />
+              </div>
             </div>
           </div>
+
+          {/* ████ LEFT WALL ████ */}
+          <div
+            className="absolute top-0 bottom-0"
+            style={{
+              left: 0,
+              width: "50%",
+              transformOrigin: "left center",
+              transform: "rotateY(58deg)",
+              background: "linear-gradient(90deg,#0e0802 0%,#1a1208 100%)",
+              borderRight: "1.5px solid rgba(201,168,76,0.08)",
+            }}
+          >
+            {/* Wall trim */}
+            <div className="absolute inset-y-0 right-0 w-px bg-[#c9a84c]/15" />
+          </div>
+
+          {/* ████ RIGHT WALL ████ */}
+          <div
+            className="absolute top-0 bottom-0"
+            style={{
+              right: 0,
+              width: "50%",
+              transformOrigin: "right center",
+              transform: "rotateY(-58deg)",
+              background: "linear-gradient(270deg,#0e0802 0%,#1a1208 100%)",
+              borderLeft: "1.5px solid rgba(201,168,76,0.08)",
+            }}
+          >
+            <div className="absolute inset-y-0 left-0 w-px bg-[#c9a84c]/15" />
+          </div>
         </div>
 
-        {/* ── Scene heading ── */}
-        <div className="text-center pt-6 pb-2 px-4">
-          <p className="text-[#c9a84c]/50 text-[10px] font-mono tracking-[0.3em] uppercase">Reception</p>
-          <h2 className="font-display text-white/90 text-xl md:text-2xl mt-1" style={{ letterSpacing: "0.03em" }}>
-            The Mehmaan Manor
-          </h2>
-          <p className="text-[#c9a84c]/40 text-xs font-mono mt-1">
-            Explore our homes below · click any room to open details
-          </p>
-        </div>
-
-        {/* ══════════════════════════════════════════
-            SECTION A — PROPERTY WALLS
-        ══════════════════════════════════════════ */}
-        <section className="px-4 md:px-8 pt-6 pb-2 max-w-4xl mx-auto w-full">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-px flex-1 bg-[#c9a84c]/15" />
-            <span className="text-[#c9a84c]/50 text-[9px] font-mono tracking-widest uppercase">Our Properties</span>
-            <div className="h-px flex-1 bg-[#c9a84c]/15" />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <PropertyCard prop={prop1} onSelect={() => setSelectedProp(prop1)} />
-            <PropertyCard prop={prop2} onSelect={() => setSelectedProp(prop2)} />
-          </div>
-        </section>
-
-        {/* ══════════════════════════════════════════
-            SECTION B — RECEPTION DESK
-        ══════════════════════════════════════════ */}
-        <section className="px-4 md:px-8 pt-6 pb-2 max-w-2xl mx-auto w-full">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-px flex-1 bg-[#c9a84c]/15" />
-            <span className="text-[#c9a84c]/50 text-[9px] font-mono tracking-widest uppercase">Reception Desk</span>
-            <div className="h-px flex-1 bg-[#c9a84c]/15" />
-          </div>
-
-          <ReceptionDesk />
-        </section>
-
-        {/* ══════════════════════════════════════════
-            SECTION C — INFO BOARDS
-        ══════════════════════════════════════════ */}
-        <section className="px-4 md:px-8 pt-6 pb-10 max-w-4xl mx-auto w-full">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-px flex-1 bg-[#c9a84c]/15" />
-            <span className="text-[#c9a84c]/50 text-[9px] font-mono tracking-widest uppercase">The Notice Board</span>
-            <div className="h-px flex-1 bg-[#c9a84c]/15" />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <HowItWorksBoard />
-            <GuestReviewsBoard />
-            <HostsBoard />
-          </div>
-        </section>
-
-        {/* ── Footer hint ── */}
+        {/* ═══════════════════════════════════════════════════════
+            ROOM CONTENT — flat layer on top of the 3D shell.
+            Uses perspective-aware positioning to feel "in" the room.
+            All interactive elements live here.
+        ═══════════════════════════════════════════════════════ */}
         <div
-          className="sticky bottom-0 w-full py-3 px-4 text-center z-20"
-          style={{ background: "linear-gradient(0deg,rgba(10,6,2,0.96) 0%,rgba(10,6,2,0.5) 100%)" }}
+          className="absolute inset-0 overflow-hidden"
+          style={{ perspective: "900px", perspectiveOrigin: "50% 42%" }}
         >
-          <p className="text-[#c9a84c]/40 text-[10px] font-mono tracking-widest">
-            Tap any property card to explore details &amp; book
+
+          {/* ──────────────── LEFT WALL FRAME ──────────────── */}
+          <button
+            onClick={() => { setActiveWall("left"); setSelectedProp(prop1); }}
+            aria-label={`Explore ${prop1.name}`}
+            aria-pressed={activeWall === "left"}
+            className="absolute focus:outline-none group"
+            style={{
+              /* Position on the left wall surface */
+              left: "2%",
+              top: "15%",
+              width: "21%",
+              height: "55%",
+              transformOrigin: "left center",
+              transform: `rotateY(58deg) ${activeWall === "left" ? "scale(1.03)" : "scale(1)"}`,
+              transition: "transform 0.4s cubic-bezier(0.22,1,0.36,1)",
+            }}
+          >
+            <WallFrame
+              photos={p1Photos}
+              currentPhoto={p1Img}
+              property={prop1}
+              label="Sector 57"
+              active={activeWall === "left"}
+            />
+          </button>
+
+          {/* ──────────────── RIGHT WALL FRAME ──────────────── */}
+          <button
+            onClick={() => { setActiveWall("right"); setSelectedProp(prop2); }}
+            aria-label={`Explore ${prop2.name}`}
+            aria-pressed={activeWall === "right"}
+            className="absolute focus:outline-none group"
+            style={{
+              right: "2%",
+              top: "15%",
+              width: "21%",
+              height: "55%",
+              transformOrigin: "right center",
+              transform: `rotateY(-58deg) ${activeWall === "right" ? "scale(1.03)" : "scale(1)"}`,
+              transition: "transform 0.4s cubic-bezier(0.22,1,0.36,1)",
+            }}
+          >
+            <WallFrame
+              photos={p2Photos}
+              currentPhoto={p2Img}
+              property={prop2}
+              label="Sector 39"
+              active={activeWall === "right"}
+            />
+          </button>
+
+          {/* ──────────────── BACK WALL CONTENT ──────────────── */}
+          {/* Reception desk */}
+          <div
+            className="absolute left-1/2 -translate-x-1/2"
+            style={{
+              bottom: "14%",
+              width: "clamp(220px,34%,420px)",
+              transform: "translateX(-50%) translateZ(-240px) scale(0.88)",
+            }}
+          >
+            <ReceptionDesk
+              active={activeWall === "desk"}
+              onOpen={() => setActiveWall(activeWall === "desk" ? "none" : "desk")}
+            />
+          </div>
+
+          {/* Info boards — row above desk */}
+          <div
+            className="absolute left-1/2 -translate-x-1/2"
+            style={{
+              bottom: "48%",
+              width: "clamp(280px,44%,540px)",
+              transform: "translateX(-50%) translateZ(-240px) scale(0.88)",
+            }}
+          >
+            <div className="flex gap-2">
+              <HowItWorksBoard />
+              <GuestReviewsBoard />
+              <HostsBoard />
+            </div>
+          </div>
+
+          {/* Heading HUD — top center */}
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 pointer-events-none">
+            <div className="flex items-center gap-2">
+              <div className="h-px w-6 bg-[#c9a84c]/30" />
+              <span className="text-[#c9a84c]/50 text-[9px] font-mono tracking-[0.3em] uppercase">Reception</span>
+              <div className="h-px w-6 bg-[#c9a84c]/30" />
+            </div>
+            <p className="font-display text-white/75 text-sm md:text-base" style={{ letterSpacing: "0.04em" }}>
+              The Mehmaan Manor
+            </p>
+          </div>
+
+          {/* Wall hint labels */}
+          {activeWall === "none" && (
+            <>
+              <div
+                className="absolute pointer-events-none manor-pop-in"
+                style={{ left: "3%", top: "72%", transform: "rotateY(58deg)", transformOrigin: "left center" }}
+              >
+                <span className="text-[#c9a84c]/55 text-[9px] font-mono tracking-widest whitespace-nowrap">← Tap wall to explore</span>
+              </div>
+              <div
+                className="absolute pointer-events-none manor-pop-in"
+                style={{ right: "3%", top: "72%", transform: "rotateY(-58deg)", transformOrigin: "right center" }}
+              >
+                <span className="text-[#c9a84c]/55 text-[9px] font-mono tracking-widest whitespace-nowrap">Tap wall to explore →</span>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* ── Vignette overlay — darkens edges for room feel ── */}
+        <div
+          className="absolute inset-0 pointer-events-none z-10"
+          style={{ background: "radial-gradient(ellipse 75% 65% at 50% 45%, transparent 0%, rgba(0,0,0,0.55) 100%)" }}
+        />
+
+        {/* ── Warm floor light ── */}
+        <div
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 pointer-events-none z-10"
+          style={{ width: "50%", height: "25%", background: "radial-gradient(ellipse at 50% 100%, rgba(201,168,76,0.08) 0%, transparent 70%)" }}
+        />
+
+        {/* ── Hint footer ── */}
+        <div
+          className="absolute bottom-0 left-0 right-0 z-20 py-2.5 px-4 text-center pointer-events-none"
+          style={{ background: "linear-gradient(0deg,rgba(5,4,2,0.90) 0%,transparent 100%)" }}
+        >
+          <p className="text-[#c9a84c]/35 text-[10px] font-mono tracking-widest">
+            Left wall: Sector 57 · Right wall: Sector 39 · Center: Book now
           </p>
         </div>
 
         <ExitBtn onClick={onClose} />
       </div>
 
-      {/* Property detail modal */}
+      {/* Property modal (above everything) */}
       {selectedProp && (
-        <PropertyModal prop={selectedProp} onClose={() => setSelectedProp(null)} />
+        <PropertyModal
+          prop={selectedProp}
+          onClose={() => { setSelectedProp(null); setActiveWall("none"); }}
+        />
       )}
     </>
   );
 }
 
-/* ── Property card (inside reception) ───────────────────────── */
-function PropertyCard({ prop, onSelect }: { prop: ManorProperty; onSelect: () => void }) {
-  const isP1 = prop.id === "1";
-
-  const heroSrc = isP1
-    ? "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&q=80&auto=format&fit=crop"
-    : "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&q=80&auto=format&fit=crop";
-
-  const tag   = isP1 ? "Sector 57" : "Sector 39";
-  const perks = isP1
-    ? ["3 guests max", "Balcony", "Wi-Fi + Netflix", "Power Backup"]
-    : ["5 guests max", "Studio & 2BHK", "Near Medanta", "Metro Nearby"];
-
+/* ── Wall photo frame ──────────────────────────────────── */
+function WallFrame({
+  photos,
+  currentPhoto,
+  property,
+  label,
+  active,
+}: {
+  photos: string[];
+  currentPhoto: number;
+  property: ManorProperty;
+  label: string;
+  active: boolean;
+}) {
   return (
-    <button
-      onClick={onSelect}
-      className="group text-left w-full rounded-2xl overflow-hidden border border-[#c9a84c]/15 hover:border-[#c9a84c]/50 focus:outline-none focus:ring-2 focus:ring-[#c9a84c] transition-all duration-400"
+    <div
+      className="w-full h-full flex flex-col rounded-xl overflow-hidden"
       style={{
-        background: "linear-gradient(135deg,#1e1409 0%,#2a1c0e 100%)",
-        boxShadow: "0 4px 24px rgba(0,0,0,0.5)",
+        border: `2px solid ${active ? "rgba(201,168,76,0.65)" : "rgba(201,168,76,0.18)"}`,
+        background: "#1a1208",
+        boxShadow: active ? "0 0 30px rgba(201,168,76,0.2)" : "none",
+        transition: "all 0.4s ease",
       }}
-      aria-label={`Explore ${prop.name} — from ₹${prop.baseRate.toLocaleString("en-IN")} per night`}
     >
-      {/* Photo */}
-      <div className="relative overflow-hidden" style={{ height: "clamp(140px,22vw,200px)" }}>
-        <img
-          src={heroSrc}
-          alt={prop.name}
-          loading="lazy"
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#1e1409] via-transparent to-transparent" />
-
-        {/* Location badge */}
-        <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-[#1a3328]/85 backdrop-blur-sm border border-[#c9a84c]/25">
-          <span className="text-[#c9a84c] text-[10px] font-mono tracking-widest uppercase">{tag}</span>
-        </div>
-
-        {/* Explore hint on hover */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <span className="px-4 py-2 rounded-full bg-[#c9a84c] text-[#1a0a00] font-bold text-xs">
-            Tap to Explore →
-          </span>
-        </div>
+      {/* Label tab */}
+      <div className="px-3 py-2 flex items-center justify-between border-b border-[#c9a84c]/12">
+        <span className="text-[#c9a84c] text-[9px] font-mono tracking-widest uppercase">{label}</span>
+        {active
+          ? <span className="text-[#c9a84c]/70 text-[8px] font-mono">Tap for details</span>
+          : <span className="text-[#c9a84c]/30 text-[8px] font-mono">Tap →</span>
+        }
       </div>
 
-      {/* Info */}
-      <div className="p-4">
-        <h3 className="font-display text-[#f5f0e8]/95 text-base leading-tight pr-2">
-          {prop.name.replace("The Mehmaan Manor — ", "")}
-        </h3>
-        <p className="text-[#f5f0e8]/40 text-[11px] mt-1 leading-snug line-clamp-1">{prop.address}</p>
-
-        {/* Price */}
-        <div className="flex items-baseline gap-1 mt-3 pb-3 border-b border-[#c9a84c]/10">
-          <span className="font-display text-2xl text-[#c9a84c] font-semibold">
-            ₹{prop.baseRate.toLocaleString("en-IN")}
-          </span>
-          <span className="text-[#f5f0e8]/35 text-xs">/night</span>
-        </div>
-
-        {/* Perks */}
-        <div className="grid grid-cols-2 gap-1.5 mt-3">
-          {perks.map(p => (
-            <span key={p} className="flex items-center gap-1.5 text-[#f5f0e8]/55 text-[11px]">
-              <span className="text-[#c9a84c] text-[9px] flex-shrink-0">◆</span>
-              {p}
-            </span>
-          ))}
-        </div>
-
-        {/* CTA row */}
-        <div className="mt-4 flex items-center justify-between">
-          <span className="text-[#c9a84c] text-xs font-mono group-hover:underline">
-            View details &amp; book →
-          </span>
-          <span className="text-[#c9a84c]/30 text-[10px] font-mono">Click to open</span>
-        </div>
-      </div>
-    </button>
-  );
-}
-
-/* ── Reception desk ─────────────────────────────────────────── */
-function ReceptionDesk() {
-  return (
-    <div
-      className="rounded-2xl border border-[#c9a84c]/20 overflow-hidden"
-      style={{ background: "linear-gradient(135deg,#1e1409 0%,#2a1c0e 100%)", boxShadow: "0 4px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(201,168,76,0.12)" }}
-    >
-      {/* Desk surface header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-[#c9a84c]/12">
-        <div>
-          <p className="text-[#c9a84c] text-[9px] font-mono tracking-[0.3em] uppercase">Reception</p>
-          <p className="font-display text-[#f5f0e8]/90 text-lg mt-0.5">The Mehmaan Manor</p>
-        </div>
-        <div className="flex flex-col items-center gap-1">
-          <span className="text-2xl select-none">⌂</span>
-          <span className="text-[#c9a84c]/50 text-[9px] font-mono">Gurugram</span>
-        </div>
-      </div>
-
-      {/* Booking options */}
-      <div className="p-5">
-        <p className="text-[#f5f0e8]/55 text-xs leading-relaxed mb-5">
-          Ready to book your stay? Choose how you'd like to proceed:
-        </p>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {/* Book directly */}
-          <Link
-            href="/book"
-            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-[#c9a84c]/20 bg-[#c9a84c]/5 hover:bg-[#c9a84c]/12 hover:border-[#c9a84c]/50 transition-all group focus:outline-none focus:ring-2 focus:ring-[#c9a84c]"
-          >
-            <span className="text-2xl select-none group-hover:scale-110 transition-transform duration-200">📅</span>
-            <span className="text-[#c9a84c] font-bold text-sm">Book Directly</span>
-            <span className="text-[#f5f0e8]/40 text-[10px] text-center">Online booking · Instant confirm</span>
-          </Link>
-
-          {/* WhatsApp */}
-          <a
-            href="https://wa.me/918828352311?text=Hi%21%20I'd%20like%20to%20book%20a%20stay%20at%20The%20Mehmaan%20Manor."
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-[#25d366]/20 bg-[#25d366]/5 hover:bg-[#25d366]/12 hover:border-[#25d366]/50 transition-all group focus:outline-none focus:ring-2 focus:ring-[#25d366]"
-          >
-            <span className="text-2xl select-none group-hover:scale-110 transition-transform duration-200">💬</span>
-            <span className="text-[#4caf6e] font-bold text-sm">WhatsApp Simran</span>
-            <span className="text-[#f5f0e8]/40 text-[10px] text-center">Responds in &lt;5 min</span>
-          </a>
-
-          {/* Browse homes */}
-          <Link
-            href="/homes"
-            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-[#f5f0e8]/10 bg-[#f5f0e8]/3 hover:bg-[#f5f0e8]/8 hover:border-[#f5f0e8]/25 transition-all group focus:outline-none focus:ring-2 focus:ring-white/40"
-          >
-            <span className="text-2xl select-none group-hover:scale-110 transition-transform duration-200">🏠</span>
-            <span className="text-[#f5f0e8]/80 font-bold text-sm">Browse Homes</span>
-            <span className="text-[#f5f0e8]/40 text-[10px] text-center">See both properties</span>
-          </Link>
-        </div>
-
-        {/* Trust strip */}
-        <div className="mt-5 pt-4 border-t border-[#c9a84c]/10 flex flex-wrap items-center justify-center gap-4 gap-y-2">
-          {[
-            { icon: "✓", label: "No booking fees" },
-            { icon: "✓", label: "Free cancellation" },
-            { icon: "✓", label: "Direct with host" },
-          ].map(b => (
-            <span key={b.label} className="flex items-center gap-1.5 text-[#f5f0e8]/35 text-[11px]">
-              <span className="text-[#c9a84c]/60 font-bold">{b.icon}</span>
-              {b.label}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ── How it Works board ─────────────────────────────────────── */
-function HowItWorksBoard() {
-  const steps = [
-    { n: "01", title: "Browse",  desc: "Explore both Gurugram homes and pick your favourite." },
-    { n: "02", title: "Book",    desc: "Reserve directly — no fees, no middlemen." },
-    { n: "03", title: "Arrive",  desc: "Check in and feel at home. Simran & Jyoti handle the rest." },
-  ];
-
-  return (
-    <div
-      className="rounded-2xl border border-[#c9a84c]/15 p-5 flex flex-col gap-4 h-full"
-      style={{ background: "linear-gradient(135deg,#16100a 0%,#211507 100%)", boxShadow: "inset 0 1px 0 rgba(201,168,76,0.08)" }}
-    >
-      <p className="text-[#c9a84c] text-[9px] font-mono tracking-[0.3em] uppercase text-center">How It Works</p>
-
-      <div className="flex flex-col gap-4">
-        {steps.map((s, i) => (
-          <div key={s.n} className="flex items-start gap-3">
-            <span
-              className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-mono font-bold text-[#c9a84c] border border-[#c9a84c]/25"
-              style={{ background: "rgba(201,168,76,0.08)" }}
-            >
-              {s.n}
-            </span>
-            <div className="pt-0.5">
-              <p className="text-[#f5f0e8]/85 text-sm font-semibold leading-tight">{s.title}</p>
-              <p className="text-[#f5f0e8]/40 text-[11px] leading-relaxed mt-0.5">{s.desc}</p>
-            </div>
-          </div>
+      {/* Photo area */}
+      <div className="relative flex-1 overflow-hidden min-h-0">
+        {photos.map((src, i) => (
+          <img
+            key={src}
+            src={src}
+            alt={`${property.name} — ${i + 1}`}
+            loading="lazy"
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{
+              opacity: i === currentPhoto ? 1 : 0,
+              transition: "opacity 1s ease",
+            }}
+          />
         ))}
+        {/* Photo overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#1a1208] via-transparent to-transparent" />
+        {/* Gold frame inset */}
+        <div className="absolute inset-0 pointer-events-none" style={{ border: "6px solid rgba(201,168,76,0.10)", borderRadius: 10 }} />
+      </div>
+
+      {/* Property info */}
+      <div className="px-3 py-2.5">
+        <p className="text-[#f5f0e8]/85 text-[11px] font-semibold leading-tight">
+          {property.name.replace("The Mehmaan Manor — ", "")}
+        </p>
+        <div className="flex items-baseline gap-1 mt-1">
+          <span className="text-[#c9a84c] font-mono text-sm font-bold">
+            ₹{property.baseRate.toLocaleString("en-IN")}
+          </span>
+          <span className="text-[#f5f0e8]/30 text-[9px]">/night</span>
+        </div>
+        <p className={cn("mt-1.5 text-center text-[9px] font-mono py-1 rounded-md transition-colors",
+          active
+            ? "bg-[#c9a84c]/20 text-[#c9a84c]"
+            : "text-[#c9a84c]/40 hover:text-[#c9a84c]/60",
+        )}>
+          {active ? "✦ Click for full details" : "View Details / Take Tour"}
+        </p>
       </div>
     </div>
   );
 }
 
-/* ── Guest Reviews board ────────────────────────────────────── */
+/* ── Reception desk ────────────────────────────────────── */
+function ReceptionDesk({ active, onOpen }: { active: boolean; onOpen: () => void }) {
+  return (
+    <div className="rounded-2xl overflow-hidden" style={{
+      border: `1px solid ${active ? "rgba(201,168,76,0.5)" : "rgba(201,168,76,0.18)"}`,
+      background: "linear-gradient(135deg,#1a1208 0%,#251808 100%)",
+      boxShadow: active ? "0 0 28px rgba(201,168,76,0.18)" : "0 4px 20px rgba(0,0,0,0.6)",
+      transition: "all 0.4s ease",
+    }}>
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[#c9a84c]/12">
+        <div>
+          <p className="text-[#c9a84c] text-[8px] font-mono tracking-[0.3em] uppercase">Reception</p>
+          <p className="font-display text-[#f5f0e8]/90 text-base mt-0.5">The Mehmaan Manor</p>
+        </div>
+        <div className="text-xl text-[#c9a84c]/60 select-none">⌂</div>
+      </div>
+
+      {/* Action grid — always visible */}
+      <div className="p-3 grid grid-cols-3 gap-2">
+        <Link
+          href="/book"
+          className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl text-center transition-all hover:bg-[#c9a84c]/10 border border-[#c9a84c]/15 hover:border-[#c9a84c]/45 focus:outline-none focus:ring-1 focus:ring-[#c9a84c]"
+        >
+          <span className="text-lg select-none">📅</span>
+          <span className="text-[#c9a84c] text-[10px] font-bold leading-tight">Book Now</span>
+          <span className="text-[#f5f0e8]/30 text-[8px]">Direct</span>
+        </Link>
+        <a
+          href="https://wa.me/918828352311?text=Hi!%20I'd%20like%20to%20book%20at%20The%20Mehmaan%20Manor."
+          target="_blank" rel="noopener noreferrer"
+          className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl text-center transition-all hover:bg-[#25d366]/10 border border-[#25d366]/15 hover:border-[#25d366]/45 focus:outline-none focus:ring-1 focus:ring-[#25d366]"
+        >
+          <span className="text-lg select-none">💬</span>
+          <span className="text-[#4caf6e] text-[10px] font-bold leading-tight">WhatsApp</span>
+          <span className="text-[#f5f0e8]/30 text-[8px]">Simran</span>
+        </a>
+        <Link
+          href="/homes"
+          className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl text-center transition-all hover:bg-[#f5f0e8]/6 border border-[#f5f0e8]/10 hover:border-[#f5f0e8]/25 focus:outline-none focus:ring-1 focus:ring-white/30"
+        >
+          <span className="text-lg select-none">🏠</span>
+          <span className="text-[#f5f0e8]/70 text-[10px] font-bold leading-tight">Browse</span>
+          <span className="text-[#f5f0e8]/30 text-[8px]">All homes</span>
+        </Link>
+      </div>
+
+      {/* Simran & Jyoti name row */}
+      <div className="px-4 pb-3 flex items-center justify-center gap-3 border-t border-[#c9a84c]/8 pt-2.5">
+        <span className="text-[#f5f0e8]/40 text-[9px] font-mono">Hosts:</span>
+        <span className="text-[#f5f0e8]/70 text-[10px] font-semibold">Simran</span>
+        <span className="text-[#c9a84c]/30 text-[8px]">•</span>
+        <span className="text-[#f5f0e8]/70 text-[10px] font-semibold">Jyoti</span>
+        <span className="relative flex h-1.5 w-1.5 ml-1">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#4caf6e] opacity-60" />
+          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#4caf6e]" />
+        </span>
+        <span className="text-[#4caf6e]/60 text-[8px] font-mono">Online</span>
+      </div>
+    </div>
+  );
+}
+
+/* ── How It Works board ────────────────────────────────── */
+function HowItWorksBoard() {
+  return (
+    <div className="flex-1 min-w-0 rounded-xl p-3 flex flex-col gap-2.5"
+      style={{ background: "#130e06", border: "1px solid rgba(201,168,76,0.14)", boxShadow: "inset 0 1px 0 rgba(201,168,76,0.07)" }}>
+      <p className="text-[#c9a84c] text-[7.5px] font-mono tracking-[0.28em] uppercase text-center">How It Works</p>
+      {[
+        { n: "01", t: "Browse", d: "Pick a home you love." },
+        { n: "02", t: "Book",   d: "Direct — no fees." },
+        { n: "03", t: "Stay",   d: "Hosts welcome you." },
+      ].map(s => (
+        <div key={s.n} className="flex items-start gap-2">
+          <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-mono font-bold text-[#c9a84c]"
+            style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.2)" }}>
+            {s.n}
+          </span>
+          <div>
+            <p className="text-[#f5f0e8]/80 text-[10px] font-semibold leading-tight">{s.t}</p>
+            <p className="text-[#f5f0e8]/35 text-[8.5px] leading-tight mt-0.5">{s.d}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ── Guest Reviews board ───────────────────────────────── */
 function GuestReviewsBoard() {
   const reviews = [
-    { name: "Priya M.", stars: 5, text: "Felt like home from day one. Simran's hospitality is unmatched!", location: "Delhi" },
-    { name: "Rahul S.", stars: 5, text: "Perfect for work trips. Fast Wi-Fi, clean rooms, no fuss.", location: "Mumbai" },
-    { name: "Anita K.", stars: 5, text: "The Sector 39 apartment is brilliant for families. We'll be back!", location: "Bengaluru" },
+    { name: "Priya M.", loc: "Delhi",     text: "Felt like home! Simran is an amazing host." },
+    { name: "Rahul S.", loc: "Mumbai",    text: "Fast Wi-Fi, spotless rooms, zero hassle." },
+    { name: "Anita K.", loc: "Bengaluru", text: "Sector 39 is perfect for our family trips!" },
   ];
-
-  const [idx, setIdx] = useState(0);
-
+  const [i, setI] = useState(0);
   useEffect(() => {
-    const t = setInterval(() => setIdx(i => (i + 1) % reviews.length), 4000);
+    const t = setInterval(() => setI(x => (x + 1) % reviews.length), 3800);
     return () => clearInterval(t);
   }, [reviews.length]);
 
-  const r = reviews[idx];
+  const r = reviews[i];
 
   return (
-    <div
-      className="rounded-2xl border border-[#c9a84c]/15 p-5 flex flex-col gap-3 h-full"
-      style={{ background: "linear-gradient(135deg,#16100a 0%,#211507 100%)", boxShadow: "inset 0 1px 0 rgba(201,168,76,0.08)" }}
-    >
-      <p className="text-[#c9a84c] text-[9px] font-mono tracking-[0.3em] uppercase text-center">Guest Reviews</p>
-
-      {/* Stars */}
-      <div className="flex items-center justify-center gap-1">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <span key={i} className="text-[#c9a84c] text-sm">★</span>
+    <div className="flex-1 min-w-0 rounded-xl p-3 flex flex-col gap-2"
+      style={{ background: "#130e06", border: "1px solid rgba(201,168,76,0.14)", boxShadow: "inset 0 1px 0 rgba(201,168,76,0.07)" }}>
+      <p className="text-[#c9a84c] text-[7.5px] font-mono tracking-[0.28em] uppercase text-center">Guest Reviews</p>
+      <div className="flex justify-center gap-0.5">
+        {Array.from({ length: 5 }).map((_, j) => (
+          <span key={j} className="text-[#c9a84c] text-[9px]">★</span>
         ))}
-        <span className="text-[#f5f0e8]/40 text-xs font-mono ml-2">4.9 / 5</span>
       </div>
-
-      {/* Review card — auto-cycles */}
-      <div key={idx} className="flex-1 flex flex-col justify-between manor-pop-in">
-        <blockquote className="text-[#f5f0e8]/75 text-xs leading-relaxed italic">
-          &ldquo;{r.text}&rdquo;
-        </blockquote>
-        <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#c9a84c]/10">
+      <div key={i} className="flex-1 flex flex-col justify-between manor-pop-in">
+        <p className="text-[#f5f0e8]/65 text-[9px] leading-relaxed italic">&ldquo;{r.text}&rdquo;</p>
+        <div className="flex items-center justify-between mt-2">
           <div>
-            <p className="text-[#f5f0e8]/80 text-xs font-semibold">{r.name}</p>
-            <p className="text-[#c9a84c]/50 text-[10px] font-mono">{r.location}</p>
+            <p className="text-[#f5f0e8]/75 text-[9px] font-semibold">{r.name}</p>
+            <p className="text-[#c9a84c]/45 text-[8px] font-mono">{r.loc}</p>
           </div>
           <div className="flex gap-1">
-            {reviews.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setIdx(i)}
-                aria-label={`Review ${i + 1}`}
-                className={cn(
-                  "rounded-full transition-all",
-                  i === idx ? "w-4 h-1.5 bg-[#c9a84c]" : "w-1.5 h-1.5 bg-[#c9a84c]/25",
-                )}
-              />
+            {reviews.map((_, j) => (
+              <button key={j} onClick={() => setI(j)} aria-label={`Review ${j + 1}`}
+                className={cn("rounded-full transition-all", j === i ? "w-3 h-1.5 bg-[#c9a84c]" : "w-1.5 h-1.5 bg-[#c9a84c]/25")} />
             ))}
           </div>
         </div>
@@ -903,83 +1120,74 @@ function GuestReviewsBoard() {
   );
 }
 
-/* ── Hosts board ────────────────────────────────────────────── */
+/* ── Hosts board ───────────────────────────────────────── */
 function HostsBoard() {
-  const hosts = [
-    { name: "Simran",  role: "Host & Manager", emoji: "👩‍💼", quote: "We treat every guest like family — because that's what Mehmaan means.", phone: "+91 88283 52311" },
-    { name: "Jyoti",   role: "Host & Support",  emoji: "👩‍🍳", quote: "From check-in to check-out, we're always just a message away.", phone: "+91 87965 68002" },
-  ];
-
   return (
-    <div
-      className="rounded-2xl border border-[#c9a84c]/15 p-5 flex flex-col gap-4 h-full"
-      style={{ background: "linear-gradient(135deg,#16100a 0%,#211507 100%)", boxShadow: "inset 0 1px 0 rgba(201,168,76,0.08)" }}
-    >
-      <p className="text-[#c9a84c] text-[9px] font-mono tracking-[0.3em] uppercase text-center">Meet Your Hosts</p>
-
-      <div className="flex flex-col gap-4">
-        {hosts.map(h => (
-          <div key={h.name} className="flex items-start gap-3">
-            <div
-              className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-xl border border-[#c9a84c]/20"
-              style={{ background: "rgba(201,168,76,0.08)" }}
-            >
-              {h.emoji}
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <p className="text-[#f5f0e8]/90 text-sm font-semibold">{h.name}</p>
-                <span className="text-[#c9a84c]/50 text-[9px] font-mono">{h.role}</span>
-              </div>
-              <p className="text-[#f5f0e8]/40 text-[11px] leading-relaxed mt-0.5 italic">&ldquo;{h.quote}&rdquo;</p>
-              <a
-                href={`tel:${h.phone.replace(/\s/g, "")}`}
-                className="mt-1 inline-flex items-center gap-1 text-[#c9a84c]/60 text-[10px] font-mono hover:text-[#c9a84c] transition-colors"
-              >
-                📞 {h.phone}
-              </a>
-            </div>
+    <div className="flex-1 min-w-0 rounded-xl p-3 flex flex-col gap-2.5"
+      style={{ background: "#130e06", border: "1px solid rgba(201,168,76,0.14)", boxShadow: "inset 0 1px 0 rgba(201,168,76,0.07)" }}>
+      <p className="text-[#c9a84c] text-[7.5px] font-mono tracking-[0.28em] uppercase text-center">Your Hosts</p>
+      {[
+        { name: "Simran", role: "Host & Manager", e: "👩‍💼", ph: "+91 88283 52311" },
+        { name: "Jyoti",  role: "Host & Support",  e: "👩‍🍳", ph: "+91 87965 68002" },
+      ].map(h => (
+        <div key={h.name} className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-full flex items-center justify-center text-sm flex-shrink-0"
+            style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.2)" }}>
+            {h.e}
           </div>
-        ))}
-      </div>
-
-      {/* Response badge */}
-      <div className="flex items-center justify-center gap-2 pt-3 border-t border-[#c9a84c]/10">
-        <span className="relative flex h-2 w-2">
+          <div className="min-w-0">
+            <p className="text-[#f5f0e8]/85 text-[10px] font-semibold">{h.name}</p>
+            <p className="text-[#f5f0e8]/35 text-[8px]">{h.role}</p>
+          </div>
+        </div>
+      ))}
+      <div className="pt-2 border-t border-[#c9a84c]/10 flex items-center justify-center gap-1.5">
+        <span className="relative flex h-1.5 w-1.5">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#4caf6e] opacity-60" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-[#4caf6e]" />
+          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#4caf6e]" />
         </span>
-        <p className="text-[#f5f0e8]/40 text-[10px] font-mono">Responds within 5 minutes</p>
+        <p className="text-[#f5f0e8]/35 text-[8px] font-mono">Responds in &lt;5 min</p>
       </div>
     </div>
   );
 }
 
-/* ─────────────────────────────────────────────────────────────
+/* ══════════════════════════════════════════════════════════
    ROOT EXPORT
-───────────────────────────────────────────────────────────── */
-export function ManorExperience({ properties }: { properties: ManorProperty[] }) {
+══════════════════════════════════════════════════════════ */
+export function ManorExperience({
+  properties,
+  onPhaseChange,
+}: {
+  properties: ManorProperty[];
+  onPhaseChange?: (active: boolean) => void;
+}) {
   const [phase, setPhase] = useState<Phase>("idle");
+
+  const go = useCallback((p: Phase) => {
+    setPhase(p);
+    onPhaseChange?.(p !== "idle");
+  }, [onPhaseChange]);
 
   const start = useCallback(() => {
     document.body.style.overflow = "hidden";
-    setPhase("intro");
-  }, []);
+    go("blackout");
+  }, [go]);
 
   const exit = useCallback(() => {
     document.body.style.overflow = "";
-    setPhase("idle");
-  }, []);
+    go("idle");
+  }, [go]);
 
   useEffect(() => () => { document.body.style.overflow = ""; }, []);
 
   return (
     <>
-      {/* ── Trigger button (idle state only) ── */}
+      {/* ── Trigger button ── shown only when idle */}
       {phase === "idle" && (
         <button
           onClick={start}
-          aria-label="Start the interactive Enter the Manor Experience"
+          aria-label="Start the Enter the Manor Experience"
           className="manor-experience-btn group inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl font-semibold text-sm transition-all duration-300 select-none focus:outline-none focus:ring-2 focus:ring-[#c9a84c] focus:ring-offset-2 focus:ring-offset-transparent"
         >
           <span className="relative flex h-2.5 w-2.5 flex-shrink-0">
@@ -991,10 +1199,11 @@ export function ManorExperience({ properties }: { properties: ManorProperty[] })
         </button>
       )}
 
-      {phase === "intro"    && <IntroScreen    onDone={() => setPhase("exterior")} />}
-      {phase === "exterior" && <ExteriorScreen onEnter={() => setPhase("entering")} onClose={exit} />}
-      {phase === "entering" && <EnterTransition onDone={() => setPhase("interior")} />}
-      {phase === "interior" && <InteriorScreen  properties={properties} onClose={exit} />}
+      {phase === "blackout"  && <BlackoutScreen   onDone={() => go("intro")}    />}
+      {phase === "intro"     && <IntroScreen       onDone={() => go("exterior")} />}
+      {phase === "exterior"  && <ExteriorScreen    onEnter={() => go("entering")} onClose={exit} />}
+      {phase === "entering"  && <EnterTransition   onDone={() => go("interior")} />}
+      {phase === "interior"  && <InteriorScreen    properties={properties} onClose={exit} />}
     </>
   );
 }

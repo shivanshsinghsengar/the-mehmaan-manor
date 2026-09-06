@@ -185,12 +185,13 @@ function HeroSlideshow({ slides }: { slides: { url: string; alt: string }[] }) {
 /* ─────────────────────────────────────────────────────────────────
    Hero Section — light overlay, readable text on any photo
 ───────────────────────────────────────────────────────────────── */
-function HeroSection({ slides, content, discountPercent, discountActive, properties }: {
+function HeroSection({ slides, content, discountPercent, discountActive, properties, onExperienceChange }: {
   slides: { url: string; alt: string }[];
   content: SiteData["content"];
   discountPercent: number;
   discountActive: boolean;
   properties: SiteData["properties"];
+  onExperienceChange: (active: boolean) => void;
 }) {
   return (
     <section className="relative w-full overflow-hidden" style={{ height: "100svh", minHeight: 520 }}>
@@ -277,7 +278,7 @@ function HeroSection({ slides, content, discountPercent, discountActive, propert
           className="mt-5 hero-line-enter"
           style={{ animationDelay: "1.15s" }}
         >
-          <ManorExperience properties={properties} />
+          <ManorExperience properties={properties} onPhaseChange={onExperienceChange} />
         </div>
       </div>
     </section>
@@ -842,8 +843,11 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
     .filter((p, i, arr) => arr.findIndex((x) => x.url === p.url) === i)
     .slice(0, 6);
 
+  // Hide the normal website while the experience is running
+  const [experienceActive, setExperienceActive] = useState(false);
+
   return (
-    <div className="min-h-screen bg-[#faf8f4]">
+    <div className="min-h-screen bg-[#faf8f4]" style={{ visibility: experienceActive ? "hidden" : "visible" }}>
       <FestivalAmbience festival={activeFestival} active={discountActive} />
       <Navigation />
       <DiscountBanner
@@ -859,6 +863,7 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
           discountPercent={discountPercent}
           discountActive={discountActive}
           properties={properties}
+          onExperienceChange={setExperienceActive}
         />
         <StatsRow />
         <PropertyCards
