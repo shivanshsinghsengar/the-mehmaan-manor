@@ -561,6 +561,10 @@
 /* ── Text balance ─────────────────────────────────────────────── */
 .text-balance { text-wrap: balance; }
 
+/* ── Hide scrollbar (keep scroll behaviour) ──────────────────── */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
 /* ══════════════════════════════════════════════════════════════════
    MANOR EXPERIENCE — interactive walkthrough
    ══════════════════════════════════════════════════════════════════ */
