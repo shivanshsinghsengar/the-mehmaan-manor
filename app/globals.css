@@ -560,3 +560,78 @@
 
 /* ── Text balance ─────────────────────────────────────────────── */
 .text-balance { text-wrap: balance; }
+
+/* ══════════════════════════════════════════════════════════════════
+   MANOR EXPERIENCE — interactive walkthrough
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Intro text phases ───────────────────────────────────────── */
+@keyframes manorIntroFadeIn {
+  0%   { opacity: 0; transform: translateY(20px) scale(0.97); }
+  100% { opacity: 1; transform: translateY(0)    scale(1); }
+}
+@keyframes manorIntroFadeOut {
+  0%   { opacity: 1; transform: translateY(0)    scale(1); }
+  100% { opacity: 0; transform: translateY(-16px) scale(0.97); }
+}
+@keyframes manorFloat {
+  0%   { transform: translateY(0px); }
+  100% { transform: translateY(-12px); }
+}
+@keyframes manorEnterZoom {
+  0%   { opacity: 1; transform: scale(1); }
+  60%  { opacity: 0.4; transform: scale(2.5); }
+  100% { opacity: 0; transform: scale(4); }
+}
+@keyframes manorPopIn {
+  0%   { opacity: 0; transform: scale(0.93) translateY(10px); }
+  100% { opacity: 1; transform: scale(1)    translateY(0); }
+}
+@keyframes manorWallPhotoFade {
+  0%   { opacity: 1; }
+  49%  { opacity: 1; }
+  50%  { opacity: 0; }
+  99%  { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.manor-intro-text {
+  will-change: opacity, transform;
+}
+.manor-intro-fadein {
+  animation: manorIntroFadeIn 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.manor-intro-hold {
+  opacity: 1;
+  transform: none;
+}
+.manor-intro-fadeout {
+  animation: manorIntroFadeOut 0.75s ease-in forwards;
+}
+.manor-enter-zoom {
+  animation: manorEnterZoom 1.3s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+.manor-pop-in {
+  animation: manorPopIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.manor-wall-photo-fade {
+  animation: manorWallPhotoFade 3.5s ease-in-out infinite;
+}
+
+/* ── Entry button ────────────────────────────────────────────── */
+.manor-experience-btn {
+  background: linear-gradient(135deg, #1a3328 0%, #0d1f1a 100%);
+  color: #c9a84c;
+  border: 1.5px solid rgba(201, 168, 76, 0.4);
+  box-shadow: 0 4px 20px rgba(26, 51, 40, 0.25), inset 0 1px 0 rgba(201, 168, 76, 0.12);
+}
+.manor-experience-btn:hover {
+  background: linear-gradient(135deg, #1e3d30 0%, #122516 100%);
+  border-color: rgba(201, 168, 76, 0.7);
+  box-shadow: 0 6px 28px rgba(26, 51, 40, 0.35), 0 0 0 1px rgba(201, 168, 76, 0.15), inset 0 1px 0 rgba(201, 168, 76, 0.18);
+  color: #e8d080;
+  transform: translateY(-1px);
+}
+.manor-experience-btn:active {
+  transform: translateY(0px);
+}

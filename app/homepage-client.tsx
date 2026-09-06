@@ -6,6 +6,7 @@ import { ArrowRight, MapPin, Star, CheckCircle2, Clock, Wifi, Tv, UtensilsCrosse
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { heroImageUrl, cardImageUrl } from "@/lib/cloudinary";
+import { ManorExperience } from "@/components/manor-experience";
 
 /* ═══════════════════════════════════════════════════════════════════
    Types
@@ -184,11 +185,12 @@ function HeroSlideshow({ slides }: { slides: { url: string; alt: string }[] }) {
 /* ─────────────────────────────────────────────────────────────────
    Hero Section — light overlay, readable text on any photo
 ───────────────────────────────────────────────────────────────── */
-function HeroSection({ slides, content, discountPercent, discountActive }: {
+function HeroSection({ slides, content, discountPercent, discountActive, properties }: {
   slides: { url: string; alt: string }[];
   content: SiteData["content"];
   discountPercent: number;
   discountActive: boolean;
+  properties: SiteData["properties"];
 }) {
   return (
     <section className="relative w-full overflow-hidden" style={{ height: "100svh", minHeight: 520 }}>
@@ -268,6 +270,14 @@ function HeroSection({ slides, content, discountPercent, discountActive }: {
               🎉 {discountPercent}% off this week
             </span>
           )}
+        </div>
+
+        {/* ── Manor Experience button ── */}
+        <div
+          className="mt-5 hero-line-enter"
+          style={{ animationDelay: "1.15s" }}
+        >
+          <ManorExperience properties={properties} />
         </div>
       </div>
     </section>
@@ -848,6 +858,7 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
           content={content}
           discountPercent={discountPercent}
           discountActive={discountActive}
+          properties={properties}
         />
         <StatsRow />
         <PropertyCards
