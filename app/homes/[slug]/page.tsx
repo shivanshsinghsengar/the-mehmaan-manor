@@ -142,24 +142,48 @@ function QuickFacts({ maxGuests, beds, baths, checkIn, checkOut, cleaningFee }: 
 }
 
 /* ── FAQ accordion ────────────────────────────────────────────── */
-const FAQS = [
+const FAQS_DEFAULT = [
   { q: "What is the check-in process?", a: "We do a personal check-in — Simran or Jyoti will meet you at the property. Check-out is self-service; just lock up and message us." },
   { q: "How many guests can stay?", a: "The guest limit is listed on this page. Extra guests may be considered for a small fee — just ask before booking." },
   { q: "Is parking available?", a: "Yes, free parking is available at both properties. Mention your vehicle when booking." },
   { q: "What is the cancellation policy?", a: "Free cancellation up to 48 hours before check-in. After that, 1 night's charge applies." },
-  { q: "Is cooking allowed?", a: "Yes — the kitchen is fully equipped with basic spices, oil, and cookware. Please clean up after cooking." },
   { q: "Are pets allowed?", a: "Small, well-behaved pets may be considered case-by-case. Please ask before booking." },
   { q: "How do I pay?", a: "We accept UPI, bank transfer, and Razorpay. Direct booking means you pay us — no third-party fees." },
   { q: "Can I book for a group/party?", a: "Yes, but please disclose the nature when booking. Noise must be kept reasonable after 10 PM per society rules." },
 ];
 
-function FAQSection() {
+const COOKING_FAQ_BY_SLUG: Record<string, { q: string; a: string }> = {
+  "sushant-lok": {
+    q: "Is cooking allowed?",
+    a: "Yes — the kitchen is available with basic utensils. Please clean up after use.",
+  },
+  "jharsa-village": {
+    q: "Is cooking allowed?",
+    a: "Yes, cooking is allowed. We provide a microwave and basic cutlery. Cookware, oil, spices, and other cooking essentials are not provided. An induction cooktop is available in the 2BHK; for other room types it can be arranged on request.",
+  },
+};
+
+function getFaqs(slug: string) {
+  const cookingFaq = COOKING_FAQ_BY_SLUG[slug] ?? {
+    q: "Is cooking allowed?",
+    a: "Yes — basic kitchen facilities are provided. Please clean up after use.",
+  };
+  // Insert cooking FAQ after cancellation policy (index 3)
+  return [
+    ...FAQS_DEFAULT.slice(0, 4),
+    cookingFaq,
+    ...FAQS_DEFAULT.slice(4),
+  ];
+}
+
+function FAQSection({ slug }: { slug: string }) {
   const [open, setOpen] = useState<number | null>(null);
+  const faqs = getFaqs(slug);
   return (
     <div>
       <h2 className="text-xl font-display text-forest mb-4">Frequently Asked Questions</h2>
       <div className="space-y-2">
-        {FAQS.map((faq, i) => (
+        {faqs.map((faq, i) => (
           <div key={i} className="bg-white border border-forest/8 rounded-xl overflow-hidden">
             <button
               className="w-full flex items-center justify-between px-4 py-3.5 text-left hover:bg-[#faf8f4] transition-colors"
@@ -857,7 +881,7 @@ export default function PropertyPage() {
                 </div>
 
                 {/* FAQ */}
-                <FAQSection />
+                <FAQSection slug={slug} />
 
                 {/* Mobile-only CTA (shown above sticky bar) */}
                 <div className="lg:hidden pt-2 pb-28">
