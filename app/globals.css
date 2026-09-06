@@ -610,6 +610,14 @@
 .manor-walkin-arch { animation: manorWalkinArch 1.85s cubic-bezier(0.4,0,0.8,1) forwards; }
 .manor-walkin-glow { animation: manorWalkinGlow 1.85s ease forwards; }
 
+/* ── Gate enter transition ───────────────────────────────────── */
+@keyframes manorGateEnter {
+  0%   { transform: scale(1);   opacity: 1; }
+  60%  { transform: scale(7);   opacity: 0.8; }
+  100% { transform: scale(18);  opacity: 0; }
+}
+.manor-gate-enter { animation: manorGateEnter 1.15s cubic-bezier(0.4,0,0.8,1) forwards; }
+
 /* ── Host welcome bubble ─────────────────────────────────────── */
 @keyframes manorWelcomeIn {
   0%   { opacity: 0; transform: translateY(20px) scale(0.95); }
