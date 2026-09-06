@@ -185,13 +185,11 @@ function HeroSlideshow({ slides }: { slides: { url: string; alt: string }[] }) {
 /* ─────────────────────────────────────────────────────────────────
    Hero Section — light overlay, readable text on any photo
 ───────────────────────────────────────────────────────────────── */
-function HeroSection({ slides, content, discountPercent, discountActive, properties, onExperienceChange }: {
+function HeroSection({ slides, content, discountPercent, discountActive }: {
   slides: { url: string; alt: string }[];
   content: SiteData["content"];
   discountPercent: number;
   discountActive: boolean;
-  properties: SiteData["properties"];
-  onExperienceChange: (active: boolean) => void;
 }) {
   return (
     <section className="relative w-full overflow-hidden" style={{ height: "100svh", minHeight: 520 }}>
@@ -271,14 +269,6 @@ function HeroSection({ slides, content, discountPercent, discountActive, propert
               🎉 {discountPercent}% off this week
             </span>
           )}
-        </div>
-
-        {/* ── Manor Experience button ── */}
-        <div
-          className="mt-5 hero-line-enter"
-          style={{ animationDelay: "1.15s" }}
-        >
-          <ManorExperience properties={properties} onPhaseChange={onExperienceChange} />
         </div>
       </div>
     </section>
@@ -847,41 +837,54 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
   const [experienceActive, setExperienceActive] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#faf8f4]" style={{ visibility: experienceActive ? "hidden" : "visible" }}>
-      <FestivalAmbience festival={activeFestival} active={discountActive} />
-      <Navigation />
-      <DiscountBanner
-        discountPercent={discountPercent}
-        activeFestival={activeFestival}
-        discountActive={discountActive}
+    <>
+      {/* ── Manor Experience — rendered OUTSIDE the site wrapper so fixed overlays are never hidden ── */}
+      <ManorExperience
+        properties={properties}
+        onPhaseChange={setExperienceActive}
       />
 
-      <main id="main-content">
-        <HeroSection
-          slides={heroSlides}
-          content={content}
+      {/* ── Normal website — hidden (not removed) while experience runs ── */}
+      <div
+        className="min-h-screen bg-[#faf8f4]"
+        style={{
+          visibility: experienceActive ? "hidden" : "visible",
+          pointerEvents: experienceActive ? "none" : "auto",
+        }}
+      >
+        <FestivalAmbience festival={activeFestival} active={discountActive} />
+        <Navigation />
+        <DiscountBanner
           discountPercent={discountPercent}
-          discountActive={discountActive}
-          properties={properties}
-          onExperienceChange={setExperienceActive}
-        />
-        <StatsRow />
-        <PropertyCards
-          properties={properties}
-          propertyCards={propertyCards}
-          discountPercent={discountPercent}
+          activeFestival={activeFestival}
           discountActive={discountActive}
         />
-        <HowItWorks />
-        <AboutSection text={content.philosophyText} />
-        <AmenitiesStrip />
-        <GallerySection photos={allPhotos} />
-        <ReviewsSection />
-        <NeighbourhoodSection />
-        <FinalCTA />
-      </main>
 
-      <Footer />
-    </div>
+        <main id="main-content">
+          <HeroSection
+            slides={heroSlides}
+            content={content}
+            discountPercent={discountPercent}
+            discountActive={discountActive}
+          />
+          <StatsRow />
+          <PropertyCards
+            properties={properties}
+            propertyCards={propertyCards}
+            discountPercent={discountPercent}
+            discountActive={discountActive}
+          />
+          <HowItWorks />
+          <AboutSection text={content.philosophyText} />
+          <AmenitiesStrip />
+          <GallerySection photos={allPhotos} />
+          <ReviewsSection />
+          <NeighbourhoodSection />
+          <FinalCTA />
+        </main>
+
+        <Footer />
+      </div>
+    </>
   );
 }

@@ -21,7 +21,7 @@
  *     └─ exit button → idle
  */
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 
 /* ─── types ──────────────────────────────────────────────── */
@@ -1183,20 +1183,22 @@ export function ManorExperience({
 
   return (
     <>
-      {/* ── Trigger button ── shown only when idle */}
+      {/* ── Trigger button — fixed over the hero, bottom-left ── */}
       {phase === "idle" && (
-        <button
-          onClick={start}
-          aria-label="Start the Enter the Manor Experience"
-          className="manor-experience-btn group inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl font-semibold text-sm transition-all duration-300 select-none focus:outline-none focus:ring-2 focus:ring-[#c9a84c] focus:ring-offset-2 focus:ring-offset-transparent"
-        >
-          <span className="relative flex h-2.5 w-2.5 flex-shrink-0">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#c9a84c] opacity-55" />
-            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#c9a84c]" />
-          </span>
-          Enter the Manor Experience
-          <span className="group-hover:translate-x-1 transition-transform duration-200" aria-hidden="true">→</span>
-        </button>
+        <div className="fixed z-[100] bottom-[max(5vh,80px)] left-5 md:left-12 lg:left-20 hero-line-enter" style={{ animationDelay: "1.2s" }}>
+          <button
+            onClick={start}
+            aria-label="Start the Enter the Manor Experience"
+            className="manor-experience-btn group inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl font-semibold text-sm transition-all duration-300 select-none focus:outline-none focus:ring-2 focus:ring-[#c9a84c] focus:ring-offset-2 focus:ring-offset-transparent"
+          >
+            <span className="relative flex h-2.5 w-2.5 flex-shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#c9a84c] opacity-55" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#c9a84c]" />
+            </span>
+            Enter the Manor Experience
+            <span className="group-hover:translate-x-1 transition-transform duration-200" aria-hidden="true">→</span>
+          </button>
+        </div>
       )}
 
       {phase === "blackout"  && <BlackoutScreen   onDone={() => go("intro")}    />}
