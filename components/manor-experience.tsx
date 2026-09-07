@@ -194,73 +194,165 @@ function ExteriorScreen({
 }) {
   const [hovered, setHovered] = useState(false);
   const [visible, setVisible] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Fade in
   useEffect(() => { const t = setTimeout(() => setVisible(true), 60); return () => clearTimeout(t); }, []);
+
+  // Mouse parallax tracking
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setMousePos({
+      x: (e.clientX - rect.left) / rect.width,
+      y: (e.clientY - rect.top) / rect.height,
+    });
+  }, []);
+
+  // Parallax offset — subtle 18px max
+  const px = (mousePos.x - 0.5) * -18;
+  const py = (mousePos.y - 0.5) * -10;
+
+  // Golden particles data (memoised)
+  const particles = React.useMemo(() => Array.from({ length: 22 }, (_, i) => ({
+    id: i,
+    left: `${5 + (i * 4.2) % 90}%`,
+    size: 1.5 + (i % 3) * 0.8,
+    duration: 3.5 + (i % 5) * 0.9,
+    delay: (i * 0.38) % 4,
+    opacity: 0.18 + (i % 4) * 0.10,
+  })), []);
 
   return (
     <div
+      ref={containerRef}
       className="fixed inset-0 z-[9991] overflow-hidden"
-      style={{
-        opacity: visible ? 1 : 0,
-        transition: "opacity 1s ease",
-      }}
+      style={{ opacity: visible ? 1 : 0, transition: "opacity 1.2s ease" }}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => { setHovered(false); setMousePos({ x: 0.5, y: 0.5 }); }}
       role="dialog"
       aria-modal="true"
     >
-      {/* ── Full-screen photorealistic background image ── */}
-      <img
-        src="/images/s57/manor-exterior.jpg"
-        alt="The Mehmaan Manor exterior"
-        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-        draggable={false}
+      {/* ══ 1. BACKGROUND IMAGE — Ken Burns slow zoom + parallax ══ */}
+      <div
+        className="absolute inset-0"
+        style={{
+          transform: `scale(${hovered ? 1.06 : 1.04}) translate(${px}px, ${py}px)`,
+          transition: hovered
+            ? "transform 0.8s cubic-bezier(0.22,1,0.36,1)"
+            : "transform 6s ease-out",
+          willChange: "transform",
+        }}
+      >
+        <img
+          src="/images/s57/manor-exterior.jpg"
+          alt="The Mehmaan Manor exterior"
+          className="w-full h-full object-cover"
+          draggable={false}
+          style={{
+            animation: "manorKenBurns 18s ease-in-out infinite alternate",
+          }}
+        />
+      </div>
+
+      {/* ══ 2. VIGNETTE — dark edges, cinematic depth ══ */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: "radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(0,0,0,0.55) 100%)",
+          transition: "opacity 0.5s ease",
+          opacity: hovered ? 0.7 : 1,
+        }}
       />
 
-      {/* ── Subtle dark gradient at bottom so "Step inside" pill is legible ── */}
+      {/* ══ 3. BOTTOM GRADIENT — makes pill readable ══ */}
       <div
         className="absolute bottom-0 left-0 right-0 pointer-events-none"
-        style={{ height: "22%", background: "linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 100%)" }}
+        style={{ height: "30%", background: "linear-gradient(to top, rgba(0,0,0,0.60) 0%, transparent 100%)" }}
       />
 
-      {/* ── Clickable overlay on the building area — full screen click triggers enter ── */}
+      {/* ══ 4. TOP GRADIENT — softens top edge ══ */}
+      <div
+        className="absolute top-0 left-0 right-0 pointer-events-none"
+        style={{ height: "18%", background: "linear-gradient(to bottom, rgba(0,0,0,0.38) 0%, transparent 100%)" }}
+      />
+
+      {/* ══ 5. HOVER GOLDEN SHIMMER ══ */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `radial-gradient(ellipse 60% 55% at ${mousePos.x * 100}% ${mousePos.y * 100}%, rgba(201,168,76,0.10) 0%, transparent 70%)`,
+          opacity: hovered ? 1 : 0,
+          transition: "opacity 0.4s ease",
+        }}
+      />
+
+      {/* ══ 6. FLOATING GOLDEN PARTICLES ══ */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+        {particles.map(p => (
+          <span
+            key={p.id}
+            className="absolute rounded-full"
+            style={{
+              left: p.left,
+              bottom: "-4px",
+              width: p.size,
+              height: p.size,
+              background: "#c9a84c",
+              opacity: visible ? p.opacity : 0,
+              animation: `manorParticleRise ${p.duration}s ease-in ${p.delay}s infinite`,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* ══ 7. CLICKABLE FULL-SCREEN OVERLAY ══ */}
       <button
         onClick={onEnter}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        onFocus={() => setHovered(true)}
-        onBlur={() => setHovered(false)}
         aria-label="Click to enter the Manor"
-        className="absolute inset-0 w-full h-full focus:outline-none"
-        style={{ background: hovered ? "rgba(201,168,76,0.04)" : "transparent", transition: "background 0.3s ease" }}
+        className="absolute inset-0 w-full h-full focus:outline-none cursor-pointer"
+        style={{ background: "transparent" }}
       />
 
-      {/* ── "Step inside" pill — bottom center ── */}
+      {/* ══ 8. "STEP INSIDE" PILL — animated glow pulse ══ */}
       <div
         className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-none"
-        style={{ opacity: visible ? 1 : 0, transition: "opacity 1.2s ease 0.8s", zIndex: 10 }}
+        style={{ opacity: visible ? 1 : 0, transition: "opacity 1.4s ease 1s", zIndex: 10 }}
       >
         <span
-          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-[13px] font-light tracking-widest select-none"
+          className="inline-flex items-center gap-2.5 px-7 py-3 rounded-full select-none"
           style={{
-            background: hovered ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.15)",
-            color: "rgba(255,255,255,0.92)",
-            border: "1px solid rgba(255,255,255,0.30)",
-            backdropFilter: "blur(12px)",
-            transition: "all 0.3s ease",
-            letterSpacing: "0.15em",
             fontFamily: "Georgia, serif",
+            fontSize: "clamp(12px, 1.1vw, 14px)",
+            letterSpacing: "0.18em",
+            color: hovered ? "#fff" : "rgba(255,255,255,0.88)",
+            background: hovered
+              ? "rgba(201,168,76,0.22)"
+              : "rgba(255,255,255,0.10)",
+            border: `1px solid ${hovered ? "rgba(201,168,76,0.65)" : "rgba(255,255,255,0.28)"}`,
+            backdropFilter: "blur(14px)",
+            boxShadow: hovered
+              ? "0 0 32px 8px rgba(201,168,76,0.20), inset 0 1px 0 rgba(255,255,255,0.15)"
+              : "0 4px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.10)",
+            transition: "all 0.35s ease",
+            animation: "manorPillPulse 3s ease-in-out infinite",
           }}
         >
-          {hovered ? "✦  Click to Enter  ✦" : "↑  Step inside the Manor"}
+          <span style={{ opacity: 0.7 }}>↑</span>
+          Step inside the Manor
         </span>
       </div>
 
-      {/* ── Top-center: location pill ── */}
+      {/* ══ 9. LOCATION PILL — top center ══ */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2" style={{ zIndex: 10 }}>
         <span
           className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-mono tracking-widest pointer-events-none"
           style={{
-            background: "rgba(0,0,0,0.30)",
-            backdropFilter: "blur(10px)",
-            color: "rgba(255,255,255,0.75)",
+            background: "rgba(0,0,0,0.32)",
+            backdropFilter: "blur(12px)",
+            color: "rgba(255,255,255,0.78)",
             border: "1px solid rgba(255,255,255,0.15)",
           }}
         >
@@ -268,7 +360,7 @@ function ExteriorScreen({
         </span>
       </div>
 
-      {/* ── Top-right: Exit ── */}
+      {/* ══ 10. EXIT BUTTON ══ */}
       <ExitBtn onClick={onClose} />
     </div>
   );
