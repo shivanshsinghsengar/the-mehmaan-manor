@@ -316,47 +316,96 @@ function ExteriorScreen({
         style={{ background: "transparent" }}
       />
 
-      {/* ══ 8. "STEP INSIDE" PILL — animated glow pulse ══ */}
+      {/* ══ 8. "STEP INSIDE" — Premium exotic entry button ══ */}
       <div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-none"
+        className="absolute bottom-10 left-1/2 -translate-x-1/2"
         style={{ opacity: visible ? 1 : 0, transition: "opacity 1.4s ease 1s", zIndex: 10 }}
       >
-        <span
-          className="inline-flex items-center gap-2.5 px-7 py-3 rounded-full select-none"
-          style={{
-            fontFamily: "Georgia, serif",
-            fontSize: "clamp(12px, 1.1vw, 14px)",
-            letterSpacing: "0.18em",
-            color: hovered ? "#fff" : "rgba(255,255,255,0.88)",
-            background: hovered
-              ? "rgba(201,168,76,0.22)"
-              : "rgba(255,255,255,0.10)",
-            border: `1px solid ${hovered ? "rgba(201,168,76,0.65)" : "rgba(255,255,255,0.28)"}`,
-            backdropFilter: "blur(14px)",
-            boxShadow: hovered
-              ? "0 0 32px 8px rgba(201,168,76,0.20), inset 0 1px 0 rgba(255,255,255,0.15)"
-              : "0 4px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.10)",
-            transition: "all 0.35s ease",
-            animation: "manorPillPulse 3s ease-in-out infinite",
-          }}
+        <button
+          onClick={onEnter}
+          className="group relative flex flex-col items-center gap-3 focus:outline-none"
         >
-          <span style={{ opacity: 0.7 }}>↑</span>
-          Step inside the Manor
-        </span>
+          {/* Thin gold line above */}
+          <div style={{
+            width: hovered ? "80px" : "40px",
+            height: "1px",
+            background: "linear-gradient(90deg, transparent, #c9a84c, transparent)",
+            transition: "width 0.5s ease",
+            margin: "0 auto",
+          }} />
+
+          {/* Main pill */}
+          <span
+            className="inline-flex items-center gap-3 select-none"
+            style={{
+              fontFamily: "Georgia, serif",
+              fontSize: "clamp(11px, 1vw, 13px)",
+              letterSpacing: "0.28em",
+              textTransform: "uppercase",
+              color: hovered ? "#c9a84c" : "rgba(255,255,255,0.95)",
+              background: hovered
+                ? "rgba(0,0,0,0.75)"
+                : "rgba(0,0,0,0.55)",
+              border: `1px solid ${hovered ? "rgba(201,168,76,0.70)" : "rgba(255,255,255,0.20)"}`,
+              backdropFilter: "blur(20px)",
+              padding: "14px 36px",
+              borderRadius: "2px",
+              boxShadow: hovered
+                ? "0 0 40px rgba(201,168,76,0.18), inset 0 0 20px rgba(201,168,76,0.05)"
+                : "0 8px 32px rgba(0,0,0,0.40)",
+              transition: "all 0.4s cubic-bezier(0.22,1,0.36,1)",
+              animation: "manorPillPulse 4s ease-in-out infinite",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {/* Left ornament */}
+            <span style={{
+              display: "inline-block",
+              width: "18px",
+              height: "1px",
+              background: hovered ? "#c9a84c" : "rgba(255,255,255,0.35)",
+              transition: "background 0.3s ease",
+            }} />
+            Step inside the Manor
+            {/* Right ornament */}
+            <span style={{
+              display: "inline-block",
+              width: "18px",
+              height: "1px",
+              background: hovered ? "#c9a84c" : "rgba(255,255,255,0.35)",
+              transition: "background 0.3s ease",
+            }} />
+          </span>
+
+          {/* Thin gold line below */}
+          <div style={{
+            width: hovered ? "80px" : "40px",
+            height: "1px",
+            background: "linear-gradient(90deg, transparent, #c9a84c, transparent)",
+            transition: "width 0.5s ease",
+            margin: "0 auto",
+          }} />
+        </button>
       </div>
 
-      {/* ══ 9. LOCATION PILL — top center ══ */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2" style={{ zIndex: 10 }}>
+      {/* ══ 9. LOCATION PILL — top center, minimal ══ */}
+      <div className="absolute top-5 left-1/2 -translate-x-1/2" style={{ zIndex: 10 }}>
         <span
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-mono tracking-widest pointer-events-none"
+          className="inline-flex items-center gap-2 px-5 py-2 pointer-events-none select-none"
           style={{
-            background: "rgba(0,0,0,0.32)",
-            backdropFilter: "blur(12px)",
-            color: "rgba(255,255,255,0.78)",
-            border: "1px solid rgba(255,255,255,0.15)",
+            fontFamily: "monospace",
+            fontSize: "10px",
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            color: "rgba(255,255,255,0.65)",
+            background: "rgba(0,0,0,0.38)",
+            backdropFilter: "blur(16px)",
+            border: "1px solid rgba(255,255,255,0.10)",
+            borderRadius: "2px",
           }}
         >
-          ✦ Gurugram · Haryana · India
+          <span style={{ color: "#c9a84c", fontSize: "8px" }}>◆</span>
+          Gurugram · Haryana · India
         </span>
       </div>
 
