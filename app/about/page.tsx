@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import { Phone, MessageCircle, Heart, Star, Users } from "lucide-react";
+import { Phone, MessageCircle, Heart, Star, Users, User } from "lucide-react";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 
@@ -163,8 +163,8 @@ export default function AboutPage() {
                   style={{ transitionDelay: `${i * 80}ms` }}
                 >
                   {/* Avatar */}
-                  <div className="w-16 h-16 rounded-full bg-[#eee9df] flex items-center justify-center mx-auto mb-4 text-2xl">
-                    {member.emoji}
+                  <div className="w-16 h-16 rounded-full bg-[#eee9df] flex items-center justify-center mx-auto mb-4 border border-forest/10">
+                    <User size={28} className="text-forest/50" />
                   </div>
                   <h3 className="font-display text-xl text-forest">{member.name}</h3>
                   <p className="text-xs text-gold font-mono tracking-wide mt-0.5 mb-3">{member.title}</p>
