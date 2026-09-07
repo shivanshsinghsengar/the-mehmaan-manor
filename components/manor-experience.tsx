@@ -202,51 +202,73 @@ function ExteriorScreen({
       style={{
         opacity: visible ? 1 : 0,
         transition: "opacity 0.7s ease",
-        background: "linear-gradient(180deg,#6fa8cf 0%,#aed4ea 22%,#c8e6c0 55%,#7aaa6a 100%)",
+        /* Sky: light steel-blue top → pale blue-green mid → grass green bottom — matches screenshot */
+        background: "linear-gradient(180deg, #7bb8d4 0%, #a8d4e8 30%, #b8ddb0 58%, #72a862 100%)",
       }}
       role="dialog"
       aria-modal="true"
     >
-      {/* Clouds */}
-      {[{ t: "7%", l: "8%", w: "28%" }, { t: "12%", l: "55%", w: "20%" }, { t: "5%", l: "35%", w: "16%" }].map((c, i) => (
-        <div key={i} className="absolute rounded-full blur-sm pointer-events-none"
-          style={{ top: c.t, left: c.l, width: c.w, height: "3%", background: "rgba(255,255,255,0.20)" }} />
-      ))}
-      {/* Ground */}
-      <div className="absolute bottom-0 left-0 right-0 pointer-events-none"
-        style={{ height: "30%", background: "linear-gradient(180deg,#7aaa6a 0%,#4d7840 100%)" }} />
-      {/* Path */}
-      <div className="absolute bottom-0 left-1/2 pointer-events-none"
-        style={{ transform: "translateX(-50%)", width: "clamp(60px,10vw,120px)", height: "33%",
-          background: "linear-gradient(180deg,#c8b890 0%,#9a8c6a 100%)",
-          clipPath: "polygon(10% 0%,90% 0%,100% 100%,0% 100%)" }} />
-      {/* Trees */}
-      <ExtTrees side="left" /><ExtTrees side="right" />
+      {/* ── Sky clouds (softer, rounder, like screenshot) ── */}
+      <div className="absolute pointer-events-none"
+        style={{ top: "6%", left: "5%", width: "22%", height: "5%",
+          background: "rgba(255,255,255,0.32)", borderRadius: "50%", filter: "blur(14px)" }} />
+      <div className="absolute pointer-events-none"
+        style={{ top: "3%", left: "9%", width: "14%", height: "4%",
+          background: "rgba(255,255,255,0.26)", borderRadius: "50%", filter: "blur(10px)" }} />
+      <div className="absolute pointer-events-none"
+        style={{ top: "8%", left: "56%", width: "18%", height: "4.5%",
+          background: "rgba(255,255,255,0.28)", borderRadius: "50%", filter: "blur(12px)" }} />
+      <div className="absolute pointer-events-none"
+        style={{ top: "5%", left: "63%", width: "10%", height: "3.5%",
+          background: "rgba(255,255,255,0.22)", borderRadius: "50%", filter: "blur(9px)" }} />
 
-      {/* Building */}
+      {/* ── Green ground ── */}
+      <div className="absolute bottom-0 left-0 right-0 pointer-events-none"
+        style={{ height: "28%", background: "linear-gradient(180deg, #72a862 0%, #4a7a38 100%)" }} />
+
+      {/* ── Sandy path (trapezoid — wider at bottom) ── */}
+      <div className="absolute bottom-0 left-1/2 pointer-events-none"
+        style={{
+          transform: "translateX(-50%)",
+          width: "clamp(80px, 13vw, 160px)",
+          height: "32%",
+          background: "linear-gradient(180deg, #c8b88a 0%, #a89868 100%)",
+          clipPath: "polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%)",
+        }} />
+
+      {/* ── Trees ── */}
+      <ExtTrees side="left" />
+      <ExtTrees side="right" />
+
+      {/* ── Building (clickable, centered) ── */}
       <button
         onClick={onEnter}
         onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
         onFocus={() => setHovered(true)} onBlur={() => setHovered(false)}
         aria-label="Click to enter the Manor"
-        className="absolute left-1/2 bottom-[26%] focus:outline-none"
+        className="absolute left-1/2 focus:outline-none"
         style={{
-          width: "clamp(200px,38vw,480px)",
+          /* vertically: building sits so bottom is at ~72% from top = 28% from bottom = above the grass */
+          bottom: "27%",
+          width: "clamp(220px, 40vw, 500px)",
           transform: `translateX(-50%) scale(${hovered ? 1.03 : 1})`,
           transition: "transform 0.5s cubic-bezier(0.22,1,0.36,1)",
         }}
       >
         <BuildingSVG hovered={hovered} />
-        <div className="mt-3 flex justify-center"
+
+        {/* "Step inside" pill — centered below building */}
+        <div className="mt-4 flex justify-center"
           style={{ opacity: visible ? 1 : 0, transition: "opacity 1.2s ease 0.8s" }}>
           <span
-            className="px-5 py-2 rounded-full text-xs font-mono tracking-widest"
+            className="px-5 py-2 rounded-full text-[11px] font-mono tracking-widest select-none"
             style={{
-              background: hovered ? "rgba(26,51,40,0.90)" : "rgba(0,0,0,0.38)",
-              color: hovered ? "#c9a84c" : "rgba(255,255,255,0.75)",
-              border: `1px solid ${hovered ? "rgba(201,168,76,0.45)" : "rgba(255,255,255,0.18)"}`,
-              backdropFilter: "blur(8px)",
+              background: hovered ? "rgba(20,45,32,0.92)" : "rgba(0,0,0,0.42)",
+              color: hovered ? "#c9a84c" : "rgba(255,255,255,0.80)",
+              border: `1px solid ${hovered ? "rgba(201,168,76,0.50)" : "rgba(255,255,255,0.22)"}`,
+              backdropFilter: "blur(10px)",
               transition: "all 0.3s ease",
+              letterSpacing: "0.18em",
             }}
           >
             {hovered ? "✦  Click to Enter  ✦" : "↑  Step inside the Manor"}
@@ -254,13 +276,49 @@ function ExteriorScreen({
         </div>
       </button>
 
-      {/* Location */}
+      {/* ── Top-left: title + tagline (matches blurred text in screenshot) ── */}
+      <div
+        className="absolute top-4 left-4 md:left-5 pointer-events-none"
+        style={{ opacity: visible ? 1 : 0, transition: "opacity 1s ease 0.4s" }}
+      >
+        <p style={{
+          fontFamily: "Georgia, serif",
+          fontSize: "clamp(0.95rem, 1.8vw, 1.4rem)",
+          color: "rgba(255,255,255,0.90)",
+          letterSpacing: "0.05em",
+          lineHeight: 1.2,
+          textShadow: "0 1px 10px rgba(0,0,0,0.30)",
+        }}>
+          The Mehmaan Manor
+        </p>
+        <p style={{
+          fontFamily: "monospace",
+          fontSize: "clamp(0.58rem, 0.85vw, 0.68rem)",
+          color: "rgba(201,168,76,0.85)",
+          letterSpacing: "0.20em",
+          textTransform: "uppercase",
+          marginTop: "3px",
+        }}>
+          Feel like Mehmaan
+        </p>
+      </div>
+
+      {/* ── Top-center: location pill ── */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none">
-        <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[11px] font-mono tracking-widest"
-          style={{ background: "rgba(0,0,0,0.28)", backdropFilter: "blur(8px)", color: "rgba(255,255,255,0.65)", border: "1px solid rgba(255,255,255,0.1)" }}>
+        <span
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-mono tracking-widest"
+          style={{
+            background: "rgba(0,0,0,0.32)",
+            backdropFilter: "blur(10px)",
+            color: "rgba(255,255,255,0.70)",
+            border: "1px solid rgba(255,255,255,0.12)",
+          }}
+        >
           📍 Gurugram · Haryana · India
         </span>
       </div>
+
+      {/* ── Top-right: Exit ── */}
       <ExitBtn onClick={onClose} />
     </div>
   );
@@ -314,22 +372,32 @@ function BuildingSVG({ hovered }: { hovered: boolean }) {
 
 function ExtTrees({ side }: { side: "left" | "right" }) {
   const isL = side === "left";
-  const specs = [{ p: isL ? "6%" : "90%", s: 1.1 }, { p: isL ? "14%" : "81%", s: 1.45 }, { p: isL ? "2%" : "96%", s: 0.8 }];
+  /* Screenshot: left side has 3 trees roughly at 3%, 10%, 17% from left
+     right side mirrored. Mid one is tallest. */
+  const specs = isL
+    ? [{ p: "3%",  s: 1.05 }, { p: "11%", s: 1.50 }, { p: "18%", s: 0.85 }]
+    : [{ p: "82%", s: 0.85 }, { p: "89%", s: 1.50 }, { p: "97%", s: 1.05 }];
+
   return (
     <>
       {specs.map((t, i) => {
-        const B = Math.round(t.s * 32);
+        const B = Math.round(t.s * 34);
         return (
-          <div key={i} className="absolute bottom-[24%] pointer-events-none"
-            style={{ left: t.p, transform: "translateX(-50%)", width: B * 2 }}>
-            {[1, 0.76, 0.56].map((sc, j) => (
+          <div key={i} className="absolute pointer-events-none"
+            style={{ bottom: "26%", left: t.p, transform: "translateX(-50%)", width: B * 2 }}>
+            {/* Three stacked circles for foliage */}
+            {[1, 0.74, 0.54].map((sc, j) => (
               <div key={j} className="rounded-full mx-auto"
-                style={{ width: B * 2 * sc, height: B * 1.9 * sc,
-                  marginTop: j === 0 ? 0 : -Math.round(B * 1.9 * sc * 0.36),
-                  background: ["#386128", "#477534", "#549040"][j] }} />
+                style={{
+                  width: B * 2 * sc,
+                  height: B * 2 * sc,
+                  marginTop: j === 0 ? 0 : -Math.round(B * 2 * sc * 0.38),
+                  background: ["#3a6b28", "#4a7c34", "#569042"][j],
+                }} />
             ))}
+            {/* Trunk */}
             <div className="mx-auto rounded-sm"
-              style={{ width: Math.round(B * 0.32), height: Math.round(t.s * 24), background: "#5c3820" }} />
+              style={{ width: Math.round(B * 0.28), height: Math.round(t.s * 22), background: "#5a3618" }} />
           </div>
         );
       })}
