@@ -197,221 +197,160 @@ function ExteriorScreen({
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Fade in
   useEffect(() => { const t = setTimeout(() => setVisible(true), 60); return () => clearTimeout(t); }, []);
 
-  // Mouse parallax tracking
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
-    setMousePos({
-      x: (e.clientX - rect.left) / rect.width,
-      y: (e.clientY - rect.top) / rect.height,
-    });
+    setMousePos({ x: (e.clientX - rect.left) / rect.width, y: (e.clientY - rect.top) / rect.height });
   }, []);
 
-  // Parallax offset — subtle 18px max
-  const px = (mousePos.x - 0.5) * -18;
-  const py = (mousePos.y - 0.5) * -10;
-
-  // Golden particles data (memoised)
-  const particles = React.useMemo(() => Array.from({ length: 22 }, (_, i) => ({
-    id: i,
-    left: `${5 + (i * 4.2) % 90}%`,
-    size: 1.5 + (i % 3) * 0.8,
-    duration: 3.5 + (i % 5) * 0.9,
-    delay: (i * 0.38) % 4,
-    opacity: 0.18 + (i % 4) * 0.10,
+  const particles = React.useMemo(() => Array.from({ length: 18 }, (_, i) => ({
+    id: i, left: `${5 + (i * 5.1) % 90}%`,
+    size: 1.5 + (i % 3) * 0.7,
+    duration: 4 + (i % 5) * 0.8,
+    delay: (i * 0.42) % 4.5,
+    opacity: 0.15 + (i % 4) * 0.08,
   })), []);
 
   return (
     <div
       ref={containerRef}
       className="fixed inset-0 z-[9991] overflow-hidden"
-      style={{ opacity: visible ? 1 : 0, transition: "opacity 1.2s ease" }}
+      style={{
+        opacity: visible ? 1 : 0,
+        transition: "opacity 0.8s ease",
+        background: "linear-gradient(180deg, #8ec5d6 0%, #9dcec2 38%, #a8d5b8 55%, #7db868 100%)",
+      }}
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => { setHovered(false); setMousePos({ x: 0.5, y: 0.5 }); }}
       role="dialog"
       aria-modal="true"
     >
-      {/* ══ 1. BACKGROUND IMAGE — Ken Burns slow zoom + parallax ══ */}
-      <div
-        className="absolute inset-0"
-        style={{
-          transform: `scale(${hovered ? 1.06 : 1.04}) translate(${px}px, ${py}px)`,
-          transition: hovered
-            ? "transform 0.8s cubic-bezier(0.22,1,0.36,1)"
-            : "transform 6s ease-out",
-          willChange: "transform",
-        }}
-      >
-        <img
-          src="/images/s57/manor-exterior.jpg"
-          alt="The Mehmaan Manor exterior"
-          className="w-full h-full object-cover"
-          draggable={false}
-          style={{
-            animation: "manorKenBurns 18s ease-in-out infinite alternate",
-          }}
-        />
-      </div>
+      {/* ── Clouds ── */}
+      <div className="absolute pointer-events-none" style={{ top: "4%", left: "4%", width: "30%", height: "7%", background: "rgba(255,255,255,0.42)", borderRadius: "999px", filter: "blur(22px)" }} />
+      <div className="absolute pointer-events-none" style={{ top: "8%", left: "8%", width: "20%", height: "5%", background: "rgba(255,255,255,0.32)", borderRadius: "999px", filter: "blur(16px)" }} />
+      <div className="absolute pointer-events-none" style={{ top: "6%", left: "54%", width: "24%", height: "6%", background: "rgba(255,255,255,0.35)", borderRadius: "999px", filter: "blur(18px)" }} />
 
-      {/* ══ 2. VIGNETTE — dark edges, cinematic depth ══ */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: "radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(0,0,0,0.55) 100%)",
-          transition: "opacity 0.5s ease",
-          opacity: hovered ? 0.7 : 1,
-        }}
-      />
+      {/* ── Ground ── */}
+      <div className="absolute bottom-0 left-0 right-0 pointer-events-none" style={{ height: "30%", background: "linear-gradient(180deg, #78b864 0%, #5a9448 100%)" }} />
 
-      {/* ══ 3. BOTTOM GRADIENT — makes pill readable ══ */}
-      <div
-        className="absolute bottom-0 left-0 right-0 pointer-events-none"
-        style={{ height: "30%", background: "linear-gradient(to top, rgba(0,0,0,0.60) 0%, transparent 100%)" }}
-      />
+      {/* ── Path ── */}
+      <div className="absolute bottom-0 left-1/2 pointer-events-none" style={{ transform: "translateX(-50%)", width: "clamp(90px,14vw,175px)", height: "32%", background: "linear-gradient(180deg,#c2b080 0%,#a89060 100%)", clipPath: "polygon(20% 0%,80% 0%,100% 100%,0% 100%)" }} />
 
-      {/* ══ 4. TOP GRADIENT — softens top edge ══ */}
-      <div
-        className="absolute top-0 left-0 right-0 pointer-events-none"
-        style={{ height: "18%", background: "linear-gradient(to bottom, rgba(0,0,0,0.38) 0%, transparent 100%)" }}
-      />
+      {/* ── Trees ── */}
+      <ExtTrees side="left" /><ExtTrees side="right" />
 
-      {/* ══ 5. HOVER GOLDEN SHIMMER ══ */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: `radial-gradient(ellipse 60% 55% at ${mousePos.x * 100}% ${mousePos.y * 100}%, rgba(201,168,76,0.10) 0%, transparent 70%)`,
-          opacity: hovered ? 1 : 0,
-          transition: "opacity 0.4s ease",
-        }}
-      />
-
-      {/* ══ 6. FLOATING GOLDEN PARTICLES ══ */}
+      {/* ── Golden particles ── */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
         {particles.map(p => (
-          <span
-            key={p.id}
-            className="absolute rounded-full"
-            style={{
-              left: p.left,
-              bottom: "-4px",
-              width: p.size,
-              height: p.size,
-              background: "#c9a84c",
-              opacity: visible ? p.opacity : 0,
-              animation: `manorParticleRise ${p.duration}s ease-in ${p.delay}s infinite`,
-            }}
-          />
+          <span key={p.id} className="absolute rounded-full" style={{ left: p.left, bottom: "-4px", width: p.size, height: p.size, background: "#c9a84c", opacity: visible ? p.opacity : 0, animation: `manorParticleRise ${p.duration}s ease-in ${p.delay}s infinite` }} />
         ))}
       </div>
 
-      {/* ══ 7. CLICKABLE FULL-SCREEN OVERLAY ══ */}
+      {/* ── Building (clickable) ── */}
       <button
         onClick={onEnter}
+        onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
+        onFocus={() => setHovered(true)} onBlur={() => setHovered(false)}
         aria-label="Click to enter the Manor"
-        className="absolute inset-0 w-full h-full focus:outline-none cursor-pointer"
-        style={{ background: "transparent" }}
-      />
-
-      {/* ══ 8. "STEP INSIDE" — Premium exotic entry button ══ */}
-      <div
-        className="absolute bottom-10 left-1/2 -translate-x-1/2"
-        style={{ opacity: visible ? 1 : 0, transition: "opacity 1.4s ease 1s", zIndex: 10 }}
+        className="absolute left-1/2 focus:outline-none"
+        style={{ bottom: "27%", width: "clamp(240px,42vw,520px)", transform: `translateX(-50%) scale(${hovered ? 1.03 : 1})`, transition: "transform 0.5s cubic-bezier(0.22,1,0.36,1)" }}
       >
-        <button
-          onClick={onEnter}
-          className="group relative flex flex-col items-center gap-3 focus:outline-none"
-        >
-          {/* Thin gold line above */}
-          <div style={{
-            width: hovered ? "80px" : "40px",
-            height: "1px",
-            background: "linear-gradient(90deg, transparent, #c9a84c, transparent)",
-            transition: "width 0.5s ease",
-            margin: "0 auto",
-          }} />
+        <BuildingSVG hovered={hovered} />
+      </button>
 
-          {/* Main pill */}
-          <span
-            className="inline-flex items-center gap-3 select-none"
-            style={{
-              fontFamily: "Georgia, serif",
-              fontSize: "clamp(11px, 1vw, 13px)",
-              letterSpacing: "0.28em",
-              textTransform: "uppercase",
-              color: hovered ? "#c9a84c" : "rgba(255,255,255,0.95)",
-              background: hovered
-                ? "rgba(0,0,0,0.75)"
-                : "rgba(0,0,0,0.55)",
-              border: `1px solid ${hovered ? "rgba(201,168,76,0.70)" : "rgba(255,255,255,0.20)"}`,
-              backdropFilter: "blur(20px)",
-              padding: "14px 36px",
-              borderRadius: "2px",
-              boxShadow: hovered
-                ? "0 0 40px rgba(201,168,76,0.18), inset 0 0 20px rgba(201,168,76,0.05)"
-                : "0 8px 32px rgba(0,0,0,0.40)",
-              transition: "all 0.4s cubic-bezier(0.22,1,0.36,1)",
-              animation: "manorPillPulse 4s ease-in-out infinite",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {/* Left ornament */}
-            <span style={{
-              display: "inline-block",
-              width: "18px",
-              height: "1px",
-              background: hovered ? "#c9a84c" : "rgba(255,255,255,0.35)",
-              transition: "background 0.3s ease",
-            }} />
+      {/* ── Hover golden shimmer ── */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 55% 50% at ${mousePos.x * 100}% ${mousePos.y * 100}%, rgba(201,168,76,0.08) 0%, transparent 70%)`, opacity: hovered ? 1 : 0, transition: "opacity 0.4s ease" }} />
+
+      {/* ══ "STEP INSIDE" — Premium entry button ══ */}
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2" style={{ opacity: visible ? 1 : 0, transition: "opacity 1.4s ease 1s", zIndex: 10 }}>
+        <button onClick={onEnter} className="group relative flex flex-col items-center gap-2 focus:outline-none">
+          <div style={{ width: hovered ? "70px" : "32px", height: "1px", background: "linear-gradient(90deg,transparent,#c9a84c,transparent)", transition: "width 0.5s ease", margin: "0 auto" }} />
+          <span className="inline-flex items-center gap-3 select-none" style={{ fontFamily: "Georgia,serif", fontSize: "clamp(11px,1vw,13px)", letterSpacing: "0.26em", textTransform: "uppercase", color: hovered ? "#c9a84c" : "rgba(255,255,255,0.95)", background: hovered ? "rgba(0,0,0,0.72)" : "rgba(0,0,0,0.48)", border: `1px solid ${hovered ? "rgba(201,168,76,0.65)" : "rgba(255,255,255,0.22)"}`, backdropFilter: "blur(18px)", padding: "13px 32px", borderRadius: "2px", boxShadow: hovered ? "0 0 36px rgba(201,168,76,0.16)" : "0 8px 28px rgba(0,0,0,0.35)", transition: "all 0.4s cubic-bezier(0.22,1,0.36,1)", animation: "manorPillPulse 4s ease-in-out infinite", whiteSpace: "nowrap" }}>
+            <span style={{ display: "inline-block", width: "16px", height: "1px", background: hovered ? "#c9a84c" : "rgba(255,255,255,0.30)", transition: "background 0.3s ease" }} />
             Step inside the Manor
-            {/* Right ornament */}
-            <span style={{
-              display: "inline-block",
-              width: "18px",
-              height: "1px",
-              background: hovered ? "#c9a84c" : "rgba(255,255,255,0.35)",
-              transition: "background 0.3s ease",
-            }} />
+            <span style={{ display: "inline-block", width: "16px", height: "1px", background: hovered ? "#c9a84c" : "rgba(255,255,255,0.30)", transition: "background 0.3s ease" }} />
           </span>
-
-          {/* Thin gold line below */}
-          <div style={{
-            width: hovered ? "80px" : "40px",
-            height: "1px",
-            background: "linear-gradient(90deg, transparent, #c9a84c, transparent)",
-            transition: "width 0.5s ease",
-            margin: "0 auto",
-          }} />
+          <div style={{ width: hovered ? "70px" : "32px", height: "1px", background: "linear-gradient(90deg,transparent,#c9a84c,transparent)", transition: "width 0.5s ease", margin: "0 auto" }} />
         </button>
       </div>
 
-      {/* ══ 9. LOCATION PILL — top center, minimal ══ */}
+      {/* ══ LOCATION — top center minimal ══ */}
       <div className="absolute top-5 left-1/2 -translate-x-1/2" style={{ zIndex: 10 }}>
-        <span
-          className="inline-flex items-center gap-2 px-5 py-2 pointer-events-none select-none"
-          style={{
-            fontFamily: "monospace",
-            fontSize: "10px",
-            letterSpacing: "0.22em",
-            textTransform: "uppercase",
-            color: "rgba(255,255,255,0.65)",
-            background: "rgba(0,0,0,0.38)",
-            backdropFilter: "blur(16px)",
-            border: "1px solid rgba(255,255,255,0.10)",
-            borderRadius: "2px",
-          }}
-        >
-          <span style={{ color: "#c9a84c", fontSize: "8px" }}>◆</span>
+        <span className="inline-flex items-center gap-2 px-5 py-2 pointer-events-none select-none" style={{ fontFamily: "monospace", fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.65)", background: "rgba(0,0,0,0.32)", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.10)", borderRadius: "2px" }}>
+          <span style={{ color: "#c9a84c", fontSize: "7px" }}>◆</span>
           Gurugram · Haryana · India
         </span>
       </div>
 
-      {/* ══ 10. EXIT BUTTON ══ */}
       <ExitBtn onClick={onClose} />
     </div>
+  );
+}
+
+function BuildingSVG({ hovered }: { hovered: boolean }) {
+  const wf = hovered ? "#f5e8b8" : "#d8c090";
+  const wg = hovered ? "rgba(255,230,130,0.30)" : "transparent";
+  return (
+    <svg viewBox="0 0 520 360" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full drop-shadow-2xl" aria-hidden="true">
+      <rect x="50" y="52" width="420" height="300" rx="3" fill="#ede2c8" stroke="#c8b07a" strokeWidth="1.5" />
+      {[100,148,196,244,292,340].map(y => <line key={y} x1="50" y1={y} x2="470" y2={y} stroke="#c8b07a" strokeWidth="0.7" />)}
+      <rect x="36" y="36" width="448" height="22" rx="2" fill="#d8c490" stroke="#b8a068" strokeWidth="1.5" />
+      {[66,106,146,186,226,266,306,346,386,426].map(x => <rect key={x} x={x} y="38" width="12" height="10" rx="1" fill="#b8a068" />)}
+      {[75,162,308,395].map(x => (
+        <g key={`w1${x}`}>
+          <rect x={x} y="72" width="58" height="60" rx="2" fill={wf} stroke="#b8a068" strokeWidth="1.2" />
+          {hovered && <rect x={x} y="72" width="58" height="60" rx="2" fill={wg} />}
+          <line x1={x+29} y1="72" x2={x+29} y2={132} stroke="#b8a068" strokeWidth="0.7" />
+          <line x1={x} y1={102} x2={x+58} y2={102} stroke="#b8a068" strokeWidth="0.7" />
+        </g>
+      ))}
+      {[75,162,308,395].map(x => (
+        <g key={`w2${x}`}>
+          <rect x={x} y="158" width="58" height="60" rx="2" fill={wf} stroke="#b8a068" strokeWidth="1.2" />
+          {hovered && <rect x={x} y="158" width="58" height="60" rx="2" fill={wg} />}
+          <line x1={x+29} y1="158" x2={x+29} y2={218} stroke="#b8a068" strokeWidth="0.7" />
+          <line x1={x} y1={188} x2={x+58} y2={188} stroke="#b8a068" strokeWidth="0.7" />
+        </g>
+      ))}
+      <rect x="210" y="260" width="100" height="92" rx="2" fill="#18302a" />
+      <ellipse cx="260" cy="260" rx="50" ry="26" fill="#18302a" />
+      <rect x="208" y="258" width="104" height="94" rx="3" fill="none" stroke="#c9a84c" strokeWidth="2.2" />
+      <ellipse cx="260" cy="260" rx="52" ry="28" fill="none" stroke="#c9a84c" strokeWidth="2.2" />
+      <rect x="215" y="270" width="38" height="60" rx="1" fill="#0d1f1a" stroke="#c9a84c" strokeWidth="1" />
+      <rect x="267" y="270" width="38" height="60" rx="1" fill="#0d1f1a" stroke="#c9a84c" strokeWidth="1" />
+      <circle cx="252" cy="302" r="3.5" fill="#c9a84c" />
+      <circle cx="268" cy="302" r="3.5" fill="#c9a84c" />
+      <rect x="186" y="232" width="148" height="24" rx="3" fill="#18302a" stroke="#c9a84c" strokeWidth="1.5" />
+      <text x="260" y="248" textAnchor="middle" fill="#c9a84c" fontSize="7.5" fontFamily="Georgia,serif" letterSpacing="2.5">THE MEHMAAN MANOR</text>
+      <rect x="192" y="350" width="136" height="7" rx="1" fill="#c8b08a" />
+      <rect x="201" y="343" width="118" height="7" rx="1" fill="#d8c098" />
+      {hovered && <rect x="50" y="52" width="420" height="300" rx="3" fill="rgba(201,168,76,0.05)" />}
+    </svg>
+  );
+}
+
+function ExtTrees({ side }: { side: "left" | "right" }) {
+  const isL = side === "left";
+  const specs = isL
+    ? [{ p: "2%", s: 0.80 }, { p: "10%", s: 1.40 }, { p: "18%", s: 1.00 }]
+    : [{ p: "82%", s: 1.00 }, { p: "90%", s: 1.40 }, { p: "98%", s: 0.80 }];
+  return (
+    <>
+      {specs.map((t, i) => {
+        const B = Math.round(t.s * 36);
+        return (
+          <div key={i} className="absolute pointer-events-none" style={{ bottom: "28%", left: t.p, transform: "translateX(-50%)", width: B * 2, display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <div className="rounded-full" style={{ width: B*2, height: B*2, background: "#4a8c38", flexShrink: 0 }} />
+            <div className="rounded-full" style={{ width: B*1.55, height: B*1.55, background: "#5ea048", marginTop: -Math.round(B*0.65), flexShrink: 0 }} />
+            <div className="rounded-full" style={{ width: B*1.1, height: B*1.1, background: "#72b458", marginTop: -Math.round(B*0.45), flexShrink: 0 }} />
+            <div style={{ width: Math.round(B*0.26), height: Math.round(t.s*18), background: "#6b3e1e", borderRadius: "2px", flexShrink: 0 }} />
+          </div>
+        );
+      })}
+    </>
   );
 }
 
