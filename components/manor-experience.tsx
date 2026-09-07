@@ -201,203 +201,76 @@ function ExteriorScreen({
       className="fixed inset-0 z-[9991] overflow-hidden"
       style={{
         opacity: visible ? 1 : 0,
-        transition: "opacity 0.7s ease",
-        /* Exact screenshot sky: #8ec5d6 top blue → #a8d5c2 teal-green horizon → #7db868 grass */
-        background: "linear-gradient(180deg, #8ec5d6 0%, #9dcec2 38%, #a8d5b8 55%, #7db868 100%)",
+        transition: "opacity 1s ease",
       }}
       role="dialog"
       aria-modal="true"
     >
-      {/* ── Clouds — wide horizontal blobs exactly like screenshot ── */}
-      {/* Left big cloud group (screenshot: 2 overlapping blobs top-left area) */}
-      <div className="absolute pointer-events-none"
-        style={{ top: "5%", left: "6%", width: "28%", height: "6%",
-          background: "rgba(255,255,255,0.38)", borderRadius: "999px", filter: "blur(18px)" }} />
-      <div className="absolute pointer-events-none"
-        style={{ top: "7%", left: "3%", width: "18%", height: "4%",
-          background: "rgba(255,255,255,0.30)", borderRadius: "999px", filter: "blur(12px)" }} />
-      {/* Right cloud (screenshot: 1 blob mid-right) */}
-      <div className="absolute pointer-events-none"
-        style={{ top: "11%", left: "55%", width: "22%", height: "5%",
-          background: "rgba(255,255,255,0.30)", borderRadius: "999px", filter: "blur(16px)" }} />
+      {/* ── Full-screen photorealistic background image ── */}
+      <img
+        src="/images/s57/manor-exterior.jpg"
+        alt="The Mehmaan Manor exterior"
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+        draggable={false}
+      />
 
-      {/* ── Green ground — flat bright green like screenshot ── */}
-      <div className="absolute bottom-0 left-0 right-0 pointer-events-none"
-        style={{ height: "28%", background: "linear-gradient(180deg, #7db868 0%, #5a9448 100%)" }} />
+      {/* ── Subtle dark gradient at bottom so "Step inside" pill is legible ── */}
+      <div
+        className="absolute bottom-0 left-0 right-0 pointer-events-none"
+        style={{ height: "22%", background: "linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 100%)" }}
+      />
 
-      {/* ── Sandy path (trapezoid — tan/khaki like screenshot) ── */}
-      <div className="absolute bottom-0 left-1/2 pointer-events-none"
-        style={{
-          transform: "translateX(-50%)",
-          width: "clamp(90px, 14vw, 180px)",
-          height: "31%",
-          background: "linear-gradient(180deg, #c0ae80 0%, #a89060 100%)",
-          clipPath: "polygon(18% 0%, 82% 0%, 100% 100%, 0% 100%)",
-        }} />
-
-      {/* ── Trees ── */}
-      <ExtTrees side="left" />
-      <ExtTrees side="right" />
-
-      {/* ── Building (clickable, centered) ── */}
+      {/* ── Clickable overlay on the building area — full screen click triggers enter ── */}
       <button
         onClick={onEnter}
-        onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
-        onFocus={() => setHovered(true)} onBlur={() => setHovered(false)}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        onFocus={() => setHovered(true)}
+        onBlur={() => setHovered(false)}
         aria-label="Click to enter the Manor"
-        className="absolute left-1/2 focus:outline-none"
-        style={{
-          /* screenshot: building bottom sits right at grass line */
-          bottom: "26%",
-          width: "clamp(240px, 42vw, 520px)",
-          transform: `translateX(-50%) scale(${hovered ? 1.03 : 1})`,
-          transition: "transform 0.5s cubic-bezier(0.22,1,0.36,1)",
-        }}
-      >
-        <BuildingSVG hovered={hovered} />
+        className="absolute inset-0 w-full h-full focus:outline-none"
+        style={{ background: hovered ? "rgba(201,168,76,0.04)" : "transparent", transition: "background 0.3s ease" }}
+      />
 
-        {/* "Step inside" pill — centered below building */}
-        <div className="mt-4 flex justify-center"
-          style={{ opacity: visible ? 1 : 0, transition: "opacity 1.2s ease 0.8s" }}>
-          <span
-            className="px-5 py-2 rounded-full text-[11px] font-mono tracking-widest select-none"
-            style={{
-              background: hovered ? "rgba(20,45,32,0.92)" : "rgba(0,0,0,0.42)",
-              color: hovered ? "#c9a84c" : "rgba(255,255,255,0.80)",
-              border: `1px solid ${hovered ? "rgba(201,168,76,0.50)" : "rgba(255,255,255,0.22)"}`,
-              backdropFilter: "blur(10px)",
-              transition: "all 0.3s ease",
-              letterSpacing: "0.18em",
-            }}
-          >
-            {hovered ? "✦  Click to Enter  ✦" : "↑  Step inside the Manor"}
-          </span>
-        </div>
-      </button>
-
-      {/* ── Top-left: title + tagline (matches blurred text in screenshot) ── */}
+      {/* ── "Step inside" pill — bottom center ── */}
       <div
-        className="absolute top-4 left-4 md:left-5 pointer-events-none"
-        style={{ opacity: visible ? 1 : 0, transition: "opacity 1s ease 0.4s" }}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-none"
+        style={{ opacity: visible ? 1 : 0, transition: "opacity 1.2s ease 0.8s", zIndex: 10 }}
       >
-        <p style={{
-          fontFamily: "Georgia, serif",
-          fontSize: "clamp(0.95rem, 1.8vw, 1.4rem)",
-          color: "rgba(255,255,255,0.90)",
-          letterSpacing: "0.05em",
-          lineHeight: 1.2,
-          textShadow: "0 1px 10px rgba(0,0,0,0.30)",
-        }}>
-          The Mehmaan Manor
-        </p>
-        <p style={{
-          fontFamily: "monospace",
-          fontSize: "clamp(0.58rem, 0.85vw, 0.68rem)",
-          color: "rgba(201,168,76,0.85)",
-          letterSpacing: "0.20em",
-          textTransform: "uppercase",
-          marginTop: "3px",
-        }}>
-          Feel like Mehmaan
-        </p>
+        <span
+          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-[13px] font-light tracking-widest select-none"
+          style={{
+            background: hovered ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.15)",
+            color: "rgba(255,255,255,0.92)",
+            border: "1px solid rgba(255,255,255,0.30)",
+            backdropFilter: "blur(12px)",
+            transition: "all 0.3s ease",
+            letterSpacing: "0.15em",
+            fontFamily: "Georgia, serif",
+          }}
+        >
+          {hovered ? "✦  Click to Enter  ✦" : "↑  Step inside the Manor"}
+        </span>
       </div>
 
       {/* ── Top-center: location pill ── */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none">
+      <div className="absolute top-4 left-1/2 -translate-x-1/2" style={{ zIndex: 10 }}>
         <span
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-mono tracking-widest"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-mono tracking-widest pointer-events-none"
           style={{
-            background: "rgba(0,0,0,0.32)",
+            background: "rgba(0,0,0,0.30)",
             backdropFilter: "blur(10px)",
-            color: "rgba(255,255,255,0.70)",
-            border: "1px solid rgba(255,255,255,0.12)",
+            color: "rgba(255,255,255,0.75)",
+            border: "1px solid rgba(255,255,255,0.15)",
           }}
         >
-          📍 Gurugram · Haryana · India
+          ✦ Gurugram · Haryana · India
         </span>
       </div>
 
       {/* ── Top-right: Exit ── */}
       <ExitBtn onClick={onClose} />
     </div>
-  );
-}
-
-function BuildingSVG({ hovered }: { hovered: boolean }) {
-  const wf = hovered ? "#f5e8b8" : "#d8c090";
-  const wg = hovered ? "rgba(255,230,130,0.30)" : "transparent";
-  return (
-    <svg viewBox="0 0 520 360" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full drop-shadow-2xl" aria-hidden="true">
-      <rect x="50" y="52" width="420" height="300" rx="3" fill="#ede2c8" stroke="#c8b07a" strokeWidth="1.5" />
-      {[100, 148, 196, 244, 292, 340].map(y => (
-        <line key={y} x1="50" y1={y} x2="470" y2={y} stroke="#c8b07a" strokeWidth="0.7" />
-      ))}
-      <rect x="36" y="36" width="448" height="22" rx="2" fill="#d8c490" stroke="#b8a068" strokeWidth="1.5" />
-      {[66, 106, 146, 186, 226, 266, 306, 346, 386, 426].map(x => (
-        <rect key={x} x={x} y="38" width="12" height="10" rx="1" fill="#b8a068" />
-      ))}
-      {[75, 162, 308, 395].map(x => (
-        <g key={`w1${x}`}>
-          <rect x={x} y="72" width="58" height="60" rx="2" fill={wf} stroke="#b8a068" strokeWidth="1.2" />
-          {hovered && <rect x={x} y="72" width="58" height="60" rx="2" fill={wg} />}
-          <line x1={x + 29} y1="72" x2={x + 29} y2={132} stroke="#b8a068" strokeWidth="0.7" />
-          <line x1={x} y1={102} x2={x + 58} y2={102} stroke="#b8a068" strokeWidth="0.7" />
-        </g>
-      ))}
-      {[75, 162, 308, 395].map(x => (
-        <g key={`w2${x}`}>
-          <rect x={x} y="158" width="58" height="60" rx="2" fill={wf} stroke="#b8a068" strokeWidth="1.2" />
-          {hovered && <rect x={x} y="158" width="58" height="60" rx="2" fill={wg} />}
-          <line x1={x + 29} y1="158" x2={x + 29} y2={218} stroke="#b8a068" strokeWidth="0.7" />
-          <line x1={x} y1={188} x2={x + 58} y2={188} stroke="#b8a068" strokeWidth="0.7" />
-        </g>
-      ))}
-      <rect x="210" y="260" width="100" height="92" rx="2" fill="#18302a" />
-      <ellipse cx="260" cy="260" rx="50" ry="26" fill="#18302a" />
-      <rect x="208" y="258" width="104" height="94" rx="3" fill="none" stroke="#c9a84c" strokeWidth="2.2" />
-      <ellipse cx="260" cy="260" rx="52" ry="28" fill="none" stroke="#c9a84c" strokeWidth="2.2" />
-      <rect x="215" y="270" width="38" height="60" rx="1" fill="#0d1f1a" stroke="#c9a84c" strokeWidth="1" />
-      <rect x="267" y="270" width="38" height="60" rx="1" fill="#0d1f1a" stroke="#c9a84c" strokeWidth="1" />
-      <circle cx="252" cy="302" r="3.5" fill="#c9a84c" />
-      <circle cx="268" cy="302" r="3.5" fill="#c9a84c" />
-      <rect x="186" y="232" width="148" height="24" rx="3" fill="#18302a" stroke="#c9a84c" strokeWidth="1.5" />
-      <text x="260" y="248" textAnchor="middle" fill="#c9a84c" fontSize="7.5" fontFamily="Georgia,serif" letterSpacing="2.5">THE MEHMAAN MANOR</text>
-      <rect x="192" y="350" width="136" height="7" rx="1" fill="#c8b08a" />
-      <rect x="201" y="343" width="118" height="7" rx="1" fill="#d8c098" />
-      {hovered && <rect x="50" y="52" width="420" height="300" rx="3" fill="rgba(201,168,76,0.05)" />}
-    </svg>
-  );
-}
-
-function ExtTrees({ side }: { side: "left" | "right" }) {
-  const isL = side === "left";
-  /* Screenshot exact positions & sizes:
-     Left:  small(2%), medium(10%), large(17%)
-     Right: large(83%), medium(90%), small(98%)  — mirrored */
-  const specs = isL
-    ? [{ p: "2%",  s: 0.80 }, { p: "10%", s: 1.40 }, { p: "18%", s: 1.00 }]
-    : [{ p: "82%", s: 1.00 }, { p: "90%", s: 1.40 }, { p: "98%", s: 0.80 }];
-
-  return (
-    <>
-      {specs.map((t, i) => {
-        const B = Math.round(t.s * 36);
-        return (
-          <div key={i} className="absolute pointer-events-none"
-            style={{ bottom: "26%", left: t.p, transform: "translateX(-50%)", width: B * 2, display: "flex", flexDirection: "column", alignItems: "center" }}>
-            {/* 3 stacked round circles — screenshot style */}
-            <div className="rounded-full"
-              style={{ width: B * 2, height: B * 2, background: "#4a8c38", flexShrink: 0 }} />
-            <div className="rounded-full"
-              style={{ width: B * 1.55, height: B * 1.55, background: "#5ea048", marginTop: -Math.round(B * 0.65), flexShrink: 0 }} />
-            <div className="rounded-full"
-              style={{ width: B * 1.1, height: B * 1.1, background: "#72b458", marginTop: -Math.round(B * 0.45), flexShrink: 0 }} />
-            {/* Short trunk */}
-            <div style={{ width: Math.round(B * 0.26), height: Math.round(t.s * 18), background: "#6b3e1e", borderRadius: "2px", flexShrink: 0 }} />
-          </div>
-        );
-      })}
-    </>
   );
 }
 
