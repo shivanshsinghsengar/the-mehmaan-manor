@@ -202,38 +202,37 @@ function ExteriorScreen({
       style={{
         opacity: visible ? 1 : 0,
         transition: "opacity 0.7s ease",
-        /* Sky: light steel-blue top → pale blue-green mid → grass green bottom — matches screenshot */
-        background: "linear-gradient(180deg, #7bb8d4 0%, #a8d4e8 30%, #b8ddb0 58%, #72a862 100%)",
+        /* Exact screenshot sky: #8ec5d6 top blue → #a8d5c2 teal-green horizon → #7db868 grass */
+        background: "linear-gradient(180deg, #8ec5d6 0%, #9dcec2 38%, #a8d5b8 55%, #7db868 100%)",
       }}
       role="dialog"
       aria-modal="true"
     >
-      {/* ── Sky clouds (softer, rounder, like screenshot) ── */}
+      {/* ── Clouds — wide horizontal blobs exactly like screenshot ── */}
+      {/* Left big cloud group (screenshot: 2 overlapping blobs top-left area) */}
       <div className="absolute pointer-events-none"
-        style={{ top: "6%", left: "5%", width: "22%", height: "5%",
-          background: "rgba(255,255,255,0.32)", borderRadius: "50%", filter: "blur(14px)" }} />
+        style={{ top: "5%", left: "6%", width: "28%", height: "6%",
+          background: "rgba(255,255,255,0.38)", borderRadius: "999px", filter: "blur(18px)" }} />
       <div className="absolute pointer-events-none"
-        style={{ top: "3%", left: "9%", width: "14%", height: "4%",
-          background: "rgba(255,255,255,0.26)", borderRadius: "50%", filter: "blur(10px)" }} />
+        style={{ top: "7%", left: "3%", width: "18%", height: "4%",
+          background: "rgba(255,255,255,0.30)", borderRadius: "999px", filter: "blur(12px)" }} />
+      {/* Right cloud (screenshot: 1 blob mid-right) */}
       <div className="absolute pointer-events-none"
-        style={{ top: "8%", left: "56%", width: "18%", height: "4.5%",
-          background: "rgba(255,255,255,0.28)", borderRadius: "50%", filter: "blur(12px)" }} />
-      <div className="absolute pointer-events-none"
-        style={{ top: "5%", left: "63%", width: "10%", height: "3.5%",
-          background: "rgba(255,255,255,0.22)", borderRadius: "50%", filter: "blur(9px)" }} />
+        style={{ top: "11%", left: "55%", width: "22%", height: "5%",
+          background: "rgba(255,255,255,0.30)", borderRadius: "999px", filter: "blur(16px)" }} />
 
-      {/* ── Green ground ── */}
+      {/* ── Green ground — flat bright green like screenshot ── */}
       <div className="absolute bottom-0 left-0 right-0 pointer-events-none"
-        style={{ height: "28%", background: "linear-gradient(180deg, #72a862 0%, #4a7a38 100%)" }} />
+        style={{ height: "28%", background: "linear-gradient(180deg, #7db868 0%, #5a9448 100%)" }} />
 
-      {/* ── Sandy path (trapezoid — wider at bottom) ── */}
+      {/* ── Sandy path (trapezoid — tan/khaki like screenshot) ── */}
       <div className="absolute bottom-0 left-1/2 pointer-events-none"
         style={{
           transform: "translateX(-50%)",
-          width: "clamp(80px, 13vw, 160px)",
-          height: "32%",
-          background: "linear-gradient(180deg, #c8b88a 0%, #a89868 100%)",
-          clipPath: "polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%)",
+          width: "clamp(90px, 14vw, 180px)",
+          height: "31%",
+          background: "linear-gradient(180deg, #c0ae80 0%, #a89060 100%)",
+          clipPath: "polygon(18% 0%, 82% 0%, 100% 100%, 0% 100%)",
         }} />
 
       {/* ── Trees ── */}
@@ -248,9 +247,9 @@ function ExteriorScreen({
         aria-label="Click to enter the Manor"
         className="absolute left-1/2 focus:outline-none"
         style={{
-          /* vertically: building sits so bottom is at ~72% from top = 28% from bottom = above the grass */
-          bottom: "27%",
-          width: "clamp(220px, 40vw, 500px)",
+          /* screenshot: building bottom sits right at grass line */
+          bottom: "26%",
+          width: "clamp(240px, 42vw, 520px)",
           transform: `translateX(-50%) scale(${hovered ? 1.03 : 1})`,
           transition: "transform 0.5s cubic-bezier(0.22,1,0.36,1)",
         }}
@@ -372,32 +371,29 @@ function BuildingSVG({ hovered }: { hovered: boolean }) {
 
 function ExtTrees({ side }: { side: "left" | "right" }) {
   const isL = side === "left";
-  /* Screenshot: left side has 3 trees roughly at 3%, 10%, 17% from left
-     right side mirrored. Mid one is tallest. */
+  /* Screenshot exact positions & sizes:
+     Left:  small(2%), medium(10%), large(17%)
+     Right: large(83%), medium(90%), small(98%)  — mirrored */
   const specs = isL
-    ? [{ p: "3%",  s: 1.05 }, { p: "11%", s: 1.50 }, { p: "18%", s: 0.85 }]
-    : [{ p: "82%", s: 0.85 }, { p: "89%", s: 1.50 }, { p: "97%", s: 1.05 }];
+    ? [{ p: "2%",  s: 0.80 }, { p: "10%", s: 1.40 }, { p: "18%", s: 1.00 }]
+    : [{ p: "82%", s: 1.00 }, { p: "90%", s: 1.40 }, { p: "98%", s: 0.80 }];
 
   return (
     <>
       {specs.map((t, i) => {
-        const B = Math.round(t.s * 34);
+        const B = Math.round(t.s * 36);
         return (
           <div key={i} className="absolute pointer-events-none"
-            style={{ bottom: "26%", left: t.p, transform: "translateX(-50%)", width: B * 2 }}>
-            {/* Three stacked circles for foliage */}
-            {[1, 0.74, 0.54].map((sc, j) => (
-              <div key={j} className="rounded-full mx-auto"
-                style={{
-                  width: B * 2 * sc,
-                  height: B * 2 * sc,
-                  marginTop: j === 0 ? 0 : -Math.round(B * 2 * sc * 0.38),
-                  background: ["#3a6b28", "#4a7c34", "#569042"][j],
-                }} />
-            ))}
-            {/* Trunk */}
-            <div className="mx-auto rounded-sm"
-              style={{ width: Math.round(B * 0.28), height: Math.round(t.s * 22), background: "#5a3618" }} />
+            style={{ bottom: "26%", left: t.p, transform: "translateX(-50%)", width: B * 2, display: "flex", flexDirection: "column", alignItems: "center" }}>
+            {/* 3 stacked round circles — screenshot style */}
+            <div className="rounded-full"
+              style={{ width: B * 2, height: B * 2, background: "#4a8c38", flexShrink: 0 }} />
+            <div className="rounded-full"
+              style={{ width: B * 1.55, height: B * 1.55, background: "#5ea048", marginTop: -Math.round(B * 0.65), flexShrink: 0 }} />
+            <div className="rounded-full"
+              style={{ width: B * 1.1, height: B * 1.1, background: "#72b458", marginTop: -Math.round(B * 0.45), flexShrink: 0 }} />
+            {/* Short trunk */}
+            <div style={{ width: Math.round(B * 0.26), height: Math.round(t.s * 18), background: "#6b3e1e", borderRadius: "2px", flexShrink: 0 }} />
           </div>
         );
       })}
