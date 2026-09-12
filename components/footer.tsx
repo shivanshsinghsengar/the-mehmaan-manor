@@ -136,7 +136,7 @@ export function Footer() {
             <p className="font-display text-sm italic text-ink/50">
               Come as a guest, leave as family.
             </p>
-            {/* Staff-only admin link — invisible to guests */}
+            {/* Staff-only admin link — subtle dot bottom-right corner */}
             <Link
               href="/admin/login"
               className="text-transparent hover:text-ink/20 transition-colors text-xs font-mono min-h-[36px] flex items-center"
@@ -148,5 +148,13 @@ export function Footer() {
         </div>
       </div>
     </footer>
+
+    {/* ── Fixed admin dot — bottom-left corner, staff only ── */}
+    <Link
+      href="/admin/login"
+      title="Staff Login"
+      aria-label="Staff Login"
+      className="fixed bottom-5 left-5 z-50 w-2 h-2 rounded-full bg-ink/15 hover:bg-gold/60 transition-all duration-300 hover:scale-150"
+    />
   );
 }
