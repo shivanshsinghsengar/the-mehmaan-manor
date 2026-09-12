@@ -4,6 +4,7 @@ import { Logo } from "@/components/logo";
 
 export function Footer() {
   return (
+    <>
     <footer className="bg-[#eee9df] border-t border-[#1e2b27]/8">
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-12 md:py-16">
 
@@ -156,5 +157,6 @@ export function Footer() {
       aria-label="Staff Login"
       className="fixed bottom-5 left-5 z-50 w-2 h-2 rounded-full bg-ink/15 hover:bg-gold/60 transition-all duration-300 hover:scale-150"
     />
+    </>
   );
 }
