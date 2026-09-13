@@ -840,7 +840,14 @@ export function HomePageClient({ siteData }: { siteData: SiteData }) {
     <>
       {/* ── Manor Experience — rendered OUTSIDE the site wrapper so fixed overlays are never hidden ── */}
       <ManorExperience
-        properties={properties}
+        properties={properties.map(p => ({
+          ...p,
+          photos: propertyCards[p.id] ?? [],
+          amenities: (p as any).amenities ?? [],
+          description: (p as any).description ?? "",
+          maxGuests: (p as any).maxGuests ?? undefined,
+          weekendRate: (p as any).weekendRate ?? undefined,
+        }))}
         onPhaseChange={setExperienceActive}
       />
 

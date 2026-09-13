@@ -27,8 +27,13 @@ export interface ManorProperty {
   name: string;
   slug: string;
   baseRate: number;
+  weekendRate?: number;
   address: string;
   vibe?: string;
+  description?: string;
+  amenities?: string[];
+  maxGuests?: number;
+  photos?: { url: string; alt: string; section?: string }[];
 }
 
 /* ─── utility ─────────────────────────────────────────────────── */
@@ -380,9 +385,13 @@ function GateTransition({ onDone }: { onDone: () => void }) {
 function ReceptionHall({
   onGate,
   onClose,
+  prop1,
+  prop2,
 }: {
   onGate: (gate: "left" | "mid" | "right") => void;
   onClose: () => void;
+  prop1: ManorProperty;
+  prop2: ManorProperty;
 }) {
   const [visible, setVisible] = useState(false);
   const [hoveredGate, setHoveredGate] = useState<"left" | "mid" | "right" | null>(null);
@@ -390,9 +399,9 @@ function ReceptionHall({
   useEffect(() => { const t = setTimeout(() => setVisible(true), 80); return () => clearTimeout(t); }, []);
 
   const gates: { id: "left" | "mid" | "right"; label: string; sub: string; icon: string; color: string }[] = [
-    { id: "left",  label: "Sector 57",       sub: "The Mehmaan Manor",   icon: "🏠", color: "#c9a84c" },
-    { id: "mid",   label: "About Us",         sub: "Our Story & Hosts",   icon: "◆",  color: "#c9a84c" },
-    { id: "right", label: "Sector 39",       sub: "The Mehmaan Manor",   icon: "🏠", color: "#c9a84c" },
+    { id: "left",  label: prop1.name.replace("The Mehmaan Manor — ", ""), sub: "The Mehmaan Manor", icon: "🏠", color: "#c9a84c" },
+    { id: "mid",   label: "About Us",  sub: "Our Story & Hosts", icon: "◆", color: "#c9a84c" },
+    { id: "right", label: prop2.name.replace("The Mehmaan Manor — ", ""), sub: "The Mehmaan Manor", icon: "🏠", color: "#c9a84c" },
   ];
 
   return (
@@ -655,23 +664,13 @@ function PropertyRoom({
   const isP1 = property.id === "1";
   const [activePhoto, setActivePhoto] = useState(0);
 
-  const photos = isP1
-    ? [
-        { src: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1200&q=90&auto=format&fit=crop", lbl: "Bedroom" },
-        { src: "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=1200&q=90&auto=format&fit=crop",  lbl: "Living Area" },
-        { src: "https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?w=1200&q=90&auto=format&fit=crop", lbl: "Balcony" },
-        { src: "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=1200&q=90&auto=format&fit=crop", lbl: "Bedroom 2" },
-      ]
-    : [
-        { src: "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1200&q=90&auto=format&fit=crop", lbl: "Studio" },
-        { src: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1200&q=90&auto=format&fit=crop",  lbl: "Living Room" },
-        { src: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&q=90&auto=format&fit=crop",  lbl: "Kitchen" },
-        { src: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200&q=90&auto=format&fit=crop", lbl: "Apartment" },
-      ];
+  // Use real photos from property data; fall back to empty array (no fake Unsplash)
+  const photos: { src: string; lbl: string }[] = (property.photos ?? [])
+    .filter(p => p.url)
+    .map((p, i) => ({ src: p.url, lbl: p.alt || `Photo ${i + 1}` }));
 
-  const amenities = isP1
-    ? ["Wi-Fi & Netflix", "Balcony", "AC", "24h Hot Water", "CCTV", "Power Backup", "Max 3 guests", "Street Parking"]
-    : ["Wi-Fi & Netflix", "Basic Kitchen", "AC", "24h Hot Water", "Near Medanta", "Metro Nearby", "Max 5 guests", "Studio & 2BHK"];
+  // Use real amenities from property data
+  const amenities = property.amenities ?? [];
 
   const waText = encodeURIComponent(`Hi! I'm interested in ${property.name}. Can you share availability?`);
 
@@ -685,8 +684,8 @@ function PropertyRoom({
       {/* ── HERO PHOTO SECTION ── */}
       <div className="relative w-full overflow-hidden" style={{ height: "clamp(260px,52vh,520px)" }}>
 
-        {/* Photos — full colour, no heavy overlay */}
-        {photos.map((p, i) => (
+        {/* Photos — show real photos or a fallback gradient */}
+        {photos.length > 0 ? photos.map((p, i) => (
           <img
             key={p.src}
             src={p.src}
@@ -695,7 +694,10 @@ function PropertyRoom({
             className="absolute inset-0 w-full h-full object-cover"
             style={{ opacity: i === activePhoto ? 1 : 0, transition: "opacity 0.7s ease" }}
           />
-        ))}
+        )) : (
+          <div className="absolute inset-0 w-full h-full"
+            style={{ background: "linear-gradient(135deg,#1a3328 0%,#2e1e0c 100%)" }} />
+        )}
 
         {/* Light gradient — just enough for text readability, not a dark curtain */}
         <div
@@ -709,7 +711,7 @@ function PropertyRoom({
         {/* Location + title — bottom left */}
         <div className="absolute bottom-0 left-0 right-0 px-5 md:px-8 pb-5 md:pb-7">
           <span className="inline-block text-[#c9a84c] text-[9px] font-mono tracking-[0.28em] uppercase mb-1.5">
-            {isP1 ? "Sector 57" : "Sector 39"} · The Mehmaan Manor
+            {property.name.replace("The Mehmaan Manor — ", "")} · The Mehmaan Manor
           </span>
           <h2 className="font-display text-white text-3xl md:text-4xl leading-tight drop-shadow-sm">
             {property.name.replace("The Mehmaan Manor — ", "")}
@@ -717,7 +719,8 @@ function PropertyRoom({
           <p className="text-white/60 text-xs mt-1 drop-shadow-sm">{property.address}</p>
         </div>
 
-        {/* Thumbnail strip — bottom right */}
+        {/* Thumbnail strip — only if multiple photos */}
+        {photos.length > 1 && (
         <div className="absolute bottom-4 right-4 flex flex-col gap-1.5">
           {photos.map((p, i) => (
             <button
@@ -736,13 +739,16 @@ function PropertyRoom({
             </button>
           ))}
         </div>
+        )}
 
         {/* Photo label pill */}
+        {photos.length > 0 && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2">
           <span className="px-3 py-1 rounded-full text-[10px] font-mono bg-black/30 backdrop-blur-sm text-white/80 border border-white/15">
-            {photos[activePhoto].lbl}
+            {photos[activePhoto]?.lbl}
           </span>
         </div>
+        )}
       </div>
 
       {/* ── CONTENT ── light background */}
@@ -754,6 +760,9 @@ function PropertyRoom({
             ₹{property.baseRate.toLocaleString("en-IN")}
           </span>
           <span className="text-ink/45 text-base">/night</span>
+          {property.maxGuests && (
+            <span className="text-ink/40 text-xs font-mono">· Max {property.maxGuests} guests</span>
+          )}
           <span className="ml-auto px-3 py-1 text-[10px] font-mono rounded-full bg-[#c9a84c]/12 text-[#c9a84c] border border-[#c9a84c]/25">
             No booking fee
           </span>
@@ -767,7 +776,8 @@ function PropertyRoom({
           <p className="text-ink/65 text-sm leading-relaxed mb-6">{property.vibe}</p>
         )}
 
-        {/* Photo grid — 4 thumbnails in a horizontal scroll strip */}
+        {/* Photo grid — only show if photos exist */}
+        {photos.length > 0 && (
         <div className="mb-6">
           <p className="text-[10px] font-mono tracking-widest uppercase text-ink/35 mb-2.5">Photo Gallery</p>
           <div className="grid grid-cols-4 gap-2">
@@ -789,22 +799,22 @@ function PropertyRoom({
             ))}
           </div>
         </div>
+        )}
 
-        {/* Amenities */}
+        {/* Amenities — real data from property */}
+        {amenities.length > 0 && (
         <div className="mb-6">
           <p className="text-[10px] font-mono tracking-widest uppercase text-ink/35 mb-3">What&apos;s Included</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             {amenities.map(a => (
-              <div
-                key={a}
-                className="flex items-center gap-2 text-xs text-ink/70 bg-white rounded-xl px-3 py-2.5 border border-forest/8"
-              >
+              <div key={a} className="flex items-center gap-2 text-xs text-ink/70 bg-white rounded-xl px-3 py-2.5 border border-forest/8">
                 <span className="text-[#c9a84c] font-bold">✓</span>
                 {a}
               </div>
             ))}
           </div>
         </div>
+        )}
 
         {/* Hosts card */}
         <div className="flex items-center gap-4 p-4 rounded-2xl mb-6 bg-white border border-forest/8">
@@ -1069,6 +1079,8 @@ export function ManorExperience({
             if (gate === "right") go("entering-right");
           }}
           onClose={exit}
+          prop1={prop1}
+          prop2={prop2}
         />
       )}
 
