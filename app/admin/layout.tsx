@@ -20,6 +20,7 @@ import {
   Layers,
   Camera,
   BarChart2,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
@@ -31,6 +32,7 @@ const navigation = [
   { name: "Properties", href: "/admin/properties", icon: Home },
   { name: "Photos", href: "/admin/photos", icon: Camera },
   { name: "Site Manager", href: "/admin/cms", icon: Layers },
+  { name: "Manor Experience", href: "/admin/manor-experience", icon: Sparkles },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart2 },
   { name: "Guests", href: "/admin/guests", icon: Users },
   { name: "Inquiries", href: "/admin/inquiries", icon: MessageSquare },

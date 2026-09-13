@@ -104,7 +104,44 @@ model SiteContent {
   discountActive     Boolean @default(false)
 }
 
-// ── Page Views ────────────────────────────────────────────────────────────────
+// ── Manor Experience ─────────────────────────────────────────────────────────
+
+model ManorExperience {
+  id                  String  @id @default("singleton")
+  // Trigger button
+  triggerLabel        String  @default("Enter the Manor Experience")
+  // Intro screen
+  introLine1Heading   String  @default("The Mehmaan Manor")
+  introLine1Sub       String  @default("Gurugram · Haryana · India")
+  introLine2Heading   String  @default("Feel like Mehmaan")
+  introLine2Sub       String  @default("A home away from home.")
+  // Exterior screen
+  exteriorLocationTag String  @default("Gurugram · Haryana · India")
+  exteriorStepLabel   String  @default("Step inside the Manor")
+  exteriorImageUrl    String  @default("")
+  // Reception hall
+  receptionWelcome    String  @default("Namaste! Choose a gate to explore — our properties or about us.")
+  receptionPlaque     String  @default("The Mehmaan Manor")
+  receptionSub        String  @default("Reception Hall · Gurugram")
+  // About room
+  aboutTitle          String  @default("Our Story")
+  aboutSubtitle       String  @default("The Mehmaan Manor")
+  aboutBody           String  @default("Mehmaan — the Hindi word for guest — carries a cultural weight that no translation captures. It's not a transaction. It's a relationship.")
+  aboutHost1Name      String  @default("Simran")
+  aboutHost1Role      String  @default("Co-founder & Host")
+  aboutHost2Name      String  @default("Jyoti")
+  aboutHost2Role      String  @default("Co-founder & Host")
+  aboutStory1Title    String  @default("The Beginning")
+  aboutStory1Body     String  @default("We couldn't find a place that felt like home. So we built one.")
+  aboutStory2Title    String  @default("The Philosophy")
+  aboutStory2Body     String  @default("Every detail is intentional. Every guest is family.")
+  aboutStory3Title    String  @default("The Promise")
+  aboutStory3Body     String  @default("Come as a guest. Leave as family.")
+  // Experience photos (stored as JSON array of {url,alt})
+  exteriorPhotos      String  @default("[]")
+  aboutPhotos         String  @default("[]")
+  isEnabled           Boolean @default(true)
+}
 
 model PageView {
   id        String @id @default(cuid())

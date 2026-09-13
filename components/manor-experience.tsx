@@ -36,6 +36,66 @@ export interface ManorProperty {
   photos?: { url: string; alt: string; section?: string }[];
 }
 
+export interface MESettings {
+  triggerLabel: string;
+  introLine1Heading: string;
+  introLine1Sub: string;
+  introLine2Heading: string;
+  introLine2Sub: string;
+  exteriorLocationTag: string;
+  exteriorStepLabel: string;
+  exteriorImageUrl: string;
+  receptionWelcome: string;
+  receptionPlaque: string;
+  receptionSub: string;
+  aboutTitle: string;
+  aboutSubtitle: string;
+  aboutBody: string;
+  aboutHost1Name: string;
+  aboutHost1Role: string;
+  aboutHost2Name: string;
+  aboutHost2Role: string;
+  aboutStory1Title: string;
+  aboutStory1Body: string;
+  aboutStory2Title: string;
+  aboutStory2Body: string;
+  aboutStory3Title: string;
+  aboutStory3Body: string;
+  exteriorPhotos: string;
+  aboutPhotos: string;
+  isEnabled: boolean;
+}
+
+const DEFAULT_ME_SETTINGS: MESettings = {
+  triggerLabel: "Enter the Manor Experience",
+  introLine1Heading: "The Mehmaan Manor",
+  introLine1Sub: "Gurugram · Haryana · India",
+  introLine2Heading: "Feel like Mehmaan",
+  introLine2Sub: "A home away from home.",
+  exteriorLocationTag: "Gurugram · Haryana · India",
+  exteriorStepLabel: "Step inside the Manor",
+  exteriorImageUrl: "",
+  receptionWelcome: "Namaste! Choose a gate to explore — our properties or about us.",
+  receptionPlaque: "The Mehmaan Manor",
+  receptionSub: "Reception Hall · Gurugram",
+  aboutTitle: "Our Story",
+  aboutSubtitle: "The Mehmaan Manor",
+  aboutBody: "Mehmaan — the Hindi word for guest — carries a cultural weight that no translation captures. It's not a transaction. It's a relationship.",
+  aboutHost1Name: "Simran",
+  aboutHost1Role: "Co-founder & Host",
+  aboutHost2Name: "Jyoti",
+  aboutHost2Role: "Co-founder & Host",
+  aboutStory1Title: "The Beginning",
+  aboutStory1Body: "We couldn't find a place that felt like home. So we built one.",
+  aboutStory2Title: "The Philosophy",
+  aboutStory2Body: "Every detail is intentional. Every guest is family.",
+  aboutStory3Title: "The Promise",
+  aboutStory3Body: "Come as a guest. Leave as family.",
+  exteriorPhotos: "[]",
+  aboutPhotos: "[]",
+  isEnabled: true,
+};
+
 /* ─── utility ─────────────────────────────────────────────────── */
 function cn(...c: (string | boolean | undefined | null)[]) {
   return c.filter(Boolean).join(" ");
@@ -109,13 +169,13 @@ function BlackoutScreen({ onDone }: { onDone: () => void }) {
 /* ═══════════════════════════════════════════════════════════════
    INTRO TEXT
 ═══════════════════════════════════════════════════════════════ */
-function IntroScreen({ onDone }: { onDone: () => void }) {
+function IntroScreen({ onDone, s }: { onDone: () => void; s: MESettings }) {
   const [idx, setIdx] = useState(0);
   const [vis, setVis] = useState<"in" | "hold" | "out">("in");
 
   const lines = [
-    { h: "The Mehmaan Manor", s: "Gurugram · Haryana · India" },
-    { h: "Feel like Mehmaan",  s: "A home away from home." },
+    { h: s.introLine1Heading, s: s.introLine1Sub },
+    { h: s.introLine2Heading, s: s.introLine2Sub },
   ];
 
   useEffect(() => {
@@ -193,9 +253,11 @@ function IntroScreen({ onDone }: { onDone: () => void }) {
 function ExteriorScreen({
   onEnter,
   onClose,
+  s,
 }: {
   onEnter: () => void;
   onClose: () => void;
+  s: MESettings;
 }) {
   const [hovered, setHovered] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -225,7 +287,7 @@ function ExteriorScreen({
       style={{
         opacity: visible ? 1 : 0,
         transition: "opacity 0.8s ease",
-        background: "linear-gradient(180deg, #8ec5d6 0%, #9dcec2 38%, #a8d5b8 55%, #7db868 100%)",
+        background: s.exteriorImageUrl ? "#000" : "linear-gradient(180deg, #8ec5d6 0%, #9dcec2 38%, #a8d5b8 55%, #7db868 100%)",
       }}
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setHovered(true)}
@@ -233,41 +295,58 @@ function ExteriorScreen({
       role="dialog"
       aria-modal="true"
     >
+      {/* ── If real image provided, show it with Ken Burns + parallax ── */}
+      {s.exteriorImageUrl && (
+        <div className="absolute inset-0"
+          style={{
+            transform: `scale(${hovered ? 1.06 : 1.04}) translate(${(mousePos.x - 0.5) * -18}px, ${(mousePos.y - 0.5) * -10}px)`,
+            transition: hovered ? "transform 0.8s cubic-bezier(0.22,1,0.36,1)" : "transform 6s ease-out",
+            willChange: "transform",
+          }}>
+          <img src={s.exteriorImageUrl} alt="The Mehmaan Manor exterior"
+            className="w-full h-full object-cover" draggable={false}
+            style={{ animation: "manorKenBurns 18s ease-in-out infinite alternate" }} />
+        </div>
+      )}
+      {/* ── SVG scene — shown when no exterior image set ── */}
+      {!s.exteriorImageUrl && (<>
       {/* ── Clouds ── */}
       <div className="absolute pointer-events-none" style={{ top: "4%", left: "4%", width: "30%", height: "7%", background: "rgba(255,255,255,0.42)", borderRadius: "999px", filter: "blur(22px)" }} />
       <div className="absolute pointer-events-none" style={{ top: "8%", left: "8%", width: "20%", height: "5%", background: "rgba(255,255,255,0.32)", borderRadius: "999px", filter: "blur(16px)" }} />
       <div className="absolute pointer-events-none" style={{ top: "6%", left: "54%", width: "24%", height: "6%", background: "rgba(255,255,255,0.35)", borderRadius: "999px", filter: "blur(18px)" }} />
-
       {/* ── Ground ── */}
       <div className="absolute bottom-0 left-0 right-0 pointer-events-none" style={{ height: "30%", background: "linear-gradient(180deg, #78b864 0%, #5a9448 100%)" }} />
-
       {/* ── Path ── */}
       <div className="absolute bottom-0 left-1/2 pointer-events-none" style={{ transform: "translateX(-50%)", width: "clamp(90px,14vw,175px)", height: "32%", background: "linear-gradient(180deg,#c2b080 0%,#a89060 100%)", clipPath: "polygon(20% 0%,80% 0%,100% 100%,0% 100%)" }} />
-
       {/* ── Trees ── */}
       <ExtTrees side="left" /><ExtTrees side="right" />
+      {/* ── Building ── */}
+      <button onClick={onEnter} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
+        onFocus={() => setHovered(true)} onBlur={() => setHovered(false)}
+        aria-label="Click to enter the Manor" className="absolute left-1/2 focus:outline-none"
+        style={{ bottom: "27%", width: "clamp(240px,42vw,520px)", transform: `translateX(-50%) scale(${hovered ? 1.03 : 1})`, transition: "transform 0.5s cubic-bezier(0.22,1,0.36,1)" }}>
+        <BuildingSVG hovered={hovered} />
+      </button>
+      </>)}
 
-      {/* ── Golden particles ── */}
+      {/* ── Golden particles (always shown) ── */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
         {particles.map(p => (
           <span key={p.id} className="absolute rounded-full" style={{ left: p.left, bottom: "-4px", width: p.size, height: p.size, background: "#c9a84c", opacity: visible ? p.opacity : 0, animation: `manorParticleRise ${p.duration}s ease-in ${p.delay}s infinite` }} />
         ))}
       </div>
 
-      {/* ── Building (clickable) ── */}
-      <button
-        onClick={onEnter}
-        onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
-        onFocus={() => setHovered(true)} onBlur={() => setHovered(false)}
-        aria-label="Click to enter the Manor"
-        className="absolute left-1/2 focus:outline-none"
-        style={{ bottom: "27%", width: "clamp(240px,42vw,520px)", transform: `translateX(-50%) scale(${hovered ? 1.03 : 1})`, transition: "transform 0.5s cubic-bezier(0.22,1,0.36,1)" }}
-      >
-        <BuildingSVG hovered={hovered} />
-      </button>
-
-      {/* ── Hover golden shimmer ── */}
-      <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 55% 50% at ${mousePos.x * 100}% ${mousePos.y * 100}%, rgba(201,168,76,0.08) 0%, transparent 70%)`, opacity: hovered ? 1 : 0, transition: "opacity 0.4s ease" }} />
+      {/* ── Vignette (shown when image is set) ── */}
+      {s.exteriorImageUrl && (
+        <>
+          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(0,0,0,0.55) 100%)", opacity: hovered ? 0.7 : 1, transition: "opacity 0.5s ease" }} />
+          <div className="absolute bottom-0 left-0 right-0 pointer-events-none" style={{ height: "30%", background: "linear-gradient(to top, rgba(0,0,0,0.60) 0%, transparent 100%)" }} />
+          <div className="absolute top-0 left-0 right-0 pointer-events-none" style={{ height: "18%", background: "linear-gradient(to bottom, rgba(0,0,0,0.38) 0%, transparent 100%)" }} />
+          <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 60% 55% at ${mousePos.x * 100}% ${mousePos.y * 100}%, rgba(201,168,76,0.10) 0%, transparent 70%)`, opacity: hovered ? 1 : 0, transition: "opacity 0.4s ease" }} />
+          {/* Full-screen click */}
+          <button onClick={onEnter} aria-label="Click to enter the Manor" className="absolute inset-0 w-full h-full focus:outline-none cursor-pointer" style={{ background: "transparent" }} />
+        </>
+      )}
 
       {/* ══ "STEP INSIDE" — Premium entry button ══ */}
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2" style={{ opacity: visible ? 1 : 0, transition: "opacity 1.4s ease 1s", zIndex: 10 }}>
@@ -275,7 +354,7 @@ function ExteriorScreen({
           <div style={{ width: hovered ? "70px" : "32px", height: "1px", background: "linear-gradient(90deg,transparent,#c9a84c,transparent)", transition: "width 0.5s ease", margin: "0 auto" }} />
           <span className="inline-flex items-center gap-3 select-none" style={{ fontFamily: "Georgia,serif", fontSize: "clamp(11px,1vw,13px)", letterSpacing: "0.26em", textTransform: "uppercase", color: hovered ? "#c9a84c" : "rgba(255,255,255,0.95)", background: hovered ? "rgba(0,0,0,0.72)" : "rgba(0,0,0,0.48)", border: `1px solid ${hovered ? "rgba(201,168,76,0.65)" : "rgba(255,255,255,0.22)"}`, backdropFilter: "blur(18px)", padding: "13px 32px", borderRadius: "2px", boxShadow: hovered ? "0 0 36px rgba(201,168,76,0.16)" : "0 8px 28px rgba(0,0,0,0.35)", transition: "all 0.4s cubic-bezier(0.22,1,0.36,1)", animation: "manorPillPulse 4s ease-in-out infinite", whiteSpace: "nowrap" }}>
             <span style={{ display: "inline-block", width: "16px", height: "1px", background: hovered ? "#c9a84c" : "rgba(255,255,255,0.30)", transition: "background 0.3s ease" }} />
-            Step inside the Manor
+            {s.exteriorStepLabel}
             <span style={{ display: "inline-block", width: "16px", height: "1px", background: hovered ? "#c9a84c" : "rgba(255,255,255,0.30)", transition: "background 0.3s ease" }} />
           </span>
           <div style={{ width: hovered ? "70px" : "32px", height: "1px", background: "linear-gradient(90deg,transparent,#c9a84c,transparent)", transition: "width 0.5s ease", margin: "0 auto" }} />
@@ -286,7 +365,7 @@ function ExteriorScreen({
       <div className="absolute top-5 left-1/2 -translate-x-1/2" style={{ zIndex: 10 }}>
         <span className="inline-flex items-center gap-2 px-5 py-2 pointer-events-none select-none" style={{ fontFamily: "monospace", fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.65)", background: "rgba(0,0,0,0.32)", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.10)", borderRadius: "2px" }}>
           <span style={{ color: "#c9a84c", fontSize: "7px" }}>◆</span>
-          Gurugram · Haryana · India
+          {s.exteriorLocationTag}
         </span>
       </div>
 
@@ -387,11 +466,13 @@ function ReceptionHall({
   onClose,
   prop1,
   prop2,
+  s,
 }: {
   onGate: (gate: "left" | "mid" | "right") => void;
   onClose: () => void;
   prop1: ManorProperty;
   prop2: ManorProperty;
+  s: MESettings;
 }) {
   const [visible, setVisible] = useState(false);
   const [hoveredGate, setHoveredGate] = useState<"left" | "mid" | "right" | null>(null);
@@ -474,10 +555,10 @@ function ReceptionHall({
         <div className="absolute top-[8%] left-1/2 -translate-x-1/2 text-center pointer-events-none">
           <div className="flex items-center gap-3">
             <div className="h-px w-12 bg-[#c9a84c]/35" />
-            <span className="text-[#c9a84c] text-[9px] font-mono tracking-[0.28em] uppercase">The Mehmaan Manor</span>
+            <span className="text-[#c9a84c] text-[9px] font-mono tracking-[0.28em] uppercase">{s.receptionPlaque}</span>
             <div className="h-px w-12 bg-[#c9a84c]/35" />
           </div>
-          <p className="text-[#f5f0e8]/30 text-[8px] font-mono mt-1">Reception Hall · Gurugram</p>
+          <p className="text-[#f5f0e8]/30 text-[8px] font-mono mt-1">{s.receptionSub}</p>
         </div>
       </div>
 
@@ -529,7 +610,9 @@ function ReceptionHall({
           style={{ background: "rgba(0,0,0,0.40)", backdropFilter: "blur(10px)", border: "1px solid rgba(201,168,76,0.18)" }}>
           <span className="text-base select-none">👩‍💼</span>
           <p className="text-[#f5f0e8]/70 text-xs">
-            Namaste! Choose a gate to explore — <span className="text-[#c9a84c]">our properties or about us.</span>
+            {s.receptionWelcome.includes("—")
+              ? <>{s.receptionWelcome.split("—")[0]}—<span className="text-[#c9a84c]">{s.receptionWelcome.split("—")[1]}</span></>
+              : s.receptionWelcome}
           </p>
           <span className="text-base select-none">👩‍🍳</span>
         </div>
@@ -886,7 +969,7 @@ function PropertyRoom({
 /* ═══════════════════════════════════════════════════════════════
    ABOUT ROOM  — center gate
 ═══════════════════════════════════════════════════════════════ */
-function AboutRoom({ onBack, onClose }: { onBack: () => void; onClose: () => void }) {
+function AboutRoom({ onBack, onClose, s, properties }: { onBack: () => void; onClose: () => void; s: MESettings; properties: ManorProperty[] }) {
   return (
     <div
       className="fixed inset-0 z-[9993] overflow-y-auto"
@@ -903,10 +986,10 @@ function AboutRoom({ onBack, onClose }: { onBack: () => void; onClose: () => voi
           <div className="h-px w-14 bg-[#c9a84c]/35" />
         </div>
         <h2 className="font-display text-white text-3xl md:text-4xl text-center" style={{ letterSpacing: "0.03em" }}>
-          The Mehmaan Manor
+          {s.aboutSubtitle}
         </h2>
         <p className="text-[#c9a84c]/65 font-mono text-xs tracking-[0.28em] uppercase mt-3">
-          Gurugram · Haryana · India
+          {s.exteriorLocationTag}
         </p>
       </div>
 
@@ -916,32 +999,24 @@ function AboutRoom({ onBack, onClose }: { onBack: () => void; onClose: () => voi
         <div className="mb-8 p-5 rounded-2xl"
           style={{ background: "rgba(201,168,76,0.05)", border: "1px solid rgba(201,168,76,0.15)" }}>
           <p className="text-[#c9a84c] text-[9px] font-mono tracking-widest uppercase mb-3">Our Philosophy</p>
-          <p className="text-[#f5f0e8]/70 text-sm leading-relaxed">
-            <em>Mehmaan</em> — the Hindi word for guest — carries a cultural weight that no translation captures.
-            It&apos;s not a transaction. It&apos;s a relationship. Two beautifully curated homes.
-            One unforgettable promise.
-          </p>
-          <p className="text-[#f5f0e8]/45 text-sm leading-relaxed mt-3">
-            This isn&apos;t a hotel. This is your Mehmaan moment.
-          </p>
+          <p className="text-[#f5f0e8]/70 text-sm leading-relaxed">{s.aboutBody}</p>
         </div>
 
-        {/* Two homes */}
+        {/* Two homes — real data */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-          {[
-            { name: "Sector 57", sub: "Sushant Lok-2", rate: "₹2,499", guests: "3 guests", emoji: "🏡" },
-            { name: "Sector 39", sub: "Jharsa, Near Medanta", rate: "₹1,999", guests: "5 guests", emoji: "🏠" },
-          ].map(p => (
-            <div key={p.name} className="p-4 rounded-2xl"
+          {properties.map(p => (
+            <div key={p.id} className="p-4 rounded-2xl"
               style={{ background: "rgba(201,168,76,0.05)", border: "1px solid rgba(201,168,76,0.15)" }}>
-              <span className="text-3xl">{p.emoji}</span>
-              <p className="text-[#c9a84c] text-xs font-mono tracking-widest uppercase mt-2">{p.name}</p>
-              <p className="text-[#f5f0e8]/50 text-[10px] mt-0.5">{p.sub}</p>
+              <span className="text-3xl">🏠</span>
+              <p className="text-[#c9a84c] text-xs font-mono tracking-widest uppercase mt-2">
+                {p.name.replace("The Mehmaan Manor — ", "")}
+              </p>
+              <p className="text-[#f5f0e8]/50 text-[10px] mt-0.5">{p.address.split(",")[0]}</p>
               <div className="flex items-baseline gap-1 mt-2">
-                <span className="font-display text-xl text-[#f5f0e8]/85">{p.rate}</span>
+                <span className="font-display text-xl text-[#f5f0e8]/85">₹{p.baseRate.toLocaleString("en-IN")}</span>
                 <span className="text-[#f5f0e8]/30 text-xs">/night</span>
               </div>
-              <p className="text-[#f5f0e8]/35 text-[9px] font-mono mt-1">Up to {p.guests}</p>
+              {p.maxGuests && <p className="text-[#f5f0e8]/35 text-[9px] font-mono mt-1">Up to {p.maxGuests} guests</p>}
             </div>
           ))}
         </div>
@@ -950,9 +1025,9 @@ function AboutRoom({ onBack, onClose }: { onBack: () => void; onClose: () => voi
         <div className="mb-8">
           <p className="text-[#c9a84c]/55 text-[9px] font-mono tracking-widest uppercase mb-4">Meet Your Hosts</p>
           {[
-            { name: "Simran", role: "Host & Manager", emoji: "👩‍💼", phone: "+91 88283 52311",
+            { name: s.aboutHost1Name, role: s.aboutHost1Role, emoji: "👩‍💼", phone: "+91 88283 52311",
               quote: "We treat every guest like family — because that's what Mehmaan means." },
-            { name: "Jyoti",  role: "Host & Support",  emoji: "👩‍🍳", phone: "+91 87965 68002",
+            { name: s.aboutHost2Name, role: s.aboutHost2Role, emoji: "👩‍🍳", phone: "+91 87965 68002",
               quote: "From check-in to check-out, we're always just a message away." },
           ].map(h => (
             <div key={h.name} className="flex items-start gap-4 p-4 rounded-2xl mb-3"
@@ -978,16 +1053,16 @@ function AboutRoom({ onBack, onClose }: { onBack: () => void; onClose: () => voi
         <div className="mb-8">
           <p className="text-[#c9a84c]/55 text-[9px] font-mono tracking-widest uppercase mb-4">How It Works</p>
           {[
-            { n: "01", t: "Browse", d: "Explore both Gurugram homes and pick the one you love." },
-            { n: "02", t: "Book Direct", d: "Reserve directly with us — no middlemen, no hidden fees." },
-            { n: "03", t: "Arrive & Enjoy", d: "Check in, feel at home. We handle everything." },
-          ].map(s => (
-            <div key={s.n} className="flex items-start gap-4 mb-4">
+            { n: "01", t: s.aboutStory1Title, d: s.aboutStory1Body },
+            { n: "02", t: s.aboutStory2Title, d: s.aboutStory2Body },
+            { n: "03", t: s.aboutStory3Title, d: s.aboutStory3Body },
+          ].map(step => (
+            <div key={step.n} className="flex items-start gap-4 mb-4">
               <span className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-xs font-mono font-bold text-[#c9a84c] border border-[#c9a84c]/25"
-                style={{ background: "rgba(201,168,76,0.08)" }}>{s.n}</span>
+                style={{ background: "rgba(201,168,76,0.08)" }}>{step.n}</span>
               <div>
-                <p className="text-[#f5f0e8]/85 text-sm font-semibold">{s.t}</p>
-                <p className="text-[#f5f0e8]/40 text-xs leading-relaxed mt-0.5">{s.d}</p>
+                <p className="text-[#f5f0e8]/85 text-sm font-semibold">{step.t}</p>
+                <p className="text-[#f5f0e8]/40 text-xs leading-relaxed mt-0.5">{step.d}</p>
               </div>
             </div>
           ))}
@@ -1027,6 +1102,15 @@ export function ManorExperience({
   onPhaseChange?: (active: boolean) => void;
 }) {
   const [phase, setPhase] = useState<MainPhase>("idle");
+  const [meSettings, setMeSettings] = useState<MESettings>(DEFAULT_ME_SETTINGS);
+
+  // Fetch manor experience settings once on mount
+  useEffect(() => {
+    fetch("/api/manor-experience")
+      .then(r => r.json())
+      .then(data => setMeSettings({ ...DEFAULT_ME_SETTINGS, ...data }))
+      .catch(() => {/* use defaults */});
+  }, []);
 
   const go = useCallback((p: MainPhase) => {
     setPhase(p);
@@ -1040,6 +1124,9 @@ export function ManorExperience({
 
   const prop1 = properties.find(p => p.id === "1") ?? properties[0];
   const prop2 = properties.find(p => p.id === "2") ?? properties[properties.length - 1];
+
+  // If experience is disabled, render nothing
+  if (!meSettings.isEnabled && phase === "idle") return null;
 
   return (
     <>
@@ -1056,7 +1143,7 @@ export function ManorExperience({
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#c9a84c] opacity-55" />
               <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#c9a84c]" />
             </span>
-            Enter the Manor Experience
+            {meSettings.triggerLabel}
             <span className="group-hover:translate-x-1 transition-transform duration-200" aria-hidden="true">→</span>
           </button>
         </div>
@@ -1064,8 +1151,8 @@ export function ManorExperience({
 
       {/* ── Phase screens ── */}
       {phase === "blackout"       && <BlackoutScreen  onDone={() => go("intro")} />}
-      {phase === "intro"          && <IntroScreen      onDone={() => go("exterior")} />}
-      {phase === "exterior"       && <ExteriorScreen   onEnter={() => go("entering-office")} onClose={exit} />}
+      {phase === "intro"          && <IntroScreen      onDone={() => go("exterior")} s={meSettings} />}
+      {phase === "exterior"       && <ExteriorScreen   onEnter={() => go("entering-office")} onClose={exit} s={meSettings} />}
 
       {/* Office entry transition */}
       {phase === "entering-office" && <GateTransition onDone={() => go("reception")} />}
@@ -1081,6 +1168,7 @@ export function ManorExperience({
           onClose={exit}
           prop1={prop1}
           prop2={prop2}
+          s={meSettings}
         />
       )}
 
@@ -1092,7 +1180,7 @@ export function ManorExperience({
       {/* Property rooms */}
       {phase === "room-left"   && <PropertyRoom property={prop1} onBack={() => go("reception")} onClose={exit} />}
       {phase === "room-right"  && <PropertyRoom property={prop2} onBack={() => go("reception")} onClose={exit} />}
-      {phase === "room-center" && <AboutRoom onBack={() => go("reception")} onClose={exit} />}
+      {phase === "room-center" && <AboutRoom onBack={() => go("reception")} onClose={exit} s={meSettings} properties={properties} />}
     </>
   );
 }
