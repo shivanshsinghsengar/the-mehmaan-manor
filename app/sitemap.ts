@@ -1,56 +1,80 @@
-import { MetadataRoute } from 'next'
- 
+// Sitemap for The Mehmaan Manor.
+// This file is picked up automatically by Next.js and served at /sitemap.xml.
+// Only listing pages that actually exist — having dead links here would hurt
+// our Google ranking more than help it.
+
+import type { MetadataRoute } from "next";
+
+const BASE = "https://themehmaan.vercel.app";
+
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://www.mehmaanmanor.com'
-  
   return [
+    // Homepage — highest priority, check weekly since content changes
     {
-      url: baseUrl,
+      url: BASE,
       lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 1,
+      changeFrequency: "weekly",
+      priority: 1.0,
     },
+
+    // Property listing page
     {
-      url: `${baseUrl}/homes`,
+      url: `${BASE}/homes`,
       lastModified: new Date(),
-      changeFrequency: 'weekly',
+      changeFrequency: "weekly",
       priority: 0.9,
     },
+
+    // Individual property pages — these are the money pages
     {
-      url: `${baseUrl}/homes/sushant-lok`,
+      url: `${BASE}/homes/sushant-lok`,
       lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.9,
+      changeFrequency: "monthly",
+      priority: 0.95,
     },
     {
-      url: `${baseUrl}/homes/jharsa-village`,
+      url: `${BASE}/homes/jharsa-village`,
       lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.9,
+      changeFrequency: "monthly",
+      priority: 0.95,
     },
+
+    // About page — helps with brand trust and local SEO
     {
-      url: `${baseUrl}/experience`,
+      url: `${BASE}/about`,
       lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/gallery`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
+      changeFrequency: "monthly",
       priority: 0.7,
     },
+
+    // Experience page — the interactive manor walkthrough
     {
-      url: `${baseUrl}/about`,
+      url: `${BASE}/experience`,
       lastModified: new Date(),
-      changeFrequency: 'monthly',
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+
+    // Gallery — good for image search
+    {
+      url: `${BASE}/gallery`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.65,
+    },
+
+    // Contact & booking pages
+    {
+      url: `${BASE}/contact`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/contact`,
+      url: `${BASE}/book`,
       lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.9,
+      changeFrequency: "monthly",
+      priority: 0.85,
     },
-  ]
+  ];
 }

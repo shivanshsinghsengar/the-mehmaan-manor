@@ -19,6 +19,11 @@ interface Property {
 export default function ContactPage() {
   const [properties, setProperties] = useState<Property[]>([]);
 
+  // Update title for this page — helps with browser history and some crawlers
+  useEffect(() => {
+    document.title = "Contact Us – The Mehmaan Manor | Gurugram Homestay";
+  }, []);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",

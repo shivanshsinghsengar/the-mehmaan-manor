@@ -30,6 +30,11 @@ export default function HomesPage() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Set page title for this route
+  useEffect(() => {
+    document.title = "Our Homes – Gurugram Boutique Homestays | The Mehmaan Manor";
+  }, []);
+
   useEffect(() => {
     Promise.all([
       fetch("/api/properties").then((r) => r.json()),

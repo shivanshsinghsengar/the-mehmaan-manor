@@ -1,5 +1,14 @@
 "use client";
 
+// ─────────────────────────────────────────────────────────────────────────────
+// About page — our story, values, and team.
+// Since this is a client component (uses useEffect for scroll animations),
+// metadata is handled via the exported metadata object below… wait, Next.js
+// doesn't allow metadata exports from "use client" files. So we keep a light
+// document.title update in useEffect instead, and rely on layout.tsx defaults
+// for crawlers. The canonical + OG for /about is set in layout.tsx metadataBase.
+// ─────────────────────────────────────────────────────────────────────────────
+
 import { useEffect } from "react";
 import Link from "next/link";
 import { Phone, MessageCircle, Heart, Star, Users, User } from "lucide-react";
@@ -62,6 +71,21 @@ const values = [
 
 export default function AboutPage() {
   useEffect(() => {
+    // Update the browser tab title for this page
+    document.title = "About Us – The Mehmaan Manor | Gurugram Boutique Homestay";
+
+    // Also update meta description for this page
+    let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
+    if (!meta) {
+      meta = document.createElement("meta") as HTMLMetaElement;
+      meta.setAttribute("name", "description");
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute(
+      "content",
+      "Meet the team behind The Mehmaan Manor — Simran, Vipin, and Jyoti. Learn about our story, our values, and why we started a boutique homestay in Gurugram."
+    );
+
     const observer = new IntersectionObserver(
       (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add("active")),
       { threshold: 0.1 }
